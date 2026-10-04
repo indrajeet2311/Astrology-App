@@ -1,6 +1,8 @@
 package com.celestia.astro.service;
 
 import com.celestia.astro.model.Ayanamsa;
+import com.celestia.astro.model.AnnualChartsResponse;
+import com.celestia.astro.model.BirthRequest;
 import com.celestia.astro.model.ChartResponse;
 import com.celestia.astro.model.ChartResponse.DailyPanchang;
 import com.celestia.astro.model.ChartResponse.Position;
@@ -10,6 +12,7 @@ import de.thmac.swisseph.SwissEph;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -20,6 +23,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.ToDoubleFunction;
 
 /** Sidereal chart calculation using the built-in Moshier ephemeris (no data files required). */
 @Service
@@ -62,6 +66,77 @@ public class SwissEphemerisCalculator {
     } finally {
       swe.swe_close();
     }
+  }
+
+  public AnnualChartsResponse calculateAnnualCharts(BirthRequest birth, int year) {
+    LocalDateTime natalLocal = LocalDateTime.of(birth.date(), birth.time());
+    if (year < natalLocal.getYear() || year < MIN_YEAR || year > MAX_YEAR) {
+      throw new IllegalArgumentException("Return year must be between the birth year and " + MAX_YEAR + ".");
+    }
+    String zoneId = birth.timeZone();
+    ZoneId zone = ZoneId.of(zoneId);
+    Instant natalInstant = natalLocal.atZone(zone).toInstant();
+    ChartResponse natal = calculate(birth.name(), natalLocal, birth.placeName(), birth.latitude(), birth.longitude(),
+        zoneId, birth.ayanamsa(), null, Boolean.TRUE.equals(birth.trueNode()),
+        birth.houseSystem() == null ? HouseSystem.WHOLE_SIGN : birth.houseSystem());
+    double natalSun = natal.planets().stream().filter(p -> p.name().equals("Sun")).findFirst().orElseThrow().longitude();
+    double natalElongation = AstroMath.norm(
+        natal.planets().stream().filter(p -> p.name().equals("Moon")).findFirst().orElseThrow().longitude() - natalSun);
+
+    SwissEph swe = new SwissEph();
+    Instant solarReturn;
+    Instant tithiReturn;
+    try {
+      swe.swe_set_sid_mode(sidMode(birth.ayanamsa()), 0, 0);
+      Instant start = LocalDate.of(year, 1, 1).atStartOfDay(zone).toInstant();
+      Instant end = LocalDate.of(year + 1, 1, 1).atStartOfDay(zone).toInstant();
+      solarReturn = findForwardCrossing(swe, start, end,
+          instant -> longitudeAt(swe, julianDay(instant), SweConst.SE_SUN), natalSun);
+      tithiReturn = findForwardCrossing(swe, solarReturn.minus(Duration.ofDays(16)),
+          solarReturn.plus(Duration.ofDays(16)), instant -> AstroMath.norm(
+              longitudeAt(swe, julianDay(instant), SweConst.SE_MOON)
+                  - longitudeAt(swe, julianDay(instant), SweConst.SE_SUN)), natalElongation);
+    } finally {
+      swe.swe_close();
+    }
+
+    ChartResponse varshaphal = calculateAtReturn(birth, solarReturn, zone);
+    ChartResponse tithiPravesh = calculateAtReturn(birth, tithiReturn, zone);
+    return new AnnualChartsResponse(year, solarReturn.atZone(zone).toOffsetDateTime().toString(), varshaphal,
+        tithiReturn.atZone(zone).toOffsetDateTime().toString(), tithiPravesh);
+  }
+
+  private ChartResponse calculateAtReturn(BirthRequest birth, Instant event, ZoneId zone) {
+    LocalDateTime local = LocalDateTime.ofInstant(event, zone);
+    return calculate(birth.name(), local, birth.placeName(), birth.latitude(), birth.longitude(), birth.timeZone(),
+        birth.ayanamsa(), local.toLocalDate(), Boolean.TRUE.equals(birth.trueNode()),
+        birth.houseSystem() == null ? HouseSystem.WHOLE_SIGN : birth.houseSystem());
+  }
+
+  private Instant findForwardCrossing(SwissEph swe, Instant start, Instant end,
+                                      ToDoubleFunction<Instant> longitude, double target) {
+    Instant left = start;
+    double leftDelta = signedAngle(longitude.applyAsDouble(left) - target);
+    while (left.isBefore(end)) {
+      Instant right = left.plus(Duration.ofHours(6));
+      if (right.isAfter(end)) right = end;
+      double rightDelta = signedAngle(longitude.applyAsDouble(right) - target);
+      if (leftDelta <= 0 && rightDelta >= 0) {
+        while (Duration.between(left, right).toMillis() > 1000) {
+          Instant middle = left.plusMillis(Duration.between(left, right).toMillis() / 2);
+          if (signedAngle(longitude.applyAsDouble(middle) - target) < 0) left = middle;
+          else right = middle;
+        }
+        return right;
+      }
+      left = right;
+      leftDelta = rightDelta;
+    }
+    throw new IllegalArgumentException("Could not find the requested annual return in that year.");
+  }
+
+  private static double signedAngle(double angle) {
+    return AstroMath.norm(angle + 180.0) - 180.0;
   }
 
   public ChartResponse calculate(String name, LocalDateTime local, String placeName,
@@ -113,7 +188,9 @@ public class SwissEphemerisCalculator {
           placeName, latitude, longitude, zoneId, ayanamsa, ayanamsaDegrees, trueNode, houseSystem);
       Position moon = planets.get(1);
       var dashas = VimshottariDasha.compute(moon.longitude(), zoned.toInstant(), zone);
+      var yoginiDashas = YoginiDasha.compute(moon.longitude(), zoned.toInstant(), zone);
       Position ascendant = position("Ascendant", ascLongitude, ascLongitude, false, Double.NaN, houseSystem);
+      var charaDashas = CharaDasha.compute(ascendant.signNumber(), planets, zoned.toInstant(), zone);
 
       // Transit houses are counted from the natal Ascendant; Sade Sati is judged from the natal Moon sign.
         Instant transitInstant = transitDate == null
@@ -123,7 +200,7 @@ public class SwissEphemerisCalculator {
       Position saturn = transitPlanets.get(6);
         var transits = new ChartResponse.Transits(transitInstant.truncatedTo(ChronoUnit.MINUTES).toString(), transitPlanets,
           ChartInsights.sadeSati(moon.signNumber(), saturn.signNumber()));
-      return new ChartResponse(details, ascendant, planets, dashas,
+      return new ChartResponse(details, ascendant, planets, dashas, yoginiDashas, charaDashas,
           ChartInsights.aspects(planets), ChartInsights.yogas(ascendant, planets), transits,
           PanchangCalculator.calculate(planets.get(0).longitude(), moon.longitude(), local.toLocalDate()));
     } finally {

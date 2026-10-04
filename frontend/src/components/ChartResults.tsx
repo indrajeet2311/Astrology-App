@@ -5,6 +5,7 @@ import { formatDate } from '../format';
 import { divisionalChart } from '../divisional';
 import type { BirthPayload, Chart, KundliMatch } from '../types';
 import { DashaTimeline } from './DashaTimeline';
+import { AnnualReturnsCard } from './AnnualReturnsCard';
 import { InsightsCard } from './InsightsCard';
 import { PanchangCard } from './PanchangCard';
 import { TransitsCard } from './TransitsCard';
@@ -12,10 +13,12 @@ import { NorthIndianChart } from './NorthIndianChart';
 import { PlanetTable } from './PlanetTable';
 import { SouthIndianChart } from './SouthIndianChart';
 import { KundliMatchCard } from './KundliMatchCard';
+import { payloadFromChart } from '../savedCharts';
 import type { SaveResult, SavedChart } from '../savedCharts';
 import { toPng } from 'html-to-image';
 
 type Style = 'north' | 'south';
+type DashaSystem = 'Vimshottari' | 'Yogini' | 'Chara';
 const DIVISIONS = [
   { code: 'D1', name: 'Rashi' },
   { code: 'D2', name: 'Hora' },
@@ -49,11 +52,14 @@ export function ChartResults({ chart, onBack, onSave, savedCharts, onMatch, onTr
 }) {
   const [style, setStyle] = useState<Style>('north');
   const [division, setDivision] = useState<Division>('D1');
+  const [dashaSystem, setDashaSystem] = useState<DashaSystem>('Vimshottari');
   const [saveMessage, setSaveMessage] = useState('');
   const [exportError, setExportError] = useState('');
   const shown = useMemo(() => divisionalChart(chart, division), [chart, division]);
   const divisionName = DIVISIONS.find((item) => item.code === division)?.name ?? 'Rashi';
   const label = `${divisionName} · ${division}`;
+  const dashaPeriods = dashaSystem === 'Yogini' ? chart.yoginiDashas
+    : dashaSystem === 'Chara' ? chart.charaDashas : chart.dashas;
   const { birthDetails: b, ascendant } = chart;
   const moon = chart.planets.find((p) => p.name === 'Moon');
   const sun = chart.planets.find((p) => p.name === 'Sun');
@@ -92,7 +98,7 @@ export function ChartResults({ chart, onBack, onSave, savedCharts, onMatch, onTr
           <button type="button" className="button-ghost" onClick={exportChart}>
             <Download size={17} /> PNG
           </button>
-          <button type="button" className="button-ghost" onClick={() => void onShare(chart).catch(() => setExportError('Could not copy the share link.'))}>
+          <button type="button" className="button-ghost" onClick={() => void onShare(chart).then(() => { setExportError(''); setSaveMessage('Share link copied to clipboard.'); }).catch(() => setExportError('Could not copy the share link.'))}>
             <LinkIcon size={17} /> Share link
           </button>
           <button type="button" className="button-ghost" onClick={() => window.print()}>
@@ -197,6 +203,7 @@ export function ChartResults({ chart, onBack, onSave, savedCharts, onMatch, onTr
       <KundliMatchCard chart={chart} savedCharts={savedCharts} onMatch={onMatch} />
 
       <TransitsCard
+        chart={chart}
         natal={chart.planets}
         transits={chart.transits}
         timeZone={b.timeZone}
@@ -205,13 +212,28 @@ export function ChartResults({ chart, onBack, onSave, savedCharts, onMatch, onTr
         onDateChange={onTransitDateChange}
       />
 
+      <AnnualReturnsCard birth={payloadFromChart(chart)} natalAscSign={chart.ascendant.signNumber} />
+
       <section className="card">
-        <h2>Vimshottari Dasha</h2>
+        <div className="card-head dasha-head">
+          <h2>{dashaSystem} Dasha</h2>
+          <div className="segmented no-print" role="group" aria-label="Dasha system">
+            {(['Vimshottari', 'Yogini', 'Chara'] as const).map((system) => (
+              <button key={system} type="button" aria-pressed={dashaSystem === system} onClick={() => setDashaSystem(system)}>
+                {system}
+              </button>
+            ))}
+          </div>
+        </div>
         <p className="muted small">
-          120-year planetary periods from the Moon's nakshatra. The first period began before birth; the balance at
-          birth is what remained. Year length is 365.25 days.
+          {dashaSystem === 'Vimshottari'
+            ? '120-year planetary cycle from the Moon’s nakshatra. First period is balanced at birth.'
+            : dashaSystem === 'Yogini'
+              ? '36-year, eight-Yogini cycle from the Moon’s birth nakshatra. First period is balanced at birth.'
+              : 'K.N. Rao-style sign sequence: odd-sign Ascendant moves zodiacally, even-sign Ascendant reverses. Duration counts to the classical sign lord; same-sign ruler gives 12 years.'}{' '}
+          Each period expands through Antardasha and Pratyantardasha. Year length is 365.25 days.
         </p>
-        <DashaTimeline dashas={chart.dashas} />
+        <DashaTimeline dashas={dashaPeriods} system={dashaSystem} />
       </section>
 
       <p className="disclaimer">

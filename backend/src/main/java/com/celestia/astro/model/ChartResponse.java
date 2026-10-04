@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 public record ChartResponse(BirthDetails birthDetails, Position ascendant, List<Position> planets,
-                            List<Dasha> dashas, List<Aspect> aspects, List<Yoga> yogas, Transits transits,
-                            Panchang panchang) {
+                            List<Dasha> dashas, List<Dasha> yoginiDashas, List<Dasha> charaDashas,
+                            List<Aspect> aspects, List<Yoga> yogas, Transits transits, Panchang panchang) {
   public record BirthDetails(String name, String date, String localTime, String utcOffset, String utcTime,
                              String placeName, double latitude, double longitude, String timeZone,
                              Ayanamsa ayanamsa, double ayanamsaDegrees, boolean trueNode, HouseSystem houseSystem) {}
@@ -36,5 +36,5 @@ public record ChartResponse(BirthDetails birthDetails, Position ascendant, List<
   /** Vimshottari mahadasha with ISO start/end dates (end exclusive) and its antardashas. */
   public record Dasha(String lord, String start, String end, List<SubPeriod> antardashas) {}
 
-  public record SubPeriod(String lord, String start, String end) {}
+  public record SubPeriod(String lord, String start, String end, List<SubPeriod> pratyantardashas) {}
 }

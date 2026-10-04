@@ -62,8 +62,8 @@ public final class AstroMath {
         part = Math.min(1, (int) (withinSign / 15.0));
         return sign % 2 == 0 ? (part == 0 ? 4 : 3) : (part == 0 ? 3 : 4);
       }
-      case 3 -> { part = segment(withinSign, 3); start = sign; }
-      case 4 -> { part = segment(withinSign, 4); start = sign; }
+      case 3 -> { part = segment(withinSign, 3) * 4; start = sign; }
+      case 4 -> { part = segment(withinSign, 4) * 3; start = sign; }
       case 7 -> {
         part = segment(withinSign, 7);
         start = sign + (sign % 2 == 0 ? 0 : 6);

@@ -38,6 +38,7 @@ export interface SubPeriod {
   lord: string;
   start: string;
   end: string;
+  pratyantardashas: SubPeriod[];
 }
 
 export interface Dasha extends SubPeriod {
@@ -114,10 +115,20 @@ export interface Chart {
   ascendant: Position;
   planets: Position[];
   dashas: Dasha[];
+  yoginiDashas: Dasha[];
+  charaDashas: Dasha[];
   aspects: Aspect[];
   yogas: Yoga[];
   transits: Transits;
   panchang: Panchang;
+}
+
+export interface AnnualChartsResponse {
+  year: number;
+  varshaphalAt: string;
+  varshaphal: Chart;
+  tithiPraveshAt: string;
+  tithiPravesh: Chart;
 }
 
 export interface Place {

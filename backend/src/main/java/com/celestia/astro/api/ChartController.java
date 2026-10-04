@@ -1,6 +1,8 @@
 package com.celestia.astro.api;
 
 import com.celestia.astro.model.BirthRequest;
+import com.celestia.astro.model.AnnualChartsRequest;
+import com.celestia.astro.model.AnnualChartsResponse;
 import com.celestia.astro.model.ChartResponse;
 import com.celestia.astro.model.KundliMatchRequest;
 import com.celestia.astro.model.KundliMatchResponse;
@@ -29,6 +31,11 @@ public class ChartController {
   @PostMapping
   public ChartResponse chart(@Valid @RequestBody BirthRequest request) {
     return calculate(request);
+  }
+
+  @PostMapping("/annual")
+  public AnnualChartsResponse annualCharts(@Valid @RequestBody AnnualChartsRequest request) {
+    return calculator.calculateAnnualCharts(request.birth(), request.year());
   }
 
   @PostMapping("/match")

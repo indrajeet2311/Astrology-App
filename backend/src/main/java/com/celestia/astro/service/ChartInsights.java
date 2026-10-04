@@ -67,21 +67,36 @@ public final class ChartInsights {
             p.name() + " is in its own or exalted sign and in a kendra from the Ascendant.", List.of(p.name())));
       }
     }
-    int[] kendras = {4, 7, 10};
-    int[] trikonas = {5, 9};
-    Set<String> seenRaja = new HashSet<>();
-    for (int k : kendras) {
-      for (int t : trikonas) {
-        String kendraLord = lordOfHouse(ascendant, k);
-        String trikonaLord = lordOfHouse(ascendant, t);
-        Position a = find(planets, kendraLord);
-        Position b = find(planets, trikonaLord);
-        if (!kendraLord.equals(trikonaLord) && a.signNumber() == b.signNumber()
-            && seenRaja.add(kendraLord + "/" + trikonaLord)) {
-          yogas.add(new Yoga("Raja Yoga",
-              "The lords of the " + ordinal(k) + " and " + ordinal(t) + " houses (" + kendraLord + " and "
-                  + trikonaLord + ") share a sign.", List.of(kendraLord, trikonaLord)));
-        }
+    Set<String> seen = new HashSet<>();
+    int[][] rajaPairs = {{4, 5}, {4, 9}, {7, 5}, {7, 9}, {10, 5}, {10, 9}, {1, 4}, {1, 5}, {1, 7}, {1, 9}, {1, 10}};
+    for (int[] pair : rajaPairs) {
+      String name = pair[0] == 10 && pair[1] == 9 ? "Dharma-Karmadhipati Yoga" : "Raja Yoga";
+      pairYoga(yogas, seen, ascendant, planets, pair[0], pair[1], name);
+    }
+    int[][] dhanaPairs = {{2, 11}, {2, 5}, {2, 9}, {2, 10}, {5, 11}, {9, 11}, {1, 2}, {1, 11}, {5, 9}};
+    for (int[] pair : dhanaPairs) {
+      pairYoga(yogas, seen, ascendant, planets, pair[0], pair[1], "Dhana Yoga");
+    }
+    int[] dusthana = {6, 8, 12};
+    for (int h : dusthana) {
+      String lord = lordOfHouse(ascendant, h);
+      Position p = find(planets, lord);
+      if (List.of(6, 8, 12).contains(p.house()) && seen.add("vip" + lord)) {
+        yogas.add(new Yoga("Viparita Raja Yoga", "The " + ordinal(h) + " lord (" + lord + ") sits in the "
+            + ordinal(p.house()) + " house, a dusthana.", List.of(lord)));
+      }
+    }
+    String ninth = lordOfHouse(ascendant, 9);
+    String lagnaLord = lordOfHouse(ascendant, 1);
+    Position ninthPos = find(planets, ninth);
+    if (isStrong(ninthPos) && isKendra(ninthPos.house()) && isStrong(find(planets, lagnaLord))) {
+      yogas.add(new Yoga("Lakshmi Yoga", "The 9th lord (" + ninth + ") is strong in a kendra and the Ascendant "
+          + "lord (" + lagnaLord + ") is in its own or exalted sign.", List.of(ninth, lagnaLord)));
+    }
+    for (Position p : planets) {
+      if (p.name().equals("Jupiter") && (p.house() == 2 || p.house() == 11)) {
+        yogas.add(new Yoga("Dhana Yoga", "Jupiter, the planet of wealth, occupies the " + ordinal(p.house())
+            + " house.", List.of("Jupiter")));
       }
     }
     if (List.of(1, 2, 4, 7, 8, 12).contains(mars.house())) {
@@ -99,6 +114,31 @@ public final class ChartInsights {
       case 1 -> new SadeSati(true, "Setting", "Saturn is in the sign after your Moon sign (last phase).");
       default -> new SadeSati(false, null, "Saturn is not within one sign of your Moon sign.");
     };
+  }
+
+  private static boolean isStrong(Position p) {
+    return "OWN".equals(p.dignity()) || "EXALTED".equals(p.dignity());
+  }
+
+  /** Reports a conjunction or sign exchange between the lords of two houses. */
+  private static void pairYoga(List<Yoga> yogas, Set<String> seen, Position ascendant, List<Position> planets,
+                               int h1, int h2, String name) {
+    String l1 = lordOfHouse(ascendant, h1);
+    String l2 = lordOfHouse(ascendant, h2);
+    if (l1.equals(l2)) return;
+    Position a = find(planets, l1);
+    Position b = find(planets, l2);
+    String key = name + (l1.compareTo(l2) < 0 ? l1 + "/" + l2 : l2 + "/" + l1);
+    String lords = "(" + l1 + " and " + l2 + ")";
+    if (a.signNumber() == b.signNumber()) {
+      if (seen.add(key + "c")) {
+        yogas.add(new Yoga(name, "The lords of the " + ordinal(h1) + " and " + ordinal(h2) + " houses " + lords
+            + " share a sign.", List.of(l1, l2)));
+      }
+    } else if (a.house() == h2 && b.house() == h1 && seen.add(key + "e")) {
+      yogas.add(new Yoga(name + " (Parivartana)", "The lords of the " + ordinal(h1) + " and " + ordinal(h2)
+          + " houses " + lords + " exchange signs.", List.of(l1, l2)));
+    }
   }
 
   private static boolean isKendra(int house) {

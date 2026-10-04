@@ -73,6 +73,10 @@ class AstroMathTest {
     assertEquals(0, AstroMath.divisionalSign(0, 1));
     assertEquals(4, AstroMath.divisionalSign(0, 2));
     assertEquals(0, AstroMath.divisionalSign(0, 3));
+    assertEquals(4, AstroMath.divisionalSign(10, 3));
+    assertEquals(8, AstroMath.divisionalSign(20, 3));
+    assertEquals(3, AstroMath.divisionalSign(8, 4));
+    assertEquals(9, AstroMath.divisionalSign(29, 4));
     assertEquals(9, AstroMath.divisionalSign(30, 9));
     assertEquals(0, AstroMath.divisionalSign(0, 16));
     assertEquals(0, AstroMath.divisionalSign(0, 20));

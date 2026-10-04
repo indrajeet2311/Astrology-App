@@ -1,6 +1,7 @@
 package com.celestia.astro.service;
 
 import com.celestia.astro.model.Ayanamsa;
+import com.celestia.astro.model.BirthRequest;
 import com.celestia.astro.model.ChartResponse;
 import org.junit.jupiter.api.Test;
 
@@ -33,7 +34,13 @@ class SwissEphemerisCalculatorTest {
         "New Delhi", 28.6139, 77.209, "Asia/Kolkata", Ayanamsa.LAHIRI);
 
     assertEquals(9, chart.planets().size());
-    var rahu = chart.planets().get(7);
+      var rahu = chart.planets().get(7);
+      assertEquals(9, chart.dashas().size());
+      assertEquals(8, chart.yoginiDashas().size());
+      assertEquals(12, chart.charaDashas().size());
+      assertEquals(9, chart.dashas().get(0).antardashas().get(0).pratyantardashas().size());
+      assertEquals(8, chart.yoginiDashas().get(0).antardashas().get(0).pratyantardashas().size());
+      assertEquals(12, chart.charaDashas().get(0).antardashas().get(0).pratyantardashas().size());
     var ketu = chart.planets().get(8);
     assertEquals("Rahu", rahu.name());
     assertEquals("Ketu", ketu.name());
@@ -45,6 +52,42 @@ class SwissEphemerisCalculatorTest {
     assertEquals("+05:30", chart.birthDetails().utcOffset());
     assertEquals("1990-08-15T01:00Z", chart.birthDetails().utcTime());
     chart.planets().forEach(p -> assertTrue(p.house() >= 1 && p.house() <= 12));
+  }
+
+  @Test
+  void charaCapricornAntardashasFollowKnRaoSequence() {
+    ChartResponse chart = calculator.calculate("Test", LocalDateTime.of(1997, 11, 23, 17, 13),
+        "Asansol", 23.6833, 86.9833, "Asia/Kolkata", Ayanamsa.LAHIRI);
+
+    var capricorn = chart.charaDashas().stream().filter(d -> d.lord().equals("Capricorn")).findFirst().orElseThrow();
+
+    assertEquals("2020-11-23", capricorn.start());
+    assertEquals("2030-11-24", capricorn.end());
+    assertEquals(java.util.List.of("Sagittarius", "Scorpio", "Libra", "Virgo", "Leo", "Cancer",
+      "Gemini", "Taurus", "Aries", "Pisces", "Aquarius", "Capricorn"),
+      capricorn.antardashas().stream().map(d -> d.lord()).toList());
+    assertEquals("2020-11-23", capricorn.antardashas().get(0).start());
+    assertEquals("2030-11-24", capricorn.antardashas().get(11).end());
+  }
+
+  @Test
+  void annualChartsRepeatTheNatalSunAndTithiPhase() {
+    LocalDateTime local = LocalDateTime.of(1997, 11, 23, 17, 13);
+    BirthRequest birth = new BirthRequest("Test", local.toLocalDate(), local.toLocalTime(), "Asansol",
+        23.6833, 86.9833, "Asia/Kolkata", Ayanamsa.LAHIRI, null, false, null);
+    ChartResponse natal = calculator.calculate("Test", local, "Asansol", 23.6833, 86.9833,
+        "Asia/Kolkata", Ayanamsa.LAHIRI);
+    var returns = calculator.calculateAnnualCharts(birth, 2026);
+
+    double natalSun = natal.planets().stream().filter(p -> p.name().equals("Sun")).findFirst().orElseThrow().longitude();
+    double natalMoon = natal.planets().stream().filter(p -> p.name().equals("Moon")).findFirst().orElseThrow().longitude();
+    double returnSun = returns.varshaphal().planets().stream().filter(p -> p.name().equals("Sun")).findFirst().orElseThrow().longitude();
+    double returnMoon = returns.tithiPravesh().planets().stream().filter(p -> p.name().equals("Moon")).findFirst().orElseThrow().longitude();
+    double returnTithiSun = returns.tithiPravesh().planets().stream().filter(p -> p.name().equals("Sun")).findFirst().orElseThrow().longitude();
+
+    assertTrue(Math.abs(AstroMath.norm(returnSun - natalSun + 180) - 180) < 0.0001);
+    assertTrue(Math.abs(AstroMath.norm((returnMoon - returnTithiSun) - (natalMoon - natalSun) + 180) - 180) < 0.0001);
+    assertEquals(2026, returns.year());
   }
 
   @Test

@@ -1,4 +1,4 @@
-import type { Chart, BirthPayload, DailyPanchang, KundliMatch, PanchangRequest, Place } from './types';
+import type { AnnualChartsResponse, Chart, BirthPayload, DailyPanchang, KundliMatch, PanchangRequest, Place } from './types';
 
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
   let response: Response;
@@ -48,6 +48,14 @@ export function calculatePanchang(payload: PanchangRequest): Promise<DailyPancha
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
+  });
+}
+
+export function calculateAnnualCharts(payload: BirthPayload, year: number): Promise<AnnualChartsResponse> {
+  return request<AnnualChartsResponse>('/api/chart/annual', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ birth: payload, year }),
   });
 }
 

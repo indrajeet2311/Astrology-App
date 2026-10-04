@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
 import { SIGN_GLYPHS } from '../constants';
 import { dateInTimeZone, formatDegrees } from '../format';
-import type { Position, Transits } from '../types';
+import type { Chart, Position, Transits } from '../types';
+import { NorthIndianChart } from './NorthIndianChart';
+import { SouthIndianChart } from './SouthIndianChart';
 
 interface Props {
+  chart: Chart;
   natal: Position[];
   transits: Transits;
   timeZone: string;
@@ -12,7 +15,9 @@ interface Props {
   onDateChange: (date: string) => void;
 }
 
-export function TransitsCard({ natal, transits, timeZone, loading, error, onDateChange }: Props) {
+export function TransitsCard({ chart, natal, transits, timeZone, loading, error, onDateChange }: Props) {
+  const [style, setStyle] = useState<'north' | 'south'>('north');
+  const transitChart: Chart = { ...chart, planets: transits.planets };
   const [date, setDate] = useState(() => dateInTimeZone(transits.asOf, timeZone));
   const { sadeSati } = transits;
   const asOf = new Date(transits.asOf).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
@@ -39,6 +44,16 @@ export function TransitsCard({ natal, transits, timeZone, loading, error, onDate
       <p className={sadeSati.active ? 'banner banner-warn' : 'banner'}>
         <strong>Sade Sati: {sadeSati.active ? `active (${sadeSati.phase})` : 'not active'}.</strong> {sadeSati.description}
       </p>
+      <div className="transit-chart">
+        <div className="segmented no-print" role="group" aria-label="Transit chart style">
+          <button type="button" aria-pressed={style === 'north'} onClick={() => setStyle('north')}>North Indian</button>
+          <button type="button" aria-pressed={style === 'south'} onClick={() => setStyle('south')}>South Indian</button>
+        </div>
+        {style === 'north'
+          ? <NorthIndianChart chart={transitChart} label="Gochar transit chart" />
+          : <SouthIndianChart chart={transitChart} label="Gochar transit chart" />}
+        <p className="muted small">Current planets placed over your natal Lagna.</p>
+      </div>
       <div className="table-wrap">
         <table>
           <thead>

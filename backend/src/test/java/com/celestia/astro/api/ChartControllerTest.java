@@ -32,6 +32,9 @@ class ChartControllerTest {
         .andExpect(jsonPath("$.planets[0].divisionalSigns.D60").isNumber())
         .andExpect(jsonPath("$.planets[0].divisionalSigns.D9").isNumber())
         .andExpect(jsonPath("$.dashas.length()").value(9))
+        .andExpect(jsonPath("$.yoginiDashas.length()").value(8))
+        .andExpect(jsonPath("$.charaDashas.length()").value(12))
+        .andExpect(jsonPath("$.yoginiDashas[0].antardashas[0].pratyantardashas.length()").value(8))
         .andExpect(jsonPath("$.aspects.length()").value(9))
         .andExpect(jsonPath("$.yogas").isArray())
         .andExpect(jsonPath("$.transits.planets.length()").value(9))
@@ -42,6 +45,18 @@ class ChartControllerTest {
         .andExpect(jsonPath("$.dashas[0].antardashas.length()").value(9))
         .andExpect(jsonPath("$.ascendant.house").value(1));
   }
+
+        @Test
+        void returnsAnnualVarshaphalAndTithiPraveshCharts() throws Exception {
+          mvc.perform(post("/api/chart/annual").contentType(MediaType.APPLICATION_JSON)
+          .content("{\"year\":2024,\"birth\":" + VALID + "}"))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.year").value(2024))
+          .andExpect(jsonPath("$.varshaphalAt").isNotEmpty())
+          .andExpect(jsonPath("$.varshaphal.planets.length()").value(9))
+          .andExpect(jsonPath("$.tithiPraveshAt").isNotEmpty())
+          .andExpect(jsonPath("$.tithiPravesh.planets.length()").value(9));
+        }
 
         @Test
         void acceptsTransitDateForBirthLocationNoon() throws Exception {
