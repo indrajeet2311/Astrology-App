@@ -12,7 +12,7 @@ export function ShadbalaCard({ chart }: { chart: Chart }) {
     <section className="card">
       <h2>Shadbala (six-fold strength)</h2>
       <p className="muted small">
-        Computed along the lines of Brihat Parashara Hora Shastra, in virupas (60 virupas = 1 rupa). A planet whose ratio is at least 1 meets its required minimum.
+        Partial BPHS-style estimate, not a JHora or Parashara Light equivalent. Values use virupas (60 virupas = 1 rupa); the ratio is provisional until the omitted and approximated components below are implemented.
       </p>
       <div className="table-wrap">
         <table className="shadbala-table">
@@ -181,7 +181,7 @@ export function VimshopakaCard({ chart }: { chart: Chart }) {
             </tbody>
           </table>
         </div>
-        <p className="muted small">Exa exalted · Moola moolatrikona · Own own sign · AMi great friend · Mit friend · Sam neutral · Sha enemy · ASh great enemy · Deb debilitated. Vimshopaka points are 20, 18, 15, 10, 7, 5 and 2.5 respectively.</p>
+        <p className="muted small">Scoring convention: exalted or own 20 · moolatrikona or great friend 18 · friend 15 · neutral 10 · enemy 7 · great enemy 5 · debilitated 0. Some Jyotish software uses different dignity or varga-weight conventions, so totals can differ.</p>
       </details>
     </section>
   );

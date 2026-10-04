@@ -20,8 +20,8 @@ export const SCHEMES: Record<SchemeName, Record<string, number>> = {
 // Points (out of 20) a planet earns in a varga by the dignity of the sign it occupies.
 type VargaStatus = Relation | 'Exalted' | 'Moolatrikona' | 'Debilitated';
 const POINTS: Record<VargaStatus, number> = {
-  Exalted: 20, Moolatrikona: 18, Own: 15, 'Adhi Mitra': 10, Mitra: 10, Sama: 7, Shatru: 5, 'Adhi Shatru': 2.5,
-  Debilitated: 2.5,
+  Exalted: 20, Moolatrikona: 18, Own: 20, 'Adhi Mitra': 18, Mitra: 15, Sama: 10, Shatru: 7, 'Adhi Shatru': 5,
+  Debilitated: 0,
 };
 
 export interface VargaPlacement {
