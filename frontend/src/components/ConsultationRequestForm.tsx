@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Clipboard, ClipboardCheck, Send } from 'lucide-react';
+import { LoaderCircle, Send } from 'lucide-react';
+import { submitConsultation } from '../api';
 import type { Chart } from '../types';
 
 type RequestFields = {
@@ -12,59 +13,55 @@ type RequestFields = {
   availability: string;
   timezone: string;
   shareBirthDetails: boolean;
+  website: string;
 };
 
 const EMPTY: RequestFields = {
   name: '', email: '', phone: '', contactMethod: 'email', topic: '', question: '',
-  availability: '', timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC', shareBirthDetails: true,
+  availability: '', timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC', shareBirthDetails: true, website: '',
 };
 
 export function ConsultationRequestForm({ chart }: { chart: Chart }) {
   const [fields, setFields] = useState(EMPTY);
-  const [prepared, setPrepared] = useState('');
-  const [copied, setCopied] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
 
   const update = <K extends keyof RequestFields>(key: K, value: RequestFields[K]) => {
     setFields((current) => ({ ...current, [key]: value }));
-    setPrepared('');
-    setCopied(false);
+    setMessage('');
+    setError('');
   };
 
-  const requestText = () => [
-    'Private astrologer consultation request',
-    `Name: ${fields.name}`,
-    `Email: ${fields.email}`,
-    `Phone: ${fields.phone || 'Not provided'}`,
-    `Preferred contact: ${fields.contactMethod}`,
-    `Guidance area: ${fields.topic}`,
-    `Question / context: ${fields.question}`,
-    `Availability: ${fields.availability || 'To be arranged'}`,
-    `Timezone: ${fields.timezone}`,
-    fields.shareBirthDetails
-      ? `Birth chart: ${chart.birthDetails.date}, ${chart.birthDetails.localTime}, ${chart.birthDetails.placeName}`
-      : 'Birth chart details: Not included',
-  ].join('\n');
-
-  const submit = (event: React.FormEvent<HTMLFormElement>) => {
+  const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setPrepared(requestText());
-    setCopied(false);
-  };
-
-  const copyRequest = async () => {
+    setBusy(true);
+    setMessage('');
+    setError('');
     try {
-      await navigator.clipboard.writeText(prepared);
-      setCopied(true);
-    } catch {
-      setCopied(false);
+      const result = await submitConsultation({
+        ...fields,
+        birthDate: chart.birthDetails.date,
+        birthTime: chart.birthDetails.localTime,
+        birthPlace: chart.birthDetails.placeName,
+      });
+      setMessage(result.message);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Your request could not be sent. Please try again.');
+    } finally {
+      setBusy(false);
     }
   };
 
   return (
     <section className="card consultation-request">
       <h2>Request a private consultation</h2>
-      <p className="muted small">Share your question and preferred contact details. Your request is not sent from this page; no astrologer booking destination is configured yet.</p>
-      <form className="consultation-form" onSubmit={submit}>
+      <p className="muted small">Your request will be emailed to ibtnextgen@gmail.com.</p>
+      <form className="consultation-form" onSubmit={(event) => void submit(event)}>
+        <label className="consultation-trap" aria-hidden="true">
+          Website
+          <input tabIndex={-1} autoComplete="off" value={fields.website} onChange={(event) => update('website', event.target.value)} />
+        </label>
         <label className="field">
           <span className="label">Your name</span>
           <input required maxLength={100} value={fields.name} onChange={(event) => update('name', event.target.value)} autoComplete="name" />
@@ -113,15 +110,13 @@ export function ConsultationRequestForm({ chart }: { chart: Chart }) {
           <input type="checkbox" checked={fields.shareBirthDetails} onChange={(event) => update('shareBirthDetails', event.target.checked)} />
           <span>Include this chart's birth date, time and place in the request.</span>
         </label>
-        <button type="submit" className="button-primary consultation-wide"><Send size={16} /> Prepare consultation request</button>
-      </form>
-      {prepared && <div className="consultation-status" role="status">
-        <p><strong>Request prepared, not sent.</strong> Configure a booking or contact destination before requests can be delivered.</p>
-        <button type="button" className="button-ghost" onClick={() => void copyRequest()}>
-          {copied ? <ClipboardCheck size={16} /> : <Clipboard size={16} />}
-          {copied ? 'Copied' : 'Copy request details'}
+        <button type="submit" className="button-primary consultation-wide" disabled={busy}>
+          {busy ? <LoaderCircle className="spin" size={16} /> : <Send size={16} />}
+          {busy ? 'Sending…' : 'Send consultation request'}
         </button>
-      </div>}
+      </form>
+      {message && <p className="consultation-status" role="status">{message}</p>}
+      {error && <p className="consultation-status hint-error" role="alert">{error}</p>}
     </section>
   );
 }

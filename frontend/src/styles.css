@@ -377,6 +377,7 @@ tbody tr:last-child > * { border-bottom: 0; }
 .consultation-form input, .consultation-form select, .consultation-form textarea { box-sizing: border-box; width: 100%; min-width: 0; padding: 10px 12px; }
 .consultation-form textarea { resize: vertical; line-height: 1.5; }
 .consultation-wide { grid-column: 1 / -1; }
+.consultation-trap { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .consultation-consent { display: flex; align-items: start; gap: 9px; color: var(--muted); font-size: 0.9rem; }
 .consultation-consent input { width: 17px; height: 17px; flex: 0 0 auto; margin: 2px 0 0; accent-color: var(--gold); }
 .consultation-form .button-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: fit-content; margin: 0; }

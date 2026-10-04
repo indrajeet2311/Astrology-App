@@ -45,6 +45,30 @@ export function matchCharts(bride: BirthPayload, groom: BirthPayload): Promise<K
   });
 }
 
+export interface ConsultationSubmission {
+  name: string;
+  email: string;
+  phone: string;
+  contactMethod: 'email' | 'phone';
+  topic: string;
+  question: string;
+  availability: string;
+  timezone: string;
+  shareBirthDetails: boolean;
+  website: string;
+  birthDate: string;
+  birthTime: string;
+  birthPlace: string;
+}
+
+export function submitConsultation(payload: ConsultationSubmission): Promise<{ message: string }> {
+  return request<{ message: string }>('/api/consultations', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+}
+
 export function calculatePanchang(payload: PanchangRequest): Promise<DailyPanchang> {
   return request<DailyPanchang>('/api/panchang', {
     method: 'POST',

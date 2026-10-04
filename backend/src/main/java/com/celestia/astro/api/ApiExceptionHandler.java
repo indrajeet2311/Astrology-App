@@ -1,6 +1,7 @@
 package com.celestia.astro.api;
 
 import com.celestia.astro.service.PlaceLookupException;
+import com.celestia.astro.service.ConsultationDeliveryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -53,6 +54,12 @@ public class ApiExceptionHandler {
   ResponseEntity<Map<String, String>> placeLookup(PlaceLookupException e) {
     log.warn("Place lookup failed", e);
     return error(HttpStatus.BAD_GATEWAY, e.getMessage());
+  }
+
+  @ExceptionHandler(ConsultationDeliveryException.class)
+  ResponseEntity<Map<String, String>> consultationDelivery(ConsultationDeliveryException e) {
+    log.error("Consultation email delivery failed", e);
+    return error(HttpStatus.SERVICE_UNAVAILABLE, e.getMessage());
   }
 
   @ExceptionHandler(RuntimeException.class)
