@@ -8,7 +8,8 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
     response = await fetch(url, init);
   } catch (e) {
     if (e instanceof DOMException && e.name === 'AbortError') throw e;
-    throw new Error('Cannot reach the NextGenAstro server. Make sure the backend is running.');
+    throw new Error(navigator.onLine ? 'Cannot reach the NextGenAstro server. Please try again shortly.'
+      : 'You are offline. Connect to the internet to calculate charts or load live data.');
   }
 
   let body: unknown = null;

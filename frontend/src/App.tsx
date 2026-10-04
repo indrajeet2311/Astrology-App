@@ -6,6 +6,7 @@ import { ChartResults } from './components/ChartResults';
 import { SavedCharts } from './components/SavedCharts';
 import { DailyPanchang } from './components/DailyPanchang';
 import { FestivalCalendarCard } from './components/FestivalCalendarCard';
+import { PwaControls } from './components/PwaControls';
 import { createChartShareUrl, readSharedChartUrl } from './chartSharing';
 import { loadSavedCharts, payloadFromChart, removeSavedChart, saveChart } from './savedCharts';
 import type { SavedChart } from './savedCharts';
@@ -69,6 +70,7 @@ export function App() {
         <span className="brand-name">NextGen<span className="brand-accent">Astro</span></span>
         <span className="brand-tag">Your birth chart, in plain words</span>
       </nav>
+      <PwaControls />
 
       <main>
         {chart ? (

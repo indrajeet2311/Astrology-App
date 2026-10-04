@@ -47,6 +47,15 @@ p { margin: 0; }
 /* Landing */
 .brand-accent { color: var(--gold); }
 .brand-tag { color: var(--muted); font-size: 0.8rem; margin-left: 6px; }
+.pwa-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: -20px 0 24px; }
+.pwa-controls:empty { display: none; }
+.pwa-action { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; padding: 8px 12px; border: 1px solid var(--card-border); border-radius: 6px; color: var(--text); background: var(--bg-soft); cursor: pointer; font: inherit; font-size: 0.85rem; }
+.pwa-action:hover { border-color: var(--gold); }
+.pwa-action:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+.pwa-status { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--muted); overflow-wrap: anywhere; }
+.pwa-status svg { flex: none; }
+.pwa-install-help { width: 100%; max-width: 440px; font-size: 0.9rem; }
+.pwa-install-help p { margin: 8px 0; }
 .steps { list-style: none; display: flex; flex-wrap: wrap; gap: 10px; padding: 0; margin: 18px 0 10px; }
 .steps li { display: flex; align-items: center; gap: 8px; padding: 6px 12px 6px 6px; border: 1px solid var(--card-border); border-radius: 999px; font-size: 0.88rem; }
 .steps strong { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--gold); color: #1c1503; font-size: 0.8rem; }
