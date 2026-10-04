@@ -27,6 +27,7 @@ export function payloadFromChart(chart: Chart): BirthPayload {
     ayanamsa: birth.ayanamsa,
     trueNode: birth.trueNode,
     houseSystem: birth.houseSystem,
+    laterOffset: birth.laterOffset,
   };
 }
 
@@ -75,7 +76,8 @@ export function sameBirthPayload(left: BirthPayload, right: BirthPayload): boole
     && left.placeName === right.placeName && left.latitude === right.latitude
     && left.longitude === right.longitude && left.timeZone === right.timeZone
     && left.ayanamsa === right.ayanamsa && (left.trueNode ?? false) === (right.trueNode ?? false)
-    && (left.houseSystem ?? 'WHOLE_SIGN') === (right.houseSystem ?? 'WHOLE_SIGN');
+    && (left.houseSystem ?? 'WHOLE_SIGN') === (right.houseSystem ?? 'WHOLE_SIGN')
+    && (left.laterOffset ?? false) === (right.laterOffset ?? false);
 }
 
 function isSavedChart(value: unknown): value is SavedChart {
@@ -89,6 +91,7 @@ function isSavedChart(value: unknown): value is SavedChart {
     && typeof payload.latitude === 'number' && typeof payload.longitude === 'number'
     && typeof payload.timeZone === 'string' && isAyanamsa(payload.ayanamsa)
     && (payload.trueNode === undefined || typeof payload.trueNode === 'boolean')
+    && (payload.laterOffset === undefined || typeof payload.laterOffset === 'boolean')
     && (payload.houseSystem === undefined || payload.houseSystem === 'WHOLE_SIGN' || payload.houseSystem === 'EQUAL');
 }
 

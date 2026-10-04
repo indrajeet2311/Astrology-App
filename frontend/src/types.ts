@@ -32,6 +32,7 @@ export interface BirthDetails {
   ayanamsaDegrees: number;
   trueNode: boolean;
   houseSystem: HouseSystem;
+  laterOffset: boolean;
 }
 
 export interface SubPeriod {
@@ -64,6 +65,46 @@ export interface KootaScore {
   detail: string;
 }
 
+export interface Manglik {
+  present: boolean;
+  level: 'None' | 'Low' | 'Medium' | 'High' | 'Cancelled';
+  factors: string[];
+  cancellations: string[];
+}
+
+export interface CompatibilityRule {
+  name: string;
+  matched: boolean;
+  points: number;
+  maxPoints: number;
+  reason: string;
+  evidence: string[];
+}
+
+export interface CompatibilityLayer {
+  name: string;
+  points: number;
+  maxPoints: number;
+  rules: CompatibilityRule[];
+}
+
+export interface HouseConnection {
+  house: number;
+  groom: number[];
+  bride: number[];
+  overlap: number[];
+  matched: boolean;
+}
+
+export interface CompatibilityReport {
+  otherVedic: CompatibilityLayer;
+  chanceOfMarriage: CompatibilityLayer;
+  directSynastry: CompatibilityRule[];
+  marriageSynastry: CompatibilityRule[];
+  connectionSets: HouseConnection[];
+  notes: string[];
+}
+
 export interface KundliMatch {
   score: number;
   maxScore: number;
@@ -71,6 +112,10 @@ export interface KundliMatch {
   groomMoonSign: string;
   kootas: KootaScore[];
   notes: string[];
+  manglik?: { bride: Manglik; groom: Manglik; balanced: boolean; verdict: string } | null;
+  remedies?: string[];
+  summary?: string | null;
+  compatibility?: CompatibilityReport | null;
 }
 
 export interface SadeSati {
@@ -150,4 +195,5 @@ export interface BirthPayload {
   trueNode?: boolean;
   houseSystem?: HouseSystem;
   transitDate?: string;
+  laterOffset?: boolean;
 }

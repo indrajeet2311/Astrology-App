@@ -137,7 +137,7 @@ export function AnnualReturnsCard({ birth, natalAscSign }: { birth: BirthPayload
             {style === 'north'
               ? <NorthIndianChart chart={chart} label={`${title} · ${returns.year}`} />
               : <SouthIndianChart chart={chart} label={`${title} · ${returns.year}`} />}
-            <PlanetTable bodies={[chart.ascendant, ...chart.planets]} />
+            <PlanetTable bodies={[chart.ascendant, ...chart.planets]} chart={chart} />
           </div>
         </div>
       )}

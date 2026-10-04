@@ -77,7 +77,11 @@ export function dayTimings(dateIso: string, lat: number, lon: number): DayTiming
   const sunrise = new Date(utcMidnight + rise * 60000);
   let sunset = new Date(utcMidnight + set * 60000);
   if (sunset <= sunrise) sunset = new Date(sunset.getTime() + 86400000);
-  const nextRise = new Date(sunrise.getTime() + 86400000);
+  const nextUtcMidnight = utcMidnight + 86400000;
+  const nextRiseMinutes = eventMinutes(nextUtcMidnight / 86400000 + 2440587.5, lat, lon, true);
+  const nextRise = nextRiseMinutes === null
+    ? new Date(sunrise.getTime() + 86400000)
+    : new Date(nextUtcMidnight + nextRiseMinutes * 60000);
   const weekday = new Date(utcMidnight).getUTCDay();
 
   const eighths = split(sunrise, sunset, 8);

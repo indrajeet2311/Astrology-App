@@ -16,6 +16,28 @@ class SwissEphemerisCalculatorTest {
   private final SwissEphemerisCalculator calculator = new SwissEphemerisCalculator();
 
   @Test
+  void repeatedDaylightSavingTimeCanSelectEitherOccurrence() {
+    LocalDateTime repeated = LocalDateTime.of(2024, 11, 3, 1, 30);
+    ChartResponse earlier = calculator.calculate("Test", repeated, "New York", 40.7128, -74.006,
+        "America/New_York", Ayanamsa.LAHIRI, null, false, null, false);
+    ChartResponse later = calculator.calculate("Test", repeated, "New York", 40.7128, -74.006,
+        "America/New_York", Ayanamsa.LAHIRI, null, false, null, true);
+
+    assertEquals("-04:00", earlier.birthDetails().utcOffset());
+    assertEquals("2024-11-03T05:30Z", earlier.birthDetails().utcTime());
+    assertEquals("-05:00", later.birthDetails().utcOffset());
+    assertEquals("2024-11-03T06:30Z", later.birthDetails().utcTime());
+    assertTrue(later.birthDetails().laterOffset());
+  }
+
+  @Test
+  void daylightSavingGapIsRejectedAsANonexistentLocalTime() {
+    LocalDateTime skipped = LocalDateTime.of(2024, 3, 10, 2, 30);
+    assertThrows(IllegalArgumentException.class, () -> calculator.calculate("Test", skipped, "New York", 40.7128,
+        -74.006, "America/New_York", Ayanamsa.LAHIRI, null, false, null, false));
+  }
+
+  @Test
   void j2000SunMatchesKnownLahiriPosition() {
     // 2000-01-01 12:00 UT: tropical Sun ~280.37 deg, Lahiri ayanamsa ~23.86 deg => ~256.51 sidereal.
     ChartResponse chart = calculator.calculate("Test", LocalDateTime.of(2000, 1, 1, 12, 0),
@@ -74,7 +96,7 @@ class SwissEphemerisCalculatorTest {
   void annualChartsRepeatTheNatalSunAndTithiPhase() {
     LocalDateTime local = LocalDateTime.of(1997, 11, 23, 17, 13);
     BirthRequest birth = new BirthRequest("Test", local.toLocalDate(), local.toLocalTime(), "Asansol",
-        23.6833, 86.9833, "Asia/Kolkata", Ayanamsa.LAHIRI, null, false, null);
+      23.6833, 86.9833, "Asia/Kolkata", Ayanamsa.LAHIRI, null, false, null, false);
     ChartResponse natal = calculator.calculate("Test", local, "Asansol", 23.6833, 86.9833,
         "Asia/Kolkata", Ayanamsa.LAHIRI);
     var returns = calculator.calculateAnnualCharts(birth, 2026);

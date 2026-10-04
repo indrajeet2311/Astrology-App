@@ -8,7 +8,8 @@ public record ChartResponse(BirthDetails birthDetails, Position ascendant, List<
                             List<Aspect> aspects, List<Yoga> yogas, Transits transits, Panchang panchang) {
   public record BirthDetails(String name, String date, String localTime, String utcOffset, String utcTime,
                              String placeName, double latitude, double longitude, String timeZone,
-                             Ayanamsa ayanamsa, double ayanamsaDegrees, boolean trueNode, HouseSystem houseSystem) {}
+                             Ayanamsa ayanamsa, double ayanamsaDegrees, boolean trueNode, HouseSystem houseSystem,
+                             boolean laterOffset) {}
 
   /** {@code dignity} is EXALTED, DEBILITATED, OWN or null; Vargottama means the same sign in D1 and D9. */
   public record Position(String name, double longitude, String sign, int signNumber, int house,

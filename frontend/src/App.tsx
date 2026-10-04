@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Compass, Orbit, Telescope } from 'lucide-react';
+import { CalendarClock, MessageCircleQuestion, Orbit, Telescope } from 'lucide-react';
 import { calculateChart, errorMessage, matchCharts } from './api';
 import { BirthForm } from './components/BirthForm';
 import { ChartResults } from './components/ChartResults';
 import { SavedCharts } from './components/SavedCharts';
 import { DailyPanchang } from './components/DailyPanchang';
+import { FestivalCalendarCard } from './components/FestivalCalendarCard';
 import { createChartShareUrl, readSharedChartUrl } from './chartSharing';
 import { loadSavedCharts, payloadFromChart, removeSavedChart, saveChart } from './savedCharts';
 import type { SavedChart } from './savedCharts';
@@ -63,9 +64,10 @@ export function App() {
 
   return (
     <div className="page">
-      <nav className="brand" aria-label="Celestia">
+      <nav className="brand" aria-label="NextGenAstro">
         <span className="brand-mark" aria-hidden>✦</span>
-        <span className="brand-name">Celestia</span>
+        <span className="brand-name">NextGen<span className="brand-accent">Astro</span></span>
+        <span className="brand-tag">Your birth chart, in plain words</span>
       </nav>
 
       <main>
@@ -85,21 +87,30 @@ export function App() {
           <>
             <div className="landing">
               <section className="intro">
-                <h1>Your Vedic birth chart, calculated precisely.</h1>
+                <span className="eyebrow">Vedic astrology, in plain language</span>
+                <h1>Understand your life through your birth chart.</h1>
                 <p>
-                  Enter when and where you were born to see your sidereal Rashi chart, planetary positions and
-                  nakshatras.
+                  Enter your birth details and get an accurate Vedic chart in seconds. Then ask simple questions about
+                  marriage, career, property, relationships, spirituality and health, and get clear answers, not jargon.
                 </p>
                 <ul className="features">
-                  <li><Telescope size={20} aria-hidden /><span><strong>Swiss Ephemeris</strong> planetary positions</span></li>
-                  <li><Compass size={20} aria-hidden /><span><strong>Sidereal zodiac</strong> with Lahiri, Raman or KP ayanamsa</span></li>
-                  <li><Orbit size={20} aria-hidden /><span><strong>North and South Indian</strong> chart styles</span></li>
+                  <li><MessageCircleQuestion size={20} aria-hidden /><span><strong>Ask anything</strong> about marriage, career, property and more, with likely timing</span></li>
+                  <li><Telescope size={20} aria-hidden /><span><strong>Precise positions</strong> from the Swiss Ephemeris, the standard used by professional astrologers</span></li>
+                  <li><CalendarClock size={20} aria-hidden /><span><strong>Plan ahead</strong> with planetary periods, Sade Sati, transits and a festival calendar</span></li>
+                  <li><Orbit size={20} aria-hidden /><span><strong>Your way</strong>: North or South Indian charts and 16 divisional charts</span></li>
                 </ul>
+                <ol className="steps">
+                  <li><strong>1</strong><span>Enter your birth details</span></li>
+                  <li><strong>2</strong><span>See your chart explained</span></li>
+                  <li><strong>3</strong><span>Ask your questions</span></li>
+                </ol>
+                <p className="muted small">Your details stay in your browser unless you share a link. Saved charts are never uploaded.</p>
               </section>
               <BirthForm loading={loading} error={error} onSubmit={calculate} />
             </div>
             <SavedCharts charts={savedCharts} onOpen={calculate} onDelete={remove} />
             <DailyPanchang />
+            <FestivalCalendarCard />
           </>
         )}
       </main>

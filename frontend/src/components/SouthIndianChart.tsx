@@ -3,13 +3,17 @@ import type { Chart } from '../types';
 import { BodyLabels } from './NorthIndianChart';
 
 // [column, row] of each sign (0 = Aries) in the fixed-sign South Indian layout.
-const GRID: [number, number][] = [
+export const GRID: [number, number][] = [
   [1, 0], [2, 0], [3, 0], [3, 1], [3, 2], [3, 3],
   [2, 3], [1, 3], [0, 3], [0, 2], [0, 1], [0, 0],
 ];
-const CELL = 100;
+export const CELL = 100;
 
-export function SouthIndianChart({ chart, label = 'Rashi · D1' }: { chart: Chart; label?: string }) {
+export function SouthIndianChart({ chart, label = 'Rashi · D1', onHouseSelect }: {
+  chart: Chart;
+  label?: string;
+  onHouseSelect?: (signNumber: number) => void;
+}) {
   const all = [chart.ascendant, ...chart.planets];
   const title = chart.birthDetails.name ?? 'Rashi';
   return (
@@ -18,9 +22,22 @@ export function SouthIndianChart({ chart, label = 'Rashi · D1' }: { chart: Char
         const x = col * CELL;
         const y = row * CELL;
         const isAsc = chart.ascendant.signNumber === sign + 1;
+        const select = () => onHouseSelect?.(sign + 1);
         return (
-          <g key={sign}>
-            <rect x={x} y={y} width={CELL} height={CELL} className={isAsc ? 'chart-house is-asc' : 'chart-house'} />
+          <g
+            key={sign}
+            role={onHouseSelect ? 'button' : undefined}
+            tabIndex={onHouseSelect ? 0 : undefined}
+            aria-label={onHouseSelect ? `View from ${SIGN_ABBR[sign]}` : undefined}
+            onClick={onHouseSelect ? select : undefined}
+            onKeyDown={onHouseSelect ? (event) => {
+              if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); select(); }
+            } : undefined}
+          >
+            <rect
+              x={x} y={y} width={CELL} height={CELL}
+              className={`${isAsc ? 'chart-house is-asc' : 'chart-house'}${onHouseSelect ? ' chart-house-interactive' : ''}`}
+            />
             <text className="chart-sign" x={x + 8} y={y + 14}>
               {SIGN_ABBR[sign]}
             </text>

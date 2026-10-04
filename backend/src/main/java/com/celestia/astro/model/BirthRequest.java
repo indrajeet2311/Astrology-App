@@ -20,4 +20,5 @@ public record BirthRequest(
     @NotNull Ayanamsa ayanamsa,
     LocalDate transitDate,
     Boolean trueNode,
-    HouseSystem houseSystem) {}
+    HouseSystem houseSystem,
+    Boolean laterOffset) {}

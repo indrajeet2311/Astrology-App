@@ -42,13 +42,14 @@ public class ChartController {
   public KundliMatchResponse match(@Valid @RequestBody KundliMatchRequest request) {
     ChartResponse bride = calculate(request.bride());
     ChartResponse groom = calculate(request.groom());
-    return kundliMatcher.match(bride.planets().get(1).longitude(), groom.planets().get(1).longitude());
+    return kundliMatcher.match(bride, groom);
   }
 
   private ChartResponse calculate(BirthRequest request) {
     return calculator.calculate(request.name(), LocalDateTime.of(request.date(), request.time()),
       request.placeName(), request.latitude(), request.longitude(), request.timeZone(), request.ayanamsa(),
         request.transitDate(), Boolean.TRUE.equals(request.trueNode()),
-        request.houseSystem() == null ? HouseSystem.WHOLE_SIGN : request.houseSystem());
+      request.houseSystem() == null ? HouseSystem.WHOLE_SIGN : request.houseSystem(),
+      Boolean.TRUE.equals(request.laterOffset()));
   }
 }

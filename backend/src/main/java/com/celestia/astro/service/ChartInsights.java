@@ -103,6 +103,7 @@ public final class ChartInsights {
       yogas.add(new Yoga("Mangal Dosha", "Mars is in the " + ordinal(mars.house()) + " house from the Ascendant.",
           List.of("Mars")));
     }
+    Doshas.add(yogas, ascendant, planets);
     return yogas;
   }
 

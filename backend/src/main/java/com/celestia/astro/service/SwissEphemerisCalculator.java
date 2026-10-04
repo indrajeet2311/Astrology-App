@@ -78,7 +78,7 @@ public class SwissEphemerisCalculator {
     Instant natalInstant = natalLocal.atZone(zone).toInstant();
     ChartResponse natal = calculate(birth.name(), natalLocal, birth.placeName(), birth.latitude(), birth.longitude(),
         zoneId, birth.ayanamsa(), null, Boolean.TRUE.equals(birth.trueNode()),
-        birth.houseSystem() == null ? HouseSystem.WHOLE_SIGN : birth.houseSystem());
+      birth.houseSystem() == null ? HouseSystem.WHOLE_SIGN : birth.houseSystem(), Boolean.TRUE.equals(birth.laterOffset()));
     double natalSun = natal.planets().stream().filter(p -> p.name().equals("Sun")).findFirst().orElseThrow().longitude();
     double natalElongation = AstroMath.norm(
         natal.planets().stream().filter(p -> p.name().equals("Moon")).findFirst().orElseThrow().longitude() - natalSun);
@@ -110,7 +110,7 @@ public class SwissEphemerisCalculator {
     LocalDateTime local = LocalDateTime.ofInstant(event, zone);
     return calculate(birth.name(), local, birth.placeName(), birth.latitude(), birth.longitude(), birth.timeZone(),
         birth.ayanamsa(), local.toLocalDate(), Boolean.TRUE.equals(birth.trueNode()),
-        birth.houseSystem() == null ? HouseSystem.WHOLE_SIGN : birth.houseSystem());
+      birth.houseSystem() == null ? HouseSystem.WHOLE_SIGN : birth.houseSystem(), false);
   }
 
   private Instant findForwardCrossing(SwissEph swe, Instant start, Instant end,
@@ -149,6 +149,14 @@ public class SwissEphemerisCalculator {
     public ChartResponse calculate(String name, LocalDateTime local, String placeName,
                    double latitude, double longitude, String zoneId, Ayanamsa ayanamsa,
                    LocalDate transitDate, boolean trueNode, HouseSystem requestedHouseSystem) {
+      return calculate(name, local, placeName, latitude, longitude, zoneId, ayanamsa, transitDate, trueNode,
+        requestedHouseSystem, false);
+      }
+
+      public ChartResponse calculate(String name, LocalDateTime local, String placeName,
+                     double latitude, double longitude, String zoneId, Ayanamsa ayanamsa,
+                     LocalDate transitDate, boolean trueNode, HouseSystem requestedHouseSystem,
+                     boolean laterOffset) {
     if (local.getYear() < MIN_YEAR || local.getYear() > MAX_YEAR) {
       throw new IllegalArgumentException("Birth year must be between " + MIN_YEAR + " and " + MAX_YEAR + ".");
     }
@@ -157,12 +165,14 @@ public class SwissEphemerisCalculator {
     }
     ZoneId zone = ZoneId.of(zoneId);
     HouseSystem houseSystem = requestedHouseSystem == null ? HouseSystem.WHOLE_SIGN : requestedHouseSystem;
-    if (zone.getRules().getValidOffsets(local).isEmpty()) {
+    List<ZoneOffset> validOffsets = zone.getRules().getValidOffsets(local);
+    if (validOffsets.isEmpty()) {
       throw new IllegalArgumentException(
           "That local time does not exist in " + zoneId + " (clocks skipped forward). Check the birth time.");
     }
-    // For a repeated hour at the end of daylight saving, java.time picks the earlier (daylight) offset.
-    ZonedDateTime zoned = local.atZone(zone);
+    boolean laterOffsetApplied = laterOffset && validOffsets.size() > 1;
+    ZoneOffset preferredOffset = laterOffsetApplied ? validOffsets.get(validOffsets.size() - 1) : validOffsets.get(0);
+    ZonedDateTime zoned = ZonedDateTime.ofLocal(local, zone, preferredOffset);
     double jdUt = julianDay(zoned.toInstant());
 
     SwissEph swe = new SwissEph();
@@ -185,7 +195,7 @@ public class SwissEphemerisCalculator {
           name == null || name.isBlank() ? null : name.trim(),
           local.toLocalDate().toString(), local.toLocalTime().toString(),
           zoned.getOffset().getId(), utc.toLocalDateTime().toString() + "Z",
-          placeName, latitude, longitude, zoneId, ayanamsa, ayanamsaDegrees, trueNode, houseSystem);
+          placeName, latitude, longitude, zoneId, ayanamsa, ayanamsaDegrees, trueNode, houseSystem, laterOffsetApplied);
       Position moon = planets.get(1);
       var dashas = VimshottariDasha.compute(moon.longitude(), zoned.toInstant(), zone);
       var yoginiDashas = YoginiDasha.compute(moon.longitude(), zoned.toInstant(), zone);
@@ -263,7 +273,7 @@ public class SwissEphemerisCalculator {
         navamsa == sign, Map.copyOf(divisionalSigns));
   }
 
-  private static int sidMode(Ayanamsa ayanamsa) {
+  static int sidMode(Ayanamsa ayanamsa) {
     return switch (ayanamsa) {
       case LAHIRI -> SweConst.SE_SIDM_LAHIRI;
       case RAMAN -> SweConst.SE_SIDM_RAMAN;

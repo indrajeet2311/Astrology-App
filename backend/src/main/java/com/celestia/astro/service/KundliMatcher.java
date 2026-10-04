@@ -1,6 +1,10 @@
 package com.celestia.astro.service;
 
+import com.celestia.astro.model.ChartResponse.Position;
+import com.celestia.astro.model.ChartResponse;
 import com.celestia.astro.model.KundliMatchResponse.KootaScore;
+import com.celestia.astro.model.KundliMatchResponse.Manglik;
+import com.celestia.astro.model.KundliMatchResponse.ManglikMatch;
 import com.celestia.astro.model.KundliMatchResponse;
 import org.springframework.stereotype.Service;
 
@@ -87,7 +91,57 @@ public class KundliMatcher {
     notes.add("This is a traditional screening method; regional rules, exceptions and practitioner interpretation vary.");
 
     return new KundliMatchResponse(total, MAX_SCORE, AstroMath.signName(brideSign),
-        AstroMath.signName(groomSign), List.copyOf(kootas), List.copyOf(notes));
+      AstroMath.signName(groomSign), List.copyOf(kootas), List.copyOf(notes), null, List.of(), null, null);
+  }
+
+  /** Guna Milan plus Mangal dosha comparison, remedies and a plain-language summary. */
+  public KundliMatchResponse match(ChartResponse bride, ChartResponse groom) {
+    return match(bride.planets(), groom.planets()).withCompatibility(VedicSynastryScorer.score(bride, groom));
+  }
+
+  /** Guna Milan plus Mangal dosha comparison, remedies and a plain-language summary. */
+  public KundliMatchResponse match(List<Position> bridePlanets, List<Position> groomPlanets) {
+    Position brideMoon = bridePlanets.get(1);
+    Position groomMoon = groomPlanets.get(1);
+    KundliMatchResponse base = match(brideMoon.longitude(), groomMoon.longitude());
+    Manglik bride = Doshas.mangal(bridePlanets);
+    Manglik groom = Doshas.mangal(groomPlanets);
+    boolean brideActive = bride.present() && !"Cancelled".equals(bride.level());
+    boolean groomActive = groom.present() && !"Cancelled".equals(groom.level());
+    boolean balanced = brideActive == groomActive;
+    String verdict = !brideActive && !groomActive
+        ? "Neither chart carries an active Mangal dosha."
+        : brideActive && groomActive
+            ? "Both charts carry Mangal dosha, which traditionally balances each other."
+            : (brideActive ? "Only the bride's chart" : "Only the groom's chart")
+                + " carries an active Mangal dosha; traditional practice recommends remedies or a balancing match.";
+    var manglik = new ManglikMatch(bride, groom, balanced, verdict);
+
+    List<String> remedies = new ArrayList<>();
+    List<String> notes = new ArrayList<>(base.notes());
+    int brideNak = AstroMath.nakshatraIndex(brideMoon.longitude());
+    int groomNak = AstroMath.nakshatraIndex(groomMoon.longitude());
+    boolean sameSign = brideMoon.signNumber() == groomMoon.signNumber();
+    boolean nadiDosha = base.kootas().stream().anyMatch(k -> k.name().equals("Nadi") && k.score() == 0);
+    boolean nadiException = nadiDosha && (sameSign != (brideNak == groomNak));
+    if (nadiDosha && nadiException) {
+      notes.add("Nadi Dosha is traditionally considered cancelled because the two Moons share either a sign or a star, but not both.");
+    } else if (nadiDosha) {
+      remedies.add("Nadi Dosha: recite the Maha Mrityunjaya mantra, perform a Nadi Dosha Nivaran puja before the wedding, and make traditional donations (grain, cow or gold) as advised by a priest.");
+    }
+    boolean bhakootDosha = base.kootas().stream().anyMatch(k -> k.name().equals("Bhakoot") && k.score() == 0);
+    if (bhakootDosha) {
+      remedies.add("Bhakoot Dosha: it is eased when both Moon-sign lords are the same or friendly; otherwise worship of the Moon-sign deities and Vishnu Sahasranama are traditionally suggested.");
+    }
+    if (brideActive != groomActive) {
+      remedies.add("Kuja (Mangal) Dosha: Tuesday fasting, Hanuman Chalisa, Mangal Shanti puja and donating red lentils or jaggery are traditional remedies; some families also perform Kumbh Vivah. Do not wear red coral without an astrologer's advice.");
+    }
+    if (remedies.isEmpty()) remedies.add("No major dosha remedies are indicated by this screening.");
+
+    double score = base.score();
+    String band = score >= 33 ? "excellent" : score >= 25 ? "very good" : score >= 18 ? "acceptable" : "below the traditional threshold";
+    String summary = String.format("Guna Milan score %.1f of 36 is %s. %s", score, band, verdict);
+    return base.withExtras(manglik, List.copyOf(remedies), summary).withNotes(List.copyOf(notes));
   }
 
   private static double varna(int brideSign, int groomSign) {

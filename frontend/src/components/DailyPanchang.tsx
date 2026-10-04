@@ -40,8 +40,8 @@ export function DailyPanchang() {
 
   return (
     <section className="card daily-panchang">
-      <h2>Daily Panchang</h2>
-      <p className="muted small">Five limbs for the selected date and location.</p>
+      <h2>Today's Panchang</h2>
+      <p className="muted small">Tithi, nakshatra, yoga, karana and Rahu Kaal for any date and place.</p>
       <div className="daily-panchang-controls">
         <div className="field">
           <label htmlFor="panchang-date">Date</label>
@@ -59,7 +59,7 @@ export function DailyPanchang() {
         </div>
         <button type="button" className="button-primary" disabled={loading || !date} onClick={() => void lookup()}>
           {loading ? <Loader2 className="spin" size={18} /> : <CalendarDays size={18} />}
-          {loading ? 'Calculating…' : 'Calculate Panchang'}
+          {loading ? 'Calculating…' : 'Show Panchang'}
         </button>
       </div>
       {error && <p className="alert" role="alert">{error}</p>}

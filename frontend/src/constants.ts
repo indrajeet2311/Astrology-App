@@ -19,6 +19,7 @@ export const BODY_ABBR: Record<string, string> = {
   Saturn: 'Sa',
   Rahu: 'Ra',
   Ketu: 'Ke',
+  AL: 'AL', A2: 'A2', A3: 'A3', A4: 'A4', A5: 'A5', A6: 'A6', A7: 'A7', A8: 'A8', A9: 'A9', A10: 'A10', A11: 'A11', UL: 'UL',
 };
 
 export const AYANAMSA_OPTIONS: { value: Ayanamsa; label: string }[] = [

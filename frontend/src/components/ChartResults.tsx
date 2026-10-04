@@ -1,13 +1,24 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, Download, FileText, Link as LinkIcon, Printer, Save } from 'lucide-react';
 import { AYANAMSA_LABEL, SIGN_GLYPHS } from '../constants';
 import { formatDate } from '../format';
-import { divisionalChart } from '../divisional';
+import { chartFromAscendantSign, divisionalChart } from '../divisional';
+import { birthTiming } from '../birthTiming';
 import type { BirthPayload, Chart, KundliMatch } from '../types';
 import { DashaTimeline } from './DashaTimeline';
 import { AnnualReturnsCard } from './AnnualReturnsCard';
 import { InsightsCard } from './InsightsCard';
 import { AshtakavargaCard } from './AshtakavargaCard';
+import { ShadbalaCard, VimshopakaCard } from './ShadbalaCard';
+import { JaiminiCard } from './JaiminiCard';
+import { AvasthaCard } from './AvasthaCard';
+import { SaturnCyclesCard } from './SaturnCyclesCard';
+import { TransitCalendarCard } from './TransitCalendarCard';
+import { AskCard } from './AskCard';
+import { ConsultationRequestForm } from './ConsultationRequestForm';
+import { YearAheadCard } from './YearAheadCard';
+import { jaiminiYogas } from '../jaiminiYogas';
+import { ArticlesTab } from './ArticlesTab';
 import { PanchangCard } from './PanchangCard';
 import { TransitsCard } from './TransitsCard';
 import { NorthIndianChart } from './NorthIndianChart';
@@ -19,6 +30,8 @@ import type { SaveResult, SavedChart } from '../savedCharts';
 import { toPng } from 'html-to-image';
 
 type Style = 'north' | 'south';
+type ResultsTab = 'birth' | 'compatibility' | 'ask' | 'consultation' | 'articles';
+type BirthSection = 'overview' | 'analysis' | 'predictive';
 type DashaSystem = 'Vimshottari' | 'Yogini' | 'Chara';
 const DIVISIONS = [
   { code: 'D1', name: 'Rashi' },
@@ -52,23 +65,30 @@ export function ChartResults({ chart, onBack, onSave, savedCharts, onMatch, onTr
   onShare: (chart: Chart) => Promise<void>;
 }) {
   const [style, setStyle] = useState<Style>('north');
+  const [activeTab, setActiveTab] = useState<ResultsTab>('birth');
+  const [birthSection, setBirthSection] = useState<BirthSection>('overview');
   const [division, setDivision] = useState<Division>('D1');
+  const [viewAscSign, setViewAscSign] = useState<number | null>(null);
   const [dashaSystem, setDashaSystem] = useState<DashaSystem>('Vimshottari');
   const [saveMessage, setSaveMessage] = useState('');
   const [exportError, setExportError] = useState('');
   const shown = useMemo(() => divisionalChart(chart, division), [chart, division]);
+  const chartView = useMemo(() => chartFromAscendantSign(shown, viewAscSign ?? shown.ascendant.signNumber), [shown, viewAscSign]);
+  const jaimini = useMemo(() => jaiminiYogas(chart), [chart]);
+  const birthSun = useMemo(() => birthTiming(chart), [chart]);
   const divisionName = DIVISIONS.find((item) => item.code === division)?.name ?? 'Rashi';
   const label = `${divisionName} · ${division}`;
   const dashaPeriods = dashaSystem === 'Yogini' ? chart.yoginiDashas
     : dashaSystem === 'Chara' ? chart.charaDashas : chart.dashas;
   const { birthDetails: b, ascendant } = chart;
+  useEffect(() => setViewAscSign(null), [chart]);
   const moon = chart.planets.find((p) => p.name === 'Moon');
   const sun = chart.planets.find((p) => p.name === 'Sun');
 
   const summary = [
-    { label: 'Lagna (Ascendant)', value: ascendant.sign, sign: ascendant.signNumber, detail: ascendant.nakshatra },
+    { label: 'Lagna (Ascendant)', value: ascendant.sign, sign: ascendant.signNumber, detail: `${ascendant.nakshatra} · pada ${ascendant.pada}` },
     { label: 'Moon sign (Rashi)', value: moon?.sign, sign: moon?.signNumber, detail: moon ? `${moon.nakshatra} · pada ${moon.pada}` : '' },
-    { label: 'Sun sign', value: sun?.sign, sign: sun?.signNumber, detail: sun?.nakshatra ?? '' },
+    { label: 'Sun sign', value: sun?.sign, sign: sun?.signNumber, detail: sun ? `${sun.nakshatra} · pada ${sun.pada}` : '' },
   ];
 
   const exportChart = async () => {
@@ -78,7 +98,7 @@ export function ChartResults({ chart, onBack, onSave, savedCharts, onMatch, onTr
     try {
       const image = await toPng(node, { pixelRatio: 2, backgroundColor: '#14173a' });
       const link = document.createElement('a');
-      link.download = `celestia-${division.toLowerCase()}-${b.date}.png`;
+      link.download = `nextgenastro-${division.toLowerCase()}-${b.date}.png`;
       link.href = image;
       link.click();
     } catch {
@@ -88,7 +108,7 @@ export function ChartResults({ chart, onBack, onSave, savedCharts, onMatch, onTr
 
   const exportPdf = () => {
     const previous = document.title;
-    document.title = `Celestia - ${b.name || 'chart'} - ${b.date}`;
+    document.title = `NextGenAstro - ${b.name || 'chart'} - ${b.date}`;
     window.addEventListener('afterprint', () => { document.title = previous; }, { once: true });
     window.print();
   };
@@ -129,6 +149,69 @@ export function ChartResults({ chart, onBack, onSave, savedCharts, onMatch, onTr
         </p>
       </header>
 
+      <nav className="results-tabs no-print" role="tablist" aria-label="Chart sections">
+        {([
+          ['birth', 'Birth Details'],
+          ['compatibility', 'Compatibility'],
+          ['ask', 'Ask Your Chart'],
+          ['consultation', 'Consultation'],
+          ['articles', 'Articles'],
+        ] as [ResultsTab, string][]).map(([id, title]) => (
+          <button
+            key={id}
+            id={`results-tab-${id}`}
+            type="button"
+            role="tab"
+            aria-selected={activeTab === id}
+            aria-controls={`results-panel-${id}`}
+            tabIndex={activeTab === id ? 0 : -1}
+            onClick={() => setActiveTab(id)}
+          >
+            {title}
+          </button>
+        ))}
+      </nav>
+
+      {activeTab === 'ask' && <section id="results-panel-ask" role="tabpanel" aria-labelledby="results-tab-ask">
+        <AskCard chart={chart} />
+      </section>}
+
+      {activeTab === 'consultation' && <section id="results-panel-consultation" role="tabpanel" aria-labelledby="results-tab-consultation">
+        <header className="panel-intro">
+          <span className="eyebrow">Private guidance</span>
+          <h2>Consultation with an astrologer</h2>
+          <p className="muted">Send a focused request with your preferred contact method and availability.</p>
+        </header>
+        <ConsultationRequestForm chart={chart} />
+      </section>}
+
+      {activeTab === 'birth' && <section id="results-panel-birth" role="tabpanel" aria-labelledby="results-tab-birth">
+      <nav className="birth-subtabs no-print" role="tablist" aria-label="Birth chart sections">
+        {([
+          ['overview', 'Overview'],
+          ['analysis', 'Chart Analysis'],
+          ['predictive', 'Predictive'],
+        ] as [BirthSection, string][]).map(([id, title]) => (
+          <button
+            key={id}
+            id={`birth-tab-${id}`}
+            type="button"
+            role="tab"
+            aria-selected={birthSection === id}
+            aria-controls={`birth-panel-${id}`}
+            tabIndex={birthSection === id ? 0 : -1}
+            onClick={() => setBirthSection(id)}
+          >
+            {title}
+          </button>
+        ))}
+      </nav>
+      {birthSection === 'overview' && <section id="birth-panel-overview" role="tabpanel" aria-labelledby="birth-tab-overview">
+      <header className="panel-intro">
+        <span className="eyebrow">Your chart</span>
+        <h2>Birth details and planetary positions</h2>
+        <p className="muted">Review your Rashi chart, birth Panchang and the placements used throughout the reading.</p>
+      </header>
       <section className="summary" aria-label="Chart summary">
         {summary.map((s) => (
           <div className="card summary-item" key={s.label}>
@@ -150,7 +233,7 @@ export function ChartResults({ chart, onBack, onSave, savedCharts, onMatch, onTr
             <h2>{divisionName} chart ({division})</h2>
             <label className="division-select no-print">
               <span className="sr-only">Divisional chart</span>
-              <select aria-label="Divisional chart" value={division} onChange={(event) => setDivision(event.target.value as Division)}>
+              <select aria-label="Divisional chart" value={division} onChange={(event) => { setDivision(event.target.value as Division); setViewAscSign(null); }}>
                 {DIVISIONS.map((item) => (
                   <option key={item.code} value={item.code}>{item.code} · {item.name}</option>
                 ))}
@@ -166,12 +249,16 @@ export function ChartResults({ chart, onBack, onSave, savedCharts, onMatch, onTr
             </div>
           </div>
           {style === 'north' ? (
-            <NorthIndianChart chart={shown} label={label} />
+            <NorthIndianChart chart={chartView} label={label} onHouseSelect={(sign) => setViewAscSign(sign === shown.ascendant.signNumber ? null : sign)} />
           ) : (
-            <SouthIndianChart chart={shown} label={label} />
+            <SouthIndianChart chart={chartView} label={label} onHouseSelect={(sign) => setViewAscSign(sign === shown.ascendant.signNumber ? null : sign)} />
           )}
+          {viewAscSign !== null && <p className="house-view-note muted small" role="status">
+            Viewing from {chartView.ascendant.sign}. House numbers have been recounted from this sign; your natal chart is unchanged.
+            <button type="button" className="button-ghost" onClick={() => setViewAscSign(null)}>Reset to natal Lagna</button>
+          </p>}
           <p className="muted small">
-            Whole-sign houses. {style === 'north' ? 'Numbers show the sign in each house; house 1 is the top diamond.' : 'Signs are fixed; the highlighted box holds the Ascendant.'}{' '}
+            Whole-sign houses. Click any house to view the chart from that sign. {style === 'north' ? 'Numbers show the sign in each house; house 1 is the top diamond.' : 'Signs are fixed; the highlighted box holds the Ascendant.'}{' '}
             ℞ marks retrograde. Su Sun · Mo Moon · Ma Mars · Me Mercury · Ju Jupiter · Ve Venus · Sa Saturn · Ra Rahu · Ke Ketu.
           </p>
         </section>
@@ -190,7 +277,18 @@ export function ChartResults({ chart, onBack, onSave, savedCharts, onMatch, onTr
             <dt>Coordinates</dt>
             <dd>{b.latitude.toFixed(4)}, {b.longitude.toFixed(4)}</dd>
             <dt>Timezone</dt>
-            <dd>{b.timeZone}</dd>
+            <dd>{b.timeZone} · UTC{b.utcOffset}{birthSun ? ` · ${birthSun.timezoneLabel}${birthSun.daylightSaving ? ' (daylight saving)' : ''}` : ''}</dd>
+            {birthSun && <>
+              <dt>Sunrise / sunset</dt>
+              <dd>{birthSun.sunrise} / {birthSun.sunset} local time · Vedic day beginning {formatDate(birthSun.dayDate)}</dd>
+              <dt>Birth Hora</dt>
+              <dd>{birthSun.hora} Hora{birthSun.horaStart ? ` · ${birthSun.horaStart}–${birthSun.horaEnd}` : ''} local time</dd>
+              <dt>Vara (weekday)</dt>
+              <dd>{birthSun.weekday} · ruled by {birthSun.weekdayLord}</dd>
+              <dt>Daylight saving</dt>
+              <dd>{birthSun.daylightSaving ? `In effect at birth; offset ${birthSun.offset} was applied automatically` : `Not in effect at birth; offset ${birthSun.offset} was applied`}</dd>
+              {b.laterOffset && <><dt>Repeated local time</dt><dd>Later daylight-saving clock occurrence selected</dd></>}
+            </>}
             <dt>Ayanamsa</dt>
             <dd>{AYANAMSA_LABEL[b.ayanamsa]} ({b.ayanamsaDegrees.toFixed(4)}°)</dd>
             <dt>House system</dt>
@@ -206,15 +304,37 @@ export function ChartResults({ chart, onBack, onSave, savedCharts, onMatch, onTr
       <section className="card">
         <h2>{division === 'D1' ? 'Planetary positions (D1)' : `Planetary positions (${division})`}</h2>
         {division !== 'D1' && <p className="muted small">Sign and whole-sign house placements for the selected division.</p>}
-        <PlanetTable bodies={[shown.ascendant, ...shown.planets]} division={division} />
+        <PlanetTable bodies={[chartView.ascendant, ...chartView.planets]} division={division} chart={chart} />
       </section>
+      </section>}
 
-      <InsightsCard aspects={chart.aspects} yogas={chart.yogas} />
+      {birthSection === 'analysis' && <section id="birth-panel-analysis" role="tabpanel" aria-labelledby="birth-tab-analysis">
+      <header className="panel-intro">
+        <span className="eyebrow">Chart interpretation</span>
+        <h2>Strengths, patterns and planetary states</h2>
+        <p className="muted">Explore yogas and doshas, Jaimini indicators, Ashtakavarga, Shadbala and divisional strength.</p>
+      </header>
+      <InsightsCard aspects={chart.aspects} yogas={chart.yogas} jaimini={jaimini} />
 
       <AshtakavargaCard chart={chart} />
 
-      <KundliMatchCard chart={chart} savedCharts={savedCharts} onMatch={onMatch} />
+      <ShadbalaCard chart={chart} />
 
+      <VimshopakaCard chart={chart} />
+
+      <JaiminiCard chart={chart} />
+
+      <AvasthaCard chart={chart} />
+      </section>}
+
+      {birthSection === 'predictive' && <section id="birth-panel-predictive" role="tabpanel" aria-labelledby="birth-tab-predictive">
+      <header className="panel-intro">
+        <span className="eyebrow">Timing and cycles</span>
+        <h2>How the next periods unfold</h2>
+        <p className="muted">Annual outlook, planetary periods and current or historical transits from this birth chart.</p>
+      </header>
+      <YearAheadCard chart={chart} />
+      <h2 className="tab-section-title">Timing and transits</h2>
       <TransitsCard
         chart={chart}
         natal={chart.planets}
@@ -226,6 +346,10 @@ export function ChartResults({ chart, onBack, onSave, savedCharts, onMatch, onTr
       />
 
       <AnnualReturnsCard birth={payloadFromChart(chart)} natalAscSign={chart.ascendant.signNumber} />
+
+      <SaturnCyclesCard chart={chart} />
+
+      <TransitCalendarCard chart={chart} />
 
       <section className="card">
         <div className="card-head dasha-head">
@@ -248,6 +372,16 @@ export function ChartResults({ chart, onBack, onSave, savedCharts, onMatch, onTr
         </p>
         <DashaTimeline dashas={dashaPeriods} system={dashaSystem} />
       </section>
+      </section>}
+      </section>}
+
+      {activeTab === 'compatibility' && <section id="results-panel-compatibility" role="tabpanel" aria-labelledby="results-tab-compatibility">
+        <KundliMatchCard chart={chart} savedCharts={savedCharts} onMatch={onMatch} />
+      </section>}
+
+      {activeTab === 'articles' && <section id="results-panel-articles" role="tabpanel" aria-labelledby="results-tab-articles">
+        <ArticlesTab />
+      </section>}
 
       <p className="disclaimer">
         Positions are computed with the Swiss Ephemeris (Moshier mode, sidereal zodiac, mean lunar node). Astrology is a
