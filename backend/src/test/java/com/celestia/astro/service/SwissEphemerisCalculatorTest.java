@@ -5,6 +5,7 @@ import com.celestia.astro.model.ChartResponse;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -55,6 +56,28 @@ class SwissEphemerisCalculatorTest {
     assertEquals("Saturn", chart.transits().planets().get(6).name());
     chart.transits().planets().forEach(p -> assertTrue(p.house() >= 1 && p.house() <= 12));
     assertTrue(chart.transits().asOf().endsWith("Z"));
+  }
+
+  @Test
+  void calculatesTransitsAtNoonOnTheSelectedBirthLocationDate() {
+    ChartResponse chart = calculator.calculate(null, LocalDateTime.of(1990, 8, 15, 6, 30),
+        "New Delhi", 28.6139, 77.209, "Asia/Kolkata", Ayanamsa.LAHIRI, LocalDate.of(2024, 1, 1));
+
+    assertEquals("2024-01-01T06:30:00Z", chart.transits().asOf());
+    assertEquals(9, chart.transits().planets().size());
+  }
+
+  @Test
+  void supportsTrueNodeAndAdditionalAyanamsas() {
+    ChartResponse mean = calculator.calculate("Test", LocalDateTime.of(2000, 1, 1, 12, 0),
+        "Greenwich", 51.4769, 0.0, "UTC", Ayanamsa.TRUE_CHITRA, null, false, null);
+    ChartResponse trueNode = calculator.calculate("Test", LocalDateTime.of(2000, 1, 1, 12, 0),
+        "Greenwich", 51.4769, 0.0, "UTC", Ayanamsa.YUKTESHWAR, null, true, null);
+
+    assertEquals(Ayanamsa.TRUE_CHITRA, mean.birthDetails().ayanamsa());
+    assertEquals(Ayanamsa.YUKTESHWAR, trueNode.birthDetails().ayanamsa());
+    assertTrue(trueNode.birthDetails().trueNode());
+    assertTrue(Math.abs(mean.planets().get(7).longitude() - trueNode.planets().get(7).longitude()) > 0.01);
   }
 
   @Test

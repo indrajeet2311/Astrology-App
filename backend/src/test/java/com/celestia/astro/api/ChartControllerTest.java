@@ -20,6 +20,7 @@ class ChartControllerTest {
   private static final String VALID = """
       {"name":"Test","date":"1990-08-15","time":"06:30","placeName":"New Delhi, India",
        "latitude":28.6139,"longitude":77.209,"timeZone":"Asia/Kolkata","ayanamsa":"LAHIRI"}""";
+  private static final String MATCH = "{\"bride\":" + VALID + ",\"groom\":" + VALID + "}";
 
   @Test
   void returnsChart() throws Exception {
@@ -41,6 +42,35 @@ class ChartControllerTest {
         .andExpect(jsonPath("$.dashas[0].antardashas.length()").value(9))
         .andExpect(jsonPath("$.ascendant.house").value(1));
   }
+
+        @Test
+        void acceptsTransitDateForBirthLocationNoon() throws Exception {
+          String withTransitDate = VALID.replace("\"ayanamsa\":\"LAHIRI\"", "\"ayanamsa\":\"LAHIRI\",\"transitDate\":\"2024-01-01\"");
+          mvc.perform(post("/api/chart").contentType(MediaType.APPLICATION_JSON).content(withTransitDate))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.transits.asOf").value("2024-01-01T06:30:00Z"));
+        }
+
+          @Test
+          void returnsAshtakootaScoresForBothCharts() throws Exception {
+            mvc.perform(post("/api/chart/match").contentType(MediaType.APPLICATION_JSON).content(MATCH))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.kootas.length()").value(8))
+            .andExpect(jsonPath("$.maxScore").value(36.0))
+            .andExpect(jsonPath("$.score").isNumber());
+          }
+
+            @Test
+            void returnsDailyPanchangForSelectedDateAndPlace() throws Exception {
+              String daily = """
+              {"date":"2024-01-01","placeName":"New Delhi, India","latitude":28.6139,
+               "longitude":77.209,"timeZone":"Asia/Kolkata","ayanamsa":"LAHIRI"}""";
+              mvc.perform(post("/api/panchang").contentType(MediaType.APPLICATION_JSON).content(daily))
+              .andExpect(status().isOk())
+              .andExpect(jsonPath("$.asOf").value("2024-01-01T06:30:00Z"))
+              .andExpect(jsonPath("$.panchang.tithi").isNotEmpty())
+              .andExpect(jsonPath("$.moon.nakshatra").isNotEmpty());
+            }
 
   @Test
   void reportsMissingFieldsAsErrorMessage() throws Exception {

@@ -2,12 +2,15 @@ package com.celestia.astro.service;
 
 import com.celestia.astro.model.Ayanamsa;
 import com.celestia.astro.model.ChartResponse;
+import com.celestia.astro.model.ChartResponse.DailyPanchang;
 import com.celestia.astro.model.ChartResponse.Position;
+import com.celestia.astro.model.HouseSystem;
 import de.thmac.swisseph.SweConst;
 import de.thmac.swisseph.SwissEph;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -33,15 +36,52 @@ public class SwissEphemerisCalculator {
       new Body("Mercury", SweConst.SE_MERCURY),
       new Body("Jupiter", SweConst.SE_JUPITER),
       new Body("Venus", SweConst.SE_VENUS),
-      new Body("Saturn", SweConst.SE_SATURN),
-      new Body("Rahu", SweConst.SE_MEAN_NODE));
+      new Body("Saturn", SweConst.SE_SATURN));
 
   public ChartResponse calculate(String name, LocalDateTime local, String placeName,
                                  double latitude, double longitude, String zoneId, Ayanamsa ayanamsa) {
+    return calculate(name, local, placeName, latitude, longitude, zoneId, ayanamsa, null);
+  }
+
+  public DailyPanchang calculatePanchang(LocalDate date, String placeName, double latitude, double longitude,
+                                         String zoneId, Ayanamsa ayanamsa) {
+    if (date.getYear() < MIN_YEAR || date.getYear() > MAX_YEAR) {
+      throw new IllegalArgumentException("Date year must be between " + MIN_YEAR + " and " + MAX_YEAR + ".");
+    }
+    ZoneId zone = ZoneId.of(zoneId);
+    Instant instant = date.atTime(12, 0).atZone(zone).toInstant();
+    double jdUt = julianDay(instant);
+    SwissEph swe = new SwissEph();
+    try {
+      swe.swe_set_sid_mode(sidMode(ayanamsa), 0, 0);
+      double sun = longitudeAt(swe, jdUt, SweConst.SE_SUN);
+      double moonLongitude = longitudeAt(swe, jdUt, SweConst.SE_MOON);
+      Position moon = position("Moon", moonLongitude, moonLongitude, false, sun, HouseSystem.WHOLE_SIGN);
+      return new DailyPanchang(instant.truncatedTo(ChronoUnit.MINUTES).toString(),
+          PanchangCalculator.calculate(sun, moonLongitude, date), moon);
+    } finally {
+      swe.swe_close();
+    }
+  }
+
+  public ChartResponse calculate(String name, LocalDateTime local, String placeName,
+                                 double latitude, double longitude, String zoneId, Ayanamsa ayanamsa,
+                                 LocalDate transitDate) {
+    return calculate(name, local, placeName, latitude, longitude, zoneId, ayanamsa, transitDate, false,
+      HouseSystem.WHOLE_SIGN);
+    }
+
+    public ChartResponse calculate(String name, LocalDateTime local, String placeName,
+                   double latitude, double longitude, String zoneId, Ayanamsa ayanamsa,
+                   LocalDate transitDate, boolean trueNode, HouseSystem requestedHouseSystem) {
     if (local.getYear() < MIN_YEAR || local.getYear() > MAX_YEAR) {
       throw new IllegalArgumentException("Birth year must be between " + MIN_YEAR + " and " + MAX_YEAR + ".");
     }
+    if (transitDate != null && (transitDate.getYear() < MIN_YEAR || transitDate.getYear() > MAX_YEAR)) {
+      throw new IllegalArgumentException("Transit year must be between " + MIN_YEAR + " and " + MAX_YEAR + ".");
+    }
     ZoneId zone = ZoneId.of(zoneId);
+    HouseSystem houseSystem = requestedHouseSystem == null ? HouseSystem.WHOLE_SIGN : requestedHouseSystem;
     if (zone.getRules().getValidOffsets(local).isEmpty()) {
       throw new IllegalArgumentException(
           "That local time does not exist in " + zoneId + " (clocks skipped forward). Check the birth time.");
@@ -62,7 +102,7 @@ public class SwissEphemerisCalculator {
       }
       double ascLongitude = AstroMath.norm(ascmc[0]);
 
-      List<Position> planets = planetsAt(swe, jdUt, ascLongitude);
+      List<Position> planets = planetsAt(swe, jdUt, ascLongitude, trueNode, houseSystem);
 
       double ayanamsaDegrees = swe.swe_get_ayanamsa_ut(jdUt);
       ZonedDateTime utc = zoned.withZoneSameInstant(ZoneOffset.UTC);
@@ -70,16 +110,18 @@ public class SwissEphemerisCalculator {
           name == null || name.isBlank() ? null : name.trim(),
           local.toLocalDate().toString(), local.toLocalTime().toString(),
           zoned.getOffset().getId(), utc.toLocalDateTime().toString() + "Z",
-          placeName, latitude, longitude, zoneId, ayanamsa, ayanamsaDegrees);
+          placeName, latitude, longitude, zoneId, ayanamsa, ayanamsaDegrees, trueNode, houseSystem);
       Position moon = planets.get(1);
       var dashas = VimshottariDasha.compute(moon.longitude(), zoned.toInstant(), zone);
-      Position ascendant = position("Ascendant", ascLongitude, ascLongitude, false, Double.NaN);
+      Position ascendant = position("Ascendant", ascLongitude, ascLongitude, false, Double.NaN, houseSystem);
 
       // Transit houses are counted from the natal Ascendant; Sade Sati is judged from the natal Moon sign.
-      Instant now = Instant.now();
-      List<Position> transitPlanets = planetsAt(swe, julianDay(now), ascLongitude);
+        Instant transitInstant = transitDate == null
+          ? Instant.now()
+          : transitDate.atTime(12, 0).atZone(zone).toInstant();
+      List<Position> transitPlanets = planetsAt(swe, julianDay(transitInstant), ascLongitude, trueNode, houseSystem);
       Position saturn = transitPlanets.get(6);
-      var transits = new ChartResponse.Transits(now.truncatedTo(ChronoUnit.MINUTES).toString(), transitPlanets,
+        var transits = new ChartResponse.Transits(transitInstant.truncatedTo(ChronoUnit.MINUTES).toString(), transitPlanets,
           ChartInsights.sadeSati(moon.signNumber(), saturn.signNumber()));
       return new ChartResponse(details, ascendant, planets, dashas,
           ChartInsights.aspects(planets), ChartInsights.yogas(ascendant, planets), transits,
@@ -90,7 +132,8 @@ public class SwissEphemerisCalculator {
   }
 
   /** Sidereal positions of the nine grahas at {@code jdUt}; the sidereal mode must already be set on {@code swe}. */
-  private List<Position> planetsAt(SwissEph swe, double jdUt, double ascLongitude) {
+  private List<Position> planetsAt(SwissEph swe, double jdUt, double ascLongitude,
+                                   boolean trueNode, HouseSystem houseSystem) {
     int flags = SweConst.SEFLG_MOSEPH | SweConst.SEFLG_SIDEREAL | SweConst.SEFLG_SPEED;
     List<Position> planets = new ArrayList<>();
     Position rahu = null;
@@ -102,17 +145,34 @@ public class SwissEphemerisCalculator {
         throw new IllegalStateException("Ephemeris calculation failed for " + body.name() + ": " + err);
       }
       if (body.name().equals("Sun")) sunLongitude = AstroMath.norm(xx[0]);
-      Position p = position(body.name(), xx[0], ascLongitude, xx[3] < 0, sunLongitude);
+      Position p = position(body.name(), xx[0], ascLongitude, xx[3] < 0, sunLongitude, houseSystem);
       planets.add(p);
-      if (body.name().equals("Rahu")) rahu = p;
     }
+    double[] nodeValues = new double[6];
+    StringBuffer nodeError = new StringBuffer();
+    int nodeId = trueNode ? SweConst.SE_TRUE_NODE : SweConst.SE_MEAN_NODE;
+    if (swe.swe_calc_ut(jdUt, nodeId, flags, nodeValues, nodeError) < 0) {
+      throw new IllegalStateException("Ephemeris calculation failed for Rahu: " + nodeError);
+    }
+    rahu = position("Rahu", nodeValues[0], ascLongitude, nodeValues[3] < 0, sunLongitude, houseSystem);
+    planets.add(rahu);
     // Ketu is always exactly opposite Rahu and moves with it.
-    planets.add(position("Ketu", rahu.longitude() + 180.0, ascLongitude, rahu.retrograde(), sunLongitude));
+    planets.add(position("Ketu", rahu.longitude() + 180.0, ascLongitude, rahu.retrograde(), sunLongitude, houseSystem));
     return planets;
   }
 
+  private static double longitudeAt(SwissEph swe, double jdUt, int bodyId) {
+    double[] values = new double[6];
+    StringBuffer err = new StringBuffer();
+    int flags = SweConst.SEFLG_MOSEPH | SweConst.SEFLG_SIDEREAL;
+    if (swe.swe_calc_ut(jdUt, bodyId, flags, values, err) < 0) {
+      throw new IllegalStateException("Ephemeris calculation failed: " + err);
+    }
+    return values[0];
+  }
+
   private static Position position(String name, double rawLongitude, double ascLongitude, boolean retrograde,
-                                   double sunLongitude) {
+                                   double sunLongitude, HouseSystem houseSystem) {
     double lon = AstroMath.norm(rawLongitude);
     int sign = AstroMath.sign(lon);
     int navamsa = AstroMath.navamsaSign(lon);
@@ -120,7 +180,7 @@ public class SwissEphemerisCalculator {
     for (int division : new int[] {1, 2, 3, 4, 7, 9, 10, 12, 16, 20, 24, 27, 30, 40, 45, 60}) {
       divisionalSigns.put("D" + division, AstroMath.divisionalSign(lon, division) + 1);
     }
-    return new Position(name, lon, AstroMath.signName(sign), sign + 1, AstroMath.house(lon, ascLongitude),
+    return new Position(name, lon, AstroMath.signName(sign), sign + 1, AstroMath.house(lon, ascLongitude, houseSystem),
         lon - sign * 30.0, AstroMath.nakshatra(lon), AstroMath.pada(lon), retrograde,
         navamsa + 1, Dignity.dignity(name, sign), Dignity.isCombust(name, lon, retrograde, sunLongitude),
         navamsa == sign, Map.copyOf(divisionalSigns));
@@ -131,6 +191,8 @@ public class SwissEphemerisCalculator {
       case LAHIRI -> SweConst.SE_SIDM_LAHIRI;
       case RAMAN -> SweConst.SE_SIDM_RAMAN;
       case KRISHNAMURTI -> SweConst.SE_SIDM_KRISHNAMURTI;
+      case TRUE_CHITRA -> SweConst.SE_SIDM_TRUE_CITRA;
+      case YUKTESHWAR -> SweConst.SE_SIDM_YUKTESHWAR;
     };
   }
 

@@ -3,7 +3,7 @@ import type { FormEvent } from 'react';
 import { Loader2, Sparkles } from 'lucide-react';
 import { AYANAMSA_OPTIONS } from '../constants';
 import { todayIso } from '../format';
-import type { Ayanamsa, BirthPayload, Place } from '../types';
+import type { Ayanamsa, BirthPayload, HouseSystem, Place } from '../types';
 import { PlaceSearch } from './PlaceSearch';
 
 interface Props {
@@ -18,6 +18,8 @@ export function BirthForm({ loading, error, onSubmit }: Props) {
   const [time, setTime] = useState('');
   const [place, setPlace] = useState<Place | null>(null);
   const [ayanamsa, setAyanamsa] = useState<Ayanamsa>('LAHIRI');
+  const [trueNode, setTrueNode] = useState(false);
+  const [houseSystem, setHouseSystem] = useState<HouseSystem>('WHOLE_SIGN');
   const [placeMissing, setPlaceMissing] = useState(false);
 
   const submit = (e: FormEvent) => {
@@ -35,6 +37,8 @@ export function BirthForm({ loading, error, onSubmit }: Props) {
       longitude: place.longitude,
       timeZone: place.timeZone,
       ayanamsa,
+      trueNode,
+      houseSystem,
     });
   };
 
@@ -86,6 +90,23 @@ export function BirthForm({ loading, error, onSubmit }: Props) {
             </option>
           ))}
         </select>
+      </div>
+
+      <div className="grid-2">
+        <div className="field">
+          <label htmlFor="house-system">House system</label>
+          <select id="house-system" value={houseSystem} onChange={(e) => setHouseSystem(e.target.value as HouseSystem)}>
+            <option value="WHOLE_SIGN">Whole sign</option>
+            <option value="EQUAL">Equal house</option>
+          </select>
+        </div>
+        <div className="field setting-toggle">
+          <span className="label">Lunar node</span>
+          <label className="toggle-row" htmlFor="true-node">
+            <input id="true-node" type="checkbox" checked={trueNode} onChange={(e) => setTrueNode(e.target.checked)} />
+            <span>Use true node (default: mean)</span>
+          </label>
+        </div>
       </div>
 
       {error && (

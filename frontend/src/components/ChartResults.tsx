@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react';
-import { ArrowLeft, Printer } from 'lucide-react';
+import { ArrowLeft, Download, Link as LinkIcon, Printer, Save } from 'lucide-react';
 import { AYANAMSA_LABEL, SIGN_GLYPHS } from '../constants';
 import { formatDate } from '../format';
 import { divisionalChart } from '../divisional';
-import type { Chart } from '../types';
+import type { BirthPayload, Chart, KundliMatch } from '../types';
 import { DashaTimeline } from './DashaTimeline';
 import { InsightsCard } from './InsightsCard';
 import { PanchangCard } from './PanchangCard';
@@ -11,6 +11,9 @@ import { TransitsCard } from './TransitsCard';
 import { NorthIndianChart } from './NorthIndianChart';
 import { PlanetTable } from './PlanetTable';
 import { SouthIndianChart } from './SouthIndianChart';
+import { KundliMatchCard } from './KundliMatchCard';
+import type { SaveResult, SavedChart } from '../savedCharts';
+import { toPng } from 'html-to-image';
 
 type Style = 'north' | 'south';
 const DIVISIONS = [
@@ -33,9 +36,21 @@ const DIVISIONS = [
 ] as const;
 type Division = (typeof DIVISIONS)[number]['code'];
 
-export function ChartResults({ chart, onBack }: { chart: Chart; onBack: () => void }) {
+export function ChartResults({ chart, onBack, onSave, savedCharts, onMatch, onTransitDateChange, transitLoading, transitError, onShare }: {
+  chart: Chart;
+  onBack: () => void;
+  onSave: (chart: Chart) => SaveResult;
+  savedCharts: SavedChart[];
+  onMatch: (groom: BirthPayload) => Promise<KundliMatch>;
+  onTransitDateChange: (date: string) => void;
+  transitLoading: boolean;
+  transitError: string;
+  onShare: (chart: Chart) => Promise<void>;
+}) {
   const [style, setStyle] = useState<Style>('north');
   const [division, setDivision] = useState<Division>('D1');
+  const [saveMessage, setSaveMessage] = useState('');
+  const [exportError, setExportError] = useState('');
   const shown = useMemo(() => divisionalChart(chart, division), [chart, division]);
   const divisionName = DIVISIONS.find((item) => item.code === division)?.name ?? 'Rashi';
   const label = `${divisionName} · ${division}`;
@@ -49,16 +64,45 @@ export function ChartResults({ chart, onBack }: { chart: Chart; onBack: () => vo
     { label: 'Sun sign', value: sun?.sign, sign: sun?.signNumber, detail: sun?.nakshatra ?? '' },
   ];
 
+  const exportChart = async () => {
+    const node = document.querySelector<HTMLElement>('.chart-card');
+    if (!node) return;
+    setExportError('');
+    try {
+      const image = await toPng(node, { pixelRatio: 2, backgroundColor: '#14173a' });
+      const link = document.createElement('a');
+      link.download = `celestia-${division.toLowerCase()}-${b.date}.png`;
+      link.href = image;
+      link.click();
+    } catch {
+      setExportError('Could not export the chart image. Use Print to save as PDF.');
+    }
+  };
+
   return (
     <div className="results">
       <div className="toolbar no-print">
         <button type="button" className="button-ghost" onClick={onBack}>
           <ArrowLeft size={17} /> Edit details
         </button>
-        <button type="button" className="button-ghost" onClick={() => window.print()}>
-          <Printer size={17} /> Print
-        </button>
+        <div className="toolbar-actions">
+          <button type="button" className="button-ghost" onClick={() => setSaveMessage(onSave(chart).message ?? '')}>
+            <Save size={17} /> Save chart
+          </button>
+          <button type="button" className="button-ghost" onClick={exportChart}>
+            <Download size={17} /> PNG
+          </button>
+          <button type="button" className="button-ghost" onClick={() => void onShare(chart).catch(() => setExportError('Could not copy the share link.'))}>
+            <LinkIcon size={17} /> Share link
+          </button>
+          <button type="button" className="button-ghost" onClick={() => window.print()}>
+            <Printer size={17} /> Print
+          </button>
+        </div>
       </div>
+      {saveMessage && <p className="save-message muted small" role="status">{saveMessage}</p>}
+      <p className="share-note muted small no-print">Share links contain the birth details needed to recreate the chart. Share only with someone you trust.</p>
+      {exportError && <p className="save-message hint-error small" role="alert">{exportError}</p>}
 
       <header className="result-head">
         <span className="eyebrow">Vedic birth chart</span>
@@ -132,6 +176,10 @@ export function ChartResults({ chart, onBack }: { chart: Chart; onBack: () => vo
             <dd>{b.timeZone}</dd>
             <dt>Ayanamsa</dt>
             <dd>{AYANAMSA_LABEL[b.ayanamsa]} ({b.ayanamsaDegrees.toFixed(4)}°)</dd>
+            <dt>House system</dt>
+            <dd>{b.houseSystem === 'EQUAL' ? 'Equal house' : 'Whole sign'}</dd>
+            <dt>Lunar node</dt>
+            <dd>{b.trueNode ? 'True node' : 'Mean node'}</dd>
           </dl>
         </section>
       </div>
@@ -139,13 +187,23 @@ export function ChartResults({ chart, onBack }: { chart: Chart; onBack: () => vo
       <PanchangCard panchang={chart.panchang} moon={moon} />
 
       <section className="card">
-        <h2>Planetary positions</h2>
-        <PlanetTable bodies={[ascendant, ...chart.planets]} />
+        <h2>{division === 'D1' ? 'Planetary positions (D1)' : `Planetary positions (${division})`}</h2>
+        {division !== 'D1' && <p className="muted small">Sign and whole-sign house placements for the selected division.</p>}
+        <PlanetTable bodies={[shown.ascendant, ...shown.planets]} division={division} />
       </section>
 
       <InsightsCard aspects={chart.aspects} yogas={chart.yogas} />
 
-      <TransitsCard natal={chart.planets} transits={chart.transits} />
+      <KundliMatchCard chart={chart} savedCharts={savedCharts} onMatch={onMatch} />
+
+      <TransitsCard
+        natal={chart.planets}
+        transits={chart.transits}
+        timeZone={b.timeZone}
+        loading={transitLoading}
+        error={transitError}
+        onDateChange={onTransitDateChange}
+      />
 
       <section className="card">
         <h2>Vimshottari Dasha</h2>

@@ -1,4 +1,5 @@
-export type Ayanamsa = 'LAHIRI' | 'RAMAN' | 'KRISHNAMURTI';
+export type Ayanamsa = 'LAHIRI' | 'RAMAN' | 'KRISHNAMURTI' | 'TRUE_CHITRA' | 'YUKTESHWAR';
+export type HouseSystem = 'WHOLE_SIGN' | 'EQUAL';
 
 export interface Position {
   name: string;
@@ -29,6 +30,8 @@ export interface BirthDetails {
   timeZone: string;
   ayanamsa: Ayanamsa;
   ayanamsaDegrees: number;
+  trueNode: boolean;
+  houseSystem: HouseSystem;
 }
 
 export interface SubPeriod {
@@ -53,6 +56,22 @@ export interface Yoga {
   planets: string[];
 }
 
+export interface KootaScore {
+  name: string;
+  score: number;
+  maxScore: number;
+  detail: string;
+}
+
+export interface KundliMatch {
+  score: number;
+  maxScore: number;
+  brideMoonSign: string;
+  groomMoonSign: string;
+  kootas: KootaScore[];
+  notes: string[];
+}
+
 export interface SadeSati {
   active: boolean;
   phase: 'Rising' | 'Peak' | 'Setting' | null;
@@ -73,6 +92,21 @@ export interface Panchang {
   varaLord: string;
   yoga: string;
   karana: string;
+}
+
+export interface DailyPanchang {
+  asOf: string;
+  panchang: Panchang;
+  moon: Position;
+}
+
+export interface PanchangRequest {
+  date: string;
+  placeName: string;
+  latitude: number;
+  longitude: number;
+  timeZone: string;
+  ayanamsa: Ayanamsa;
 }
 
 export interface Chart {
@@ -102,4 +136,7 @@ export interface BirthPayload {
   longitude: number;
   timeZone: string;
   ayanamsa: Ayanamsa;
+  trueNode?: boolean;
+  houseSystem?: HouseSystem;
+  transitDate?: string;
 }

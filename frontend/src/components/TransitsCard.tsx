@@ -1,16 +1,41 @@
+import { useEffect, useState } from 'react';
 import { SIGN_GLYPHS } from '../constants';
-import { formatDegrees } from '../format';
+import { dateInTimeZone, formatDegrees } from '../format';
 import type { Position, Transits } from '../types';
 
-export function TransitsCard({ natal, transits }: { natal: Position[]; transits: Transits }) {
+interface Props {
+  natal: Position[];
+  transits: Transits;
+  timeZone: string;
+  loading: boolean;
+  error: string;
+  onDateChange: (date: string) => void;
+}
+
+export function TransitsCard({ natal, transits, timeZone, loading, error, onDateChange }: Props) {
+  const [date, setDate] = useState(() => dateInTimeZone(transits.asOf, timeZone));
   const { sadeSati } = transits;
   const asOf = new Date(transits.asOf).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+  useEffect(() => setDate(dateInTimeZone(transits.asOf, timeZone)), [transits.asOf, timeZone]);
   return (
     <section className="card">
-      <h2>Current transits (Gochar)</h2>
+      <div className="transit-head">
+        <div>
+          <h2>Transits (Gochar)</h2>
+          <p className="muted small">Positions are calculated at noon in the birth location's timezone.</p>
+        </div>
+        <div className="transit-date-control no-print">
+          <label htmlFor="transit-date">Transit date</label>
+          <input id="transit-date" type="date" value={date} onChange={(event) => setDate(event.target.value)} />
+          <button type="button" className="button-ghost" disabled={loading || !date} onClick={() => onDateChange(date)}>
+            {loading ? 'Updating…' : 'Update'}
+          </button>
+        </div>
+      </div>
       <p className="muted small">
         Planet positions as of {asOf}. House numbers count from your natal Ascendant.
       </p>
+      {error && <p className="alert" role="alert">{error}</p>}
       <p className={sadeSati.active ? 'banner banner-warn' : 'banner'}>
         <strong>Sade Sati: {sadeSati.active ? `active (${sadeSati.phase})` : 'not active'}.</strong> {sadeSati.description}
       </p>

@@ -21,7 +21,8 @@ function PlanetStates({ p }: { p: Position }) {
   );
 }
 
-export function PlanetTable({ bodies }: { bodies: Position[] }) {
+export function PlanetTable({ bodies, division = 'D1' }: { bodies: Position[]; division?: string }) {
+  const isRashi = division === 'D1';
   return (
     <div className="table-wrap">
       <table>
@@ -29,11 +30,11 @@ export function PlanetTable({ bodies }: { bodies: Position[] }) {
           <tr>
             <th scope="col">Body</th>
             <th scope="col">Sign</th>
-            <th scope="col">Degree</th>
+            {isRashi && <th scope="col">Degree</th>}
             <th scope="col">House</th>
             <th scope="col">Nakshatra</th>
             <th scope="col">Motion</th>
-            <th scope="col">State</th>
+            {isRashi && <th scope="col">State</th>}
           </tr>
         </thead>
         <tbody>
@@ -46,15 +47,13 @@ export function PlanetTable({ bodies }: { bodies: Position[] }) {
                 </span>{' '}
                 {p.sign}
               </td>
-              <td className="num">{formatDegrees(p.degreeInSign)}</td>
+              {isRashi && <td className="num">{formatDegrees(p.degreeInSign)}</td>}
               <td className="num">{p.house}</td>
               <td>
                 {p.nakshatra} <span className="muted">pada {p.pada}</span>
               </td>
               <td>{p.name === 'Ascendant' ? '—' : p.retrograde ? 'Retrograde' : 'Direct'}</td>
-              <td>
-                <PlanetStates p={p} />
-              </td>
+              {isRashi && <td><PlanetStates p={p} /></td>}
             </tr>
           ))}
         </tbody>

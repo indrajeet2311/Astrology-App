@@ -1,6 +1,7 @@
 package com.celestia.astro.service;
 
 import org.junit.jupiter.api.Test;
+import com.celestia.astro.model.HouseSystem;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -29,6 +30,15 @@ class AstroMathTest {
     assertEquals(1, AstroMath.house(10, 15));
     assertEquals(2, AstroMath.house(40, 15));
     assertEquals(12, AstroMath.house(340, 15));
+  }
+
+  @Test
+  void equalHousesAreAnchoredToExactAscendantLongitude() {
+    assertEquals(1, AstroMath.house(15, 15, HouseSystem.EQUAL));
+    assertEquals(1, AstroMath.house(44.999, 15, HouseSystem.EQUAL));
+    assertEquals(2, AstroMath.house(45, 15, HouseSystem.EQUAL));
+    assertEquals(12, AstroMath.house(14.999, 15, HouseSystem.EQUAL));
+    assertEquals(2, AstroMath.house(40, 15, HouseSystem.WHOLE_SIGN));
   }
 
   @Test

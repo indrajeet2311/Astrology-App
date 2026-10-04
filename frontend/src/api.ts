@@ -1,4 +1,4 @@
-import type { Chart, BirthPayload, Place } from './types';
+import type { Chart, BirthPayload, DailyPanchang, KundliMatch, PanchangRequest, Place } from './types';
 
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
   let response: Response;
@@ -29,6 +29,22 @@ export function searchPlaces(query: string, signal: AbortSignal): Promise<Place[
 
 export function calculateChart(payload: BirthPayload): Promise<Chart> {
   return request<Chart>('/api/chart', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function matchCharts(bride: BirthPayload, groom: BirthPayload): Promise<KundliMatch> {
+  return request<KundliMatch>('/api/chart/match', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ bride, groom }),
+  });
+}
+
+export function calculatePanchang(payload: PanchangRequest): Promise<DailyPanchang> {
+  return request<DailyPanchang>('/api/panchang', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),

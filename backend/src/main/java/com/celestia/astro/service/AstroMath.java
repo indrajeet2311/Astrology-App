@@ -1,5 +1,7 @@
 package com.celestia.astro.service;
 
+import com.celestia.astro.model.HouseSystem;
+
 /** Pure zodiac arithmetic on sidereal ecliptic longitudes in degrees. */
 public final class AstroMath {
   private static final String[] SIGNS = {
@@ -33,6 +35,13 @@ public final class AstroMath {
   /** Whole-sign house (1-12) of a longitude relative to the Ascendant. */
   public static int house(double longitude, double ascendant) {
     return 1 + Math.floorMod(sign(longitude) - sign(ascendant), 12);
+  }
+
+  public static int house(double longitude, double ascendant, HouseSystem system) {
+    if (system == HouseSystem.EQUAL) {
+      return Math.min(12, (int) (norm(longitude - ascendant) / 30.0) + 1);
+    }
+    return house(longitude, ascendant);
   }
 
   /** Zero-based D9 (Navamsa) sign; each 3°20' slice advances one sign, starting from Aries across the zodiac. */

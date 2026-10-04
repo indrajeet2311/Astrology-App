@@ -8,7 +8,7 @@ public record ChartResponse(BirthDetails birthDetails, Position ascendant, List<
                             Panchang panchang) {
   public record BirthDetails(String name, String date, String localTime, String utcOffset, String utcTime,
                              String placeName, double latitude, double longitude, String timeZone,
-                             Ayanamsa ayanamsa, double ayanamsaDegrees) {}
+                             Ayanamsa ayanamsa, double ayanamsaDegrees, boolean trueNode, HouseSystem houseSystem) {}
 
   /** {@code dignity} is EXALTED, DEBILITATED, OWN or null; Vargottama means the same sign in D1 and D9. */
   public record Position(String name, double longitude, String sign, int signNumber, int house,
@@ -24,6 +24,8 @@ public record ChartResponse(BirthDetails birthDetails, Position ascendant, List<
   /** {@code tithiNumber} runs 1-30 across the lunar month; {@code paksha} is Shukla (waxing) or Krishna (waning). */
   public record Panchang(int tithiNumber, String tithi, String paksha, String vara, String varaLord, String yoga,
                          String karana) {}
+
+  public record DailyPanchang(String asOf, Panchang panchang, Position moon) {}
 
   /** Planets at {@code asOf} (UTC ISO instant); houses are counted from the natal Ascendant. */
   public record Transits(String asOf, List<Position> planets, SadeSati sadeSati) {}
