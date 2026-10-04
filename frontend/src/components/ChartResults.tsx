@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ArrowLeft, Download, Link as LinkIcon, Printer, Save } from 'lucide-react';
+import { ArrowLeft, Download, FileText, Link as LinkIcon, Printer, Save } from 'lucide-react';
 import { AYANAMSA_LABEL, SIGN_GLYPHS } from '../constants';
 import { formatDate } from '../format';
 import { divisionalChart } from '../divisional';
@@ -7,6 +7,7 @@ import type { BirthPayload, Chart, KundliMatch } from '../types';
 import { DashaTimeline } from './DashaTimeline';
 import { AnnualReturnsCard } from './AnnualReturnsCard';
 import { InsightsCard } from './InsightsCard';
+import { AshtakavargaCard } from './AshtakavargaCard';
 import { PanchangCard } from './PanchangCard';
 import { TransitsCard } from './TransitsCard';
 import { NorthIndianChart } from './NorthIndianChart';
@@ -85,6 +86,13 @@ export function ChartResults({ chart, onBack, onSave, savedCharts, onMatch, onTr
     }
   };
 
+  const exportPdf = () => {
+    const previous = document.title;
+    document.title = `Celestia - ${b.name || 'chart'} - ${b.date}`;
+    window.addEventListener('afterprint', () => { document.title = previous; }, { once: true });
+    window.print();
+  };
+
   return (
     <div className="results">
       <div className="toolbar no-print">
@@ -100,6 +108,9 @@ export function ChartResults({ chart, onBack, onSave, savedCharts, onMatch, onTr
           </button>
           <button type="button" className="button-ghost" onClick={() => void onShare(chart).then(() => { setExportError(''); setSaveMessage('Share link copied to clipboard.'); }).catch(() => setExportError('Could not copy the share link.'))}>
             <LinkIcon size={17} /> Share link
+          </button>
+          <button type="button" className="button-ghost" onClick={exportPdf}>
+            <FileText size={17} /> PDF
           </button>
           <button type="button" className="button-ghost" onClick={() => window.print()}>
             <Printer size={17} /> Print
@@ -199,6 +210,8 @@ export function ChartResults({ chart, onBack, onSave, savedCharts, onMatch, onTr
       </section>
 
       <InsightsCard aspects={chart.aspects} yogas={chart.yogas} />
+
+      <AshtakavargaCard chart={chart} />
 
       <KundliMatchCard chart={chart} savedCharts={savedCharts} onMatch={onMatch} />
 

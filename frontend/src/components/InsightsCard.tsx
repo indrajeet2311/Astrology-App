@@ -18,8 +18,9 @@ export function InsightsCard({ aspects, yogas }: { aspects: Aspect[]; yogas: Yog
           </ul>
         )}
         <p className="muted small">
-          Checked: Gaja Kesari, Budhaditya, Chandra-Mangal, Pancha Mahapurusha, Raja Yoga (kendra and trikona lords in
-          the same sign) and Mangal Dosha. Houses are whole-sign from the Ascendant; no cancellation rules are applied.
+          Checked: Gaja Kesari, Budhaditya, Chandra-Mangal, Pancha Mahapurusha, Raja Yoga (including Dharma-Karmadhipati,
+          sign exchanges and Viparita), Dhana Yoga, Lakshmi Yoga and Mangal Dosha. Houses are whole-sign from the Ascendant;
+          no cancellation rules are applied.
         </p>
       </section>
 

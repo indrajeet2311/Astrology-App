@@ -227,6 +227,24 @@ tbody tr:last-child > * { border-bottom: 0; }
 .annual-controls label { display: grid; gap: 3px; color: var(--muted); font-size: 0.82rem; }
 .annual-controls input { width: 110px; padding: 7px 9px; }
 .annual-controls .button-primary { width: auto; margin: 0; padding: 9px 14px; }
+.day-timings { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--card-border); }
+.day-timings h3 { margin: 0 0 10px; font-family: Georgia, serif; }
+.slot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin: 12px 0; }
+.slot { display: grid; gap: 2px; padding: 8px 12px; border: 1px solid var(--card-border); border-radius: 10px; }
+.slot-good { border-color: rgba(120, 220, 160, 0.55); background: rgba(120, 220, 160, 0.08); }
+.slot-bad { border-color: rgba(240, 138, 138, 0.55); background: rgba(240, 138, 138, 0.08); }
+.av-table th, .av-table td { padding: 6px 8px; text-align: center; white-space: nowrap; }
+.av-table th:first-child { text-align: left; }
+.av-lagna { outline: 1px solid var(--gold); outline-offset: -2px; }
+.av-high { background: rgba(120, 220, 160, 0.16); }
+.av-low { background: rgba(240, 138, 138, 0.16); }
+.av-sarva th, .av-sarva td { border-top: 1px solid var(--card-border); }
+.strength-list { display: grid; gap: 12px; margin-top: 12px; }
+.strength-row { display: grid; grid-template-columns: 110px 1fr 52px; gap: 4px 12px; align-items: center; }
+.strength-name { display: grid; }
+.strength-bar { height: 10px; border-radius: 6px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
+.strength-bar span { display: block; height: 100%; border-radius: 6px; background: linear-gradient(90deg, #8a6df0, var(--gold)); }
+.strength-parts { grid-column: 2 / 4; }
 .annual-facts { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
 .annual-facts .fact { display: grid; gap: 2px; padding: 10px 16px; min-width: 150px; border: 1px solid var(--gold); border-radius: 12px; background: rgba(240, 200, 100, 0.07); }
 .annual-facts .fact strong { font-size: 1.15rem; color: var(--gold); }
@@ -285,6 +303,11 @@ tbody tr:last-child > * { border-bottom: 0; }
   body { background: #fff; }
   .no-print, .brand { display: none !important; }
   .card { backdrop-filter: none; break-inside: avoid; }
+  .table-wrap { overflow: visible; }
+  .av-high, .av-low, .slot-good, .slot-bad { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .strength-bar span { print-color-adjust: exact; -webkit-print-color-adjust: exact; background: #8a6a12; }
+  .strength-bar { background: #e5e5e5; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  @page { margin: 12mm; }
   .chart-house { fill: none; }
   .chart-house.is-asc { fill: #f3ead0; }
 }

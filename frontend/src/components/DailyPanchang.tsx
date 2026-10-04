@@ -5,12 +5,16 @@ import { AYANAMSA_OPTIONS } from '../constants';
 import { todayIso } from '../format';
 import type { Ayanamsa, DailyPanchang as DailyPanchangResult, Place } from '../types';
 import { PlaceSearch } from './PlaceSearch';
+import { DayTimingsPanel } from './DayTimingsPanel';
+import { dayTimings } from '../dayTimings';
+import type { DayTimings } from '../dayTimings';
 
 export function DailyPanchang() {
   const [date, setDate] = useState(todayIso);
   const [place, setPlace] = useState<Place | null>(null);
   const [ayanamsa, setAyanamsa] = useState<Ayanamsa>('LAHIRI');
   const [result, setResult] = useState<DailyPanchangResult | null>(null);
+  const [timings, setTimings] = useState<{ data: DayTimings | null; timeZone: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -24,9 +28,11 @@ export function DailyPanchang() {
     try {
       setResult(await calculatePanchang({ date, placeName: place.placeName, latitude: place.latitude,
         longitude: place.longitude, timeZone: place.timeZone, ayanamsa }));
+      setTimings({ data: dayTimings(date, place.latitude, place.longitude), timeZone: place.timeZone });
     } catch (e) {
       setError(errorMessage(e, 'Could not calculate the Panchang.'));
       setResult(null);
+      setTimings(null);
     } finally {
       setLoading(false);
     }
@@ -68,6 +74,9 @@ export function DailyPanchang() {
             <div className="panchang-item"><span className="muted">Karana</span><strong>{result.panchang.karana}</strong></div>
           </div>
           <p className="muted small">Calculated at local noon. Vara uses the civil date; sunrise-aware vara is not included.</p>
+          {timings?.data
+            ? <DayTimingsPanel timings={timings.data} timeZone={timings.timeZone} />
+            : timings && <p className="muted small">No sunrise or sunset at this location on this date.</p>}
         </div>
       )}
     </section>
