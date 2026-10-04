@@ -2,42 +2,45 @@ package com.celestia.astro.service;
 
 import com.celestia.astro.model.ConsultationRequest;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.MailException;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
+
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class ConsultationEmailService {
   private static final String RECIPIENT = "ibtnextgen@gmail.com";
 
-  private final JavaMailSender mailSender;
-  private final String smtpHost;
+  private final RestClient resendClient;
   private final String fromAddress;
 
-  public ConsultationEmailService(JavaMailSender mailSender,
-                                  @Value("${spring.mail.host:}") String smtpHost,
-                                  @Value("${celestia.mail-from:}") String fromAddress) {
-    this.mailSender = mailSender;
-    this.smtpHost = smtpHost;
+  public ConsultationEmailService(@Value("${celestia.email.resend-api-key:}") String apiKey,
+                                  @Value("${celestia.email.resend-from:}") String fromAddress) {
+    this.resendClient = StringUtils.hasText(apiKey)
+        ? RestClient.builder().baseUrl("https://api.resend.com")
+            .defaultHeader("Authorization", "Bearer " + apiKey).build()
+        : null;
     this.fromAddress = fromAddress;
   }
 
   public void send(ConsultationRequest request) {
-    if (!StringUtils.hasText(smtpHost) || !StringUtils.hasText(fromAddress)) {
+    if (resendClient == null || !StringUtils.hasText(fromAddress)) {
       throw new ConsultationDeliveryException("Consultation email delivery is not configured.");
     }
 
-    SimpleMailMessage message = new SimpleMailMessage();
-    message.setFrom(fromAddress);
-    message.setTo(RECIPIENT);
-    message.setReplyTo(request.email());
-    message.setSubject("Private consultation request: " + request.topic());
-    message.setText(body(request));
     try {
-      mailSender.send(message);
-    } catch (MailException e) {
+      resendClient.post().uri("/emails")
+          .body(Map.of(
+              "from", fromAddress,
+              "to", List.of(RECIPIENT),
+              "reply_to", request.email(),
+              "subject", "Private consultation request: " + request.topic(),
+              "text", body(request)))
+          .retrieve().toBodilessEntity();
+    } catch (RestClientException e) {
       throw new ConsultationDeliveryException("The consultation request could not be delivered.", e);
     }
   }
