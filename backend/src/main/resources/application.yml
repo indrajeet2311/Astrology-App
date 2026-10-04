@@ -1,0 +1,7 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: celestia-backend
+celestia:
+  geocoder-url: ${CELESTIA_GEOCODER_URL:https://geocoding-api.open-meteo.com/v1/search}

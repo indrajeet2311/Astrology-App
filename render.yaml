@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: celestia-astro-api-indrajeet
+    runtime: docker
+    plan: free
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile

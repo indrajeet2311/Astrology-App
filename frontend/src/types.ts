@@ -1,0 +1,105 @@
+export type Ayanamsa = 'LAHIRI' | 'RAMAN' | 'KRISHNAMURTI';
+
+export interface Position {
+  name: string;
+  longitude: number;
+  sign: string;
+  signNumber: number;
+  house: number;
+  degreeInSign: number;
+  nakshatra: string;
+  pada: number;
+  retrograde: boolean;
+  navamsaSignNumber: number;
+  dignity: 'EXALTED' | 'DEBILITATED' | 'OWN' | null;
+  combust: boolean;
+  vargottama: boolean;
+  divisionalSigns: Record<string, number>;
+}
+
+export interface BirthDetails {
+  name: string | null;
+  date: string;
+  localTime: string;
+  utcOffset: string;
+  utcTime: string;
+  placeName: string;
+  latitude: number;
+  longitude: number;
+  timeZone: string;
+  ayanamsa: Ayanamsa;
+  ayanamsaDegrees: number;
+}
+
+export interface SubPeriod {
+  lord: string;
+  start: string;
+  end: string;
+}
+
+export interface Dasha extends SubPeriod {
+  antardashas: SubPeriod[];
+}
+
+export interface Aspect {
+  planet: string;
+  houses: number[];
+  planets: string[];
+}
+
+export interface Yoga {
+  name: string;
+  description: string;
+  planets: string[];
+}
+
+export interface SadeSati {
+  active: boolean;
+  phase: 'Rising' | 'Peak' | 'Setting' | null;
+  description: string;
+}
+
+export interface Transits {
+  asOf: string;
+  planets: Position[];
+  sadeSati: SadeSati;
+}
+
+export interface Panchang {
+  tithiNumber: number;
+  tithi: string;
+  paksha: 'Shukla' | 'Krishna';
+  vara: string;
+  varaLord: string;
+  yoga: string;
+  karana: string;
+}
+
+export interface Chart {
+  birthDetails: BirthDetails;
+  ascendant: Position;
+  planets: Position[];
+  dashas: Dasha[];
+  aspects: Aspect[];
+  yogas: Yoga[];
+  transits: Transits;
+  panchang: Panchang;
+}
+
+export interface Place {
+  placeName: string;
+  latitude: number;
+  longitude: number;
+  timeZone: string;
+}
+
+export interface BirthPayload {
+  name: string;
+  date: string;
+  time: string;
+  placeName: string;
+  latitude: number;
+  longitude: number;
+  timeZone: string;
+  ayanamsa: Ayanamsa;
+}
