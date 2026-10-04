@@ -149,23 +149,33 @@ public class TransitCalendarService {
   private static List<SlowTransitsResponse.Segment> segments(BodyAt source, Instant start, Instant end, ZoneId zone) {
     List<SlowTransitsResponse.Segment> result = new ArrayList<>();
     Instant segmentStart = start;
-    int sign = signNumber(source.at(start).longitude());
+    double firstLongitude = source.at(start).longitude();
+    int sign = signNumber(firstLongitude);
+    int nakshatra = AstroMath.nakshatraIndex(firstLongitude);
     Instant previous = start;
     for (Instant t = start.plus(Duration.ofDays(4)); ; t = t.plus(Duration.ofDays(4))) {
       boolean last = !t.isBefore(end);
       Instant at = last ? end : t;
-      int s = signNumber(source.at(at).longitude());
-      if (s != sign) {
-        final int before = sign;
-        Instant boundary = Ephem.firstTrue(previous, at, x -> signNumber(source.at(x).longitude()) != before);
-        result.add(new SlowTransitsResponse.Segment(sign, date(segmentStart, zone), date(boundary, zone)));
+      double longitude = source.at(at).longitude();
+      int s = signNumber(longitude);
+      int n = AstroMath.nakshatraIndex(longitude);
+      if (s != sign || n != nakshatra) {
+        final int beforeSign = sign;
+        final int beforeNakshatra = nakshatra;
+        Instant boundary = Ephem.firstTrue(previous, at, x -> {
+          double candidate = source.at(x).longitude();
+          return signNumber(candidate) != beforeSign || AstroMath.nakshatraIndex(candidate) != beforeNakshatra;
+        });
+        result.add(new SlowTransitsResponse.Segment(sign, nakshatra, date(segmentStart, zone), date(boundary, zone)));
         segmentStart = boundary;
-        sign = s;
+        double boundaryLongitude = source.at(boundary).longitude();
+        sign = signNumber(boundaryLongitude);
+        nakshatra = AstroMath.nakshatraIndex(boundaryLongitude);
       }
       previous = at;
       if (last) break;
     }
-    result.add(new SlowTransitsResponse.Segment(sign, date(segmentStart, zone), date(end, zone)));
+    result.add(new SlowTransitsResponse.Segment(sign, nakshatra, date(segmentStart, zone), date(end, zone)));
     return result;
   }
 

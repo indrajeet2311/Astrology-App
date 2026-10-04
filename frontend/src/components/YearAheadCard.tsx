@@ -92,12 +92,12 @@ function TopicRow({ item }: { item: TopicOutlook }) {
       {item.favourable.length > 0 ? (
         <ul className="year-window-list">
           {item.favourable.map((window, i) => (
-            <li key={`good-${i}`}><span className="ev-good">Favourable: {formatRange(window.start, window.end)}</span>{window.md && ` · ${window.md}–${window.ad}`}</li>
+            <li key={`good-${i}`}><span className="ev-good">Favourable: {formatRange(window.start, window.end)}</span>{window.md && ` · ${window.system} ${window.md}–${window.ad}`}</li>
           ))}
         </ul>
       ) : <p className="muted small">No standout favourable dasha window identified in this period.</p>}
       {item.careful.map((window, i) => (
-        <p className="year-caution small" key={`care-${i}`}>Plan with extra care: {formatRange(window.start, window.end)} · {window.md}–{window.ad}</p>
+        <p className="year-caution small" key={`care-${i}`}>Plan with extra care: {formatRange(window.start, window.end)} · {window.system} {window.md}–{window.ad}</p>
       ))}
     </article>
   );

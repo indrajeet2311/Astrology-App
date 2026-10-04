@@ -13,6 +13,6 @@ public record SlowTransitsResponse(String from, String to, List<Track> tracks) {
   /** name is Jupiter, Saturn or Rahu (Ketu is always six signs from Rahu). */
   public record Track(String name, List<Segment> segments) {}
 
-  /** signNumber is 1-12; start and end are local dates in the birth timezone. */
-  public record Segment(int signNumber, String start, String end) {}
+  /** signNumber is 1-12 and nakshatraIndex is zero-based; dates are local to the birth timezone. */
+  public record Segment(int signNumber, int nakshatraIndex, String start, String end) {}
 }

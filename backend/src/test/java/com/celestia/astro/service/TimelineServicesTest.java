@@ -67,10 +67,21 @@ class TimelineServicesTest {
       var segments = track.segments();
       assertEquals("2020-01-01", segments.get(0).start());
       assertEquals("2035-01-01", segments.get(segments.size() - 1).end());
+      assertTrue(segments.stream().allMatch(s -> s.nakshatraIndex() >= 0 && s.nakshatraIndex() < 27));
       for (int i = 1; i < segments.size(); i++) assertEquals(segments.get(i - 1).end(), segments.get(i).start());
     }
     var jupiter = result.tracks().get(0).segments();
-    assertTrue(jupiter.size() >= 15 && jupiter.size() <= 45, "Jupiter segments " + jupiter.size());
+    int signChanges = 0;
+    boolean hasNakshatraOnlyBoundary = false;
+    for (int index = 1; index < jupiter.size(); index++) {
+      var previous = jupiter.get(index - 1);
+      var current = jupiter.get(index);
+      if (previous.signNumber() != current.signNumber()) signChanges++;
+      else if (previous.nakshatraIndex() != current.nakshatraIndex()) hasNakshatraOnlyBoundary = true;
+      assertTrue(previous.signNumber() != current.signNumber() || previous.nakshatraIndex() != current.nakshatraIndex());
+    }
+    assertTrue(signChanges >= 14 && signChanges <= 44, "Jupiter sign changes " + signChanges);
+    assertTrue(hasNakshatraOnlyBoundary, "Nakshatra changes within a sign must remain separate segments");
   }
 
   @Test

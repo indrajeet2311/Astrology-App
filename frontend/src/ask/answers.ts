@@ -1,17 +1,22 @@
 import { SIGN_LORDS } from '../constants';
+import { rashiAspects } from '../jaiminiYogas';
 import { signStatus } from '../vargas';
 import type { JaiminiYoga } from '../jaiminiYogas';
-import { assessHouse, assessVarga, blend, STATUS_TEXT, verdictFor } from './assess';
+import { assessHouse, assessPlanetInfluences, assessVarga, blend, houseFactorSummary, placementComfort, STATUS_TEXT, verdictFor } from './assess';
 import type { Assessment, Verdict } from './assess';
 import {
-  addPeaks, aspectors, doubleTransit, formatRange, lordOfHouse, occupants, ordinal, planet, saturnPressure,
+  addNavataraPeaks, addPeaks, aspectors, doubleTransit, formatRange, lordOfHouse, occupants, ordinal, planet, saturnPressure,
   scoreWindows, signName, signOfHouse, significators, targetSigns, topWindows, transitIntervals, vargaExtras, vargaHouseOf,
-  vargaHouseSign, vargaLord, vargaOccupants, vargaSign, vargaStatus, vargottama,
+  vargaHouseSign, vargaLord, vargaOccupants, vargaSign, vargaStatus, vargottama, functionalNature, MALEFICS, hasNeechaBhanga, houseKartari,
 } from './core';
 import type { Context, Evidence, SigSpec, Sigs, Window } from './core';
 
 export type DomainId = 'marriage' | 'relationship' | 'career' | 'property' | 'spiritual' | 'health';
 export type Focus = 'timing' | 'nature' | 'riseFall' | 'general';
+
+const PRIMARY_HOUSES: Record<DomainId, number[]> = {
+  marriage: [7], relationship: [5, 7], career: [10], property: [4], spiritual: [9, 12], health: [1, 6],
+};
 
 export interface WindowGroup {
   title: string;
@@ -101,6 +106,115 @@ function dignityNote(ctx: Context, name: string): string {
   return signStatus(p, ctx.relations)?.text ?? `in ${p.sign}`;
 }
 
+function signDistance(from: number, to: number): number {
+  return ((to - from + 12) % 12) + 1;
+}
+
+function interchartRead(ctx: Context, domain: DomainId): { adjustment: number; evidence: Evidence[]; summary: string } {
+  const focus = {
+    marriage: [lordOfHouse(ctx, 7), 'Venus', 'Jupiter'],
+    relationship: [lordOfHouse(ctx, 5), lordOfHouse(ctx, 7), 'Venus', 'Moon'],
+    career: [lordOfHouse(ctx, 10), lordOfHouse(ctx, 4), 'Saturn', 'Sun', 'Mercury'],
+    property: [lordOfHouse(ctx, 4), lordOfHouse(ctx, 11), 'Mars', 'Venus', 'Moon'],
+    spiritual: [lordOfHouse(ctx, 9), lordOfHouse(ctx, 12), 'Jupiter', 'Ketu'],
+    health: [lordOfHouse(ctx, 1), lordOfHouse(ctx, 6), 'Sun', 'Moon'],
+  }[domain];
+  const plan = PLANS[domain];
+  const planets = [...new Set([...focus, ...plan.houses.map((house) => vargaLord(ctx, plan.division, house)), ...(plan.karaka ? [plan.karaka] : [])])];
+  const difficult = new Set([6, 8, 12]);
+  const shifts: string[] = [];
+  const karaka = (code: string) => ctx.karakas.find((item) => item.code === code)?.planet.name;
+  const jaiminiPairs = ({
+    marriage: [[karaka('AK'), karaka('DK')!, 'Atmakaraka–Darakaraka'], [karaka('DK'), lordOfHouse(ctx, 7), 'Darakaraka–7th lord']],
+    relationship: [[karaka('AK'), karaka('DK')!, 'Atmakaraka–Darakaraka'], [karaka('DK'), lordOfHouse(ctx, 5), 'Darakaraka–5th lord']],
+    career: [[karaka('AK'), karaka('AmK')!, 'Atmakaraka–Amatyakaraka'], [karaka('AmK'), lordOfHouse(ctx, 10), 'Amatyakaraka–10th lord']],
+    property: [[karaka('MK'), lordOfHouse(ctx, 4), 'Matrikaraka–4th lord']],
+    spiritual: [[karaka('AK'), 'Ketu', 'Atmakaraka–Ketu'], [karaka('AK'), lordOfHouse(ctx, 9), 'Atmakaraka–9th lord']],
+    health: [[karaka('MK'), 'Moon', 'Matrikaraka–Moon'], [karaka('AK'), lordOfHouse(ctx, 1), 'Atmakaraka–Ascendant lord']],
+  } satisfies Record<DomainId, [string | undefined, string, string][]>)[domain];
+  const jaiminiLinks = jaiminiPairs.flatMap(([a, b, label]) => {
+    if (!a || a === b) return [];
+    const aSign = planet(ctx, a).signNumber;
+    const bSign = planet(ctx, b).signNumber;
+    return aSign === bSign || rashiAspects(aSign, bSign)
+      ? [`${label}: ${a} in ${signName(aSign)} ${aSign === bSign ? 'conjoins' : 'has Jaimini rashi drishti to'} ${b} in ${signName(bSign)}`]
+      : [];
+  });
+  const evidence: Evidence[] = ctx.chart.planets.map((natal) => {
+    const name = natal.name;
+    const navamsa = vargaSign(ctx, name, 'D9');
+    const moved = signDistance(natal.signNumber, navamsa);
+    const house = vargaHouseOf(ctx, name, 'D9');
+    const comfort = placementComfort(house, vargaStatus(ctx, name, 'D9'), MALEFICS.includes(name));
+    const shifted = moved === 1 ? 'remains in the same sign' : 'moves to the ' + ordinal(moved) + ' sign from its D1 sign';
+    if (difficult.has(moved)) shifts.push(`${name} moves ${moved} signs D1 ${natal.sign} → D9 ${signName(navamsa)}`);
+    return {
+      text: `${name}${planets.includes(name) ? ' (topic indicator)' : ' (chart-wide context)'}: D1 ${natal.sign}, house ${natal.house}, ${dignityNote(ctx, name)}; D9 ${signName(navamsa)} (${shifted}; D9 house ${house})${difficult.has(moved) ? ', a 6th/8th/12th D1-to-D9 shift to weigh carefully' : ''}; ${STATUS_TEXT[vargaStatus(ctx, name, 'D9')]}; ${comfort}.`,
+      tone: difficult.has(moved) ? 'bad' : ['Exalted', 'Own', 'Adhi Mitra', 'Mitra'].includes(vargaStatus(ctx, name, 'D9')) ? 'good' : 'neutral',
+    };
+  });
+  evidence.push(...[...new Map(ctx.chart.planets.flatMap((position) => [
+    ...assessPlanetInfluences(ctx, position.name).evidence,
+    ...assessPlanetInfluences(ctx, position.name, 'D9').evidence,
+  ]).map((item) => [item.text, item])).values()]);
+  let challengedPairs = 0;
+  const relations: string[] = [];
+  for (let i = 0; i < planets.length; i++) {
+    for (let j = i + 1; j < planets.length; j++) {
+      const a = planets[i], b = planets[j];
+      const d1 = signDistance(planet(ctx, a).signNumber, planet(ctx, b).signNumber);
+      const d9 = signDistance(vargaSign(ctx, a, 'D9'), vargaSign(ctx, b, 'D9'));
+      const d1Issue = difficult.has(d1);
+      const d9Issue = difficult.has(d9);
+      if (!d1Issue && !d9Issue) continue;
+      challengedPairs++;
+      relations.push(`${a} and ${b}: D1 ${d1}th, D9 ${d9}th`);
+    }
+  }
+  if (shifts.length) {
+    evidence.push({
+      text: `Planets moving 6/8/12 signs from their own D1 sign to D9: ${shifts.join('; ')}. This is a caution about how each planet carries its promise into Navamsa, not a denial by itself.`,
+      tone: 'bad',
+    });
+  } else {
+    evidence.push({ text: 'None of the nine grahas moves 6, 8 or 12 signs from its own D1 sign to D9; absence of this pattern is not by itself a positive promise.', tone: 'neutral' });
+  }
+  evidence.push({
+    text: jaiminiLinks.length
+      ? `Jaimini sign connections relevant to ${domain}: ${jaiminiLinks.join('; ')}. Treat these as supporting links, weighed with the full chart.`
+      : `No direct Jaimini sign connection was found among the selected ${domain} karakas and house lords.`,
+    tone: jaiminiLinks.length ? 'good' : 'neutral',
+  });
+  if (relations.length) {
+    evidence.push({
+      text: `6/8/12 relationships among key indicators: ${relations.slice(0, 6).join('; ')}. These are areas of friction to weigh against dignity, house strength and cancellation; they do not by themselves deny the outcome.`,
+      tone: 'bad',
+    });
+  } else {
+    evidence.push({ text: 'The selected lords and karakas do not form 6/8/12 sign relationships with one another in D1 or D9.', tone: 'good' });
+  }
+  const relevantShifts = planets.filter((name) => difficult.has(signDistance(planet(ctx, name).signNumber, vargaSign(ctx, name, 'D9')))).length;
+  const adjustment = -Math.min(8, (challengedPairs + relevantShifts) * 2);
+  const summaryParts = [
+    shifts.length ? `${shifts.length} of ${ctx.chart.planets.length} grahas have 6/8/12 self-shifts: ${shifts.join('; ')}` : '',
+    relations.length ? `inter-planet links ${relations.slice(0, 3).join('; ')}` : '',
+  ].filter(Boolean);
+  const movementSummary = summaryParts.length
+    ? `D1-to-D9 check: ${summaryParts.join('. ')}. These 6/8/12 patterns are cautions to balance against dignity, house strength and cancellation, not denials.`
+    : 'D1-to-D9 check: no graha has a 6/8/12 self-shift, and the selected topic indicators have no such inter-planet relationships.';
+  const primaryHouses = PRIMARY_HOUSES[domain];
+  const natalSummary = primaryHouses.map((house) => {
+    const assessment = assessHouse(ctx, house, null, [3, 6, 10, 11].includes(house));
+    const pressures = assessment.evidence.filter((item) => item.tone === 'bad');
+    const supports = assessment.evidence.filter((item) => item.tone === 'good');
+    const kartari = assessment.evidence.filter((item) => /^(Paap|Subha) Kartari/.test(item.text));
+    const selected = [...new Set([...kartari, ...pressures.slice(0, 3), ...supports.slice(0, 3)])];
+    return `D1 ${ordinal(house)} house (${signName(signOfHouse(ctx, house))}): ${selected.map((item) => item.text).join(' ')} Supporting factors do not erase pressures, and pressures do not by themselves deny the topic.`;
+  }).join(' ');
+  const summary = `${natalSummary} ${movementSummary}`;
+  return { adjustment, evidence, summary };
+}
+
 /** How strong a planet is, in a word a non-astrologer can use. */
 function strengthWord(ctx: Context, name: string): string {
   const p = planet(ctx, name);
@@ -109,11 +223,6 @@ function strengthWord(ctx: Context, name: string): string {
   if (p.dignity === 'DEBILITATED' || (r !== undefined && r < 0.85)) return 'on the weaker side';
   return 'moderately strong';
 }
-
-const STATUS_PLAIN: Record<string, string> = {
-  Exalted: 'at its best', Own: 'comfortable in its own sign', 'Adhi Mitra': 'among very good friends', Mitra: 'among friends',
-  Sama: 'in neutral territory', Shatru: 'in an unfriendly sign', 'Adhi Shatru': 'in a very unfriendly sign', Debilitated: 'weakened', Node: 'present',
-};
 
 // ------------------------------------------------------------------ plain-language helpers
 
@@ -150,7 +259,8 @@ function describeWindow(w: Window, sigs: Sigs): string {
     const parts = [...new Set(s.reasons)].slice(0, 2).map(plainReason);
     return parts.length ? ` (${lord} ${parts.join(' and ')})` : '';
   };
-  return `The long background period belongs to ${w.md}${clause(w.md)}. Inside it, the sub-period that tends to trigger events belongs to ${w.ad}${clause(w.ad)}.`;
+  const anchors = w.reasons.filter((reason) => reason.startsWith('Chara sign'));
+  return `${w.md} / ${w.ad}${clause(w.adPlanet)}.${anchors.length ? ` ${[...new Set(anchors)].join('; ')}.` : ''} Topic activation: ${w.activationScore ?? Math.round(w.relative * 100)}/100.`;
 }
 
 function explain(groups: WindowGroup[], sigsFor: (g: WindowGroup) => Sigs) {
@@ -159,12 +269,12 @@ function explain(groups: WindowGroup[], sigsFor: (g: WindowGroup) => Sigs) {
 
 export function ratingWord(relative: number, tone: 'good' | 'caution'): string {
   if (tone === 'caution') return relative >= 0.8 ? 'most demanding' : relative >= 0.55 ? 'demanding' : 'mildly demanding';
-  return relative >= 0.8 ? 'very favourable' : relative >= 0.55 ? 'favourable' : 'mildly favourable';
+  return relative >= 0.7 ? 'stronger support' : relative >= 0.55 ? 'good support with qualifications' : relative >= 0.4 ? 'mixed; patience needed' : 'limited support; extra care';
 }
 
 function windowText(w: Window): string {
-  const peak = w.peaks[0];
-  return `${formatRange(w.start, w.end)} (${ratingWord(w.relative, 'good')}${peak ? `, with the best stretch around ${formatRange(peak.start, peak.end)}` : ''})`;
+  const peak = w.peaks.find((item) => !item.note.startsWith('Navatara:'));
+  return `${w.system} ${formatRange(w.start, w.end)} (${ratingWord(w.relative, 'good')}${peak ? `, with the best stretch around ${formatRange(peak.start, peak.end)}` : ''})`;
 }
 
 /** One sentence naming the nearest window and, when different, the most favourable one. */
@@ -173,8 +283,8 @@ function nextSentence(label: string, windows: Window[]): string | null {
   const first = windows[0];
   const strongest = [...windows].sort((x, y) => y.score - x.score)[0];
   return first === strongest
-    ? `The best upcoming ${label} is ${windowText(first)}.`
-    : `The nearest ${label} is ${windowText(first)}; the most favourable overall is ${windowText(strongest)}.`;
+    ? `The ${first.current ? 'currently active' : 'best upcoming'} ${label} is ${windowText(first)}.`
+    : `The ${first.current ? 'currently active' : 'nearest'} ${label} is ${windowText(first)}; the strongest topic activation among the selected periods is ${windowText(strongest)}.`;
 }
 
 // ------------------------------------------------------------------ timing helpers
@@ -183,6 +293,7 @@ interface TimingOptions {
   from: string;
   to: string;
   houses: number[];
+  promiseScore: number;
   upcoming: number;
   earlier?: number;
   min: number;
@@ -192,28 +303,49 @@ interface TimingOptions {
   division?: string;
 }
 
-const DASHA_INTRO = 'Life in Vedic astrology moves through planetary periods (dashas). A long "main period" sets the background for years, and a shorter "sub-period" inside it often triggers events.';
+const DASHA_INTRO = 'Vimshottari and Yogini use planetary main/sub-period lordship, placement, dignity, influences and MD–AD links. Chara adds topic-karaka signs and derived houses (DK and 7th from DK for partnership; AmK and 10th from AmK for career). Agreement is counted only over shared dates, then transits supply secondary corroboration. Scores are heuristics, not event probabilities.';
 const DOUBLE_NOTE = (theme: string) => `Jupiter and Saturn, the two slow-moving planets, are both supporting your ${theme}`;
 const PRESSURE_NOTE = (theme: string) => `Saturn, the planet of pressure and delay, is weighing on your ${theme}`;
 
 function peaksFor(ctx: Context, windows: Window[], o: TimingOptions) {
-  const test = o.pressure ? saturnPressure(targetSigns(ctx, o.houses)) : doubleTransit(targetSigns(ctx, o.houses));
+  const targets = targetSigns(ctx, o.houses, o.division);
+  const test = o.pressure ? saturnPressure(targets) : doubleTransit(targets);
   addPeaks(windows, transitIntervals(ctx, test, o.from, o.to), o.note);
+  addNavataraPeaks(ctx, windows);
+}
+
+function promiseTimingNote(score: number): string {
+  const level = score >= 70 ? 'strong' : score >= 55 ? 'good with qualifications' : score >= 40 ? 'mixed, requiring patience' : 'limited, requiring extra care';
+  return `Natal promise is assessed first: ${level} support (${score}/100). Thresholds: 70–100 stronger support, 55–69 good with qualifications, 40–54 mixed/patience, below 40 extra care. Period activation is separate; the timing label cannot exceed this natal support score. Structural cautions may qualify the verdict further.`;
+}
+
+function balancedWindows(windows: Window[], count: number, minimum: number): Window[] {
+  const selected: Window[] = [];
+  for (const system of ['Vimshottari', 'Yogini', 'Chara'] as const) {
+    selected.push(...topWindows(windows.filter((window) => window.system === system), 1, minimum));
+  }
+  const rest = topWindows(windows.filter((window) => !selected.includes(window)), Math.max(0, count - selected.length), minimum);
+  return [...selected, ...rest].sort((left, right) => left.start.localeCompare(right.start));
 }
 
 function supportGroups(ctx: Context, sigs: Sigs, o: TimingOptions, labels: { upcoming: string; earlier: string; blurb: string }): WindowGroup[] {
   const upcomingFrom = later(o.from, ctx.today);
-  const scored = scoreWindows(ctx, sigs, upcomingFrom, o.to, o.division).filter((w) => !w.past);
-  const upcoming = topWindows(scored, o.upcoming, o.min);
+  const scored = scoreWindows(ctx, sigs, upcomingFrom, o.to, o.division, o.houses).filter((w) => !w.past);
+  const upcoming = balancedWindows(scored, o.upcoming, o.min);
   // Also keep the best near-term window so the first result is not always years away.
   const soon = addYears(ctx.today, 4);
-  const near = topWindows(scored.filter((w) => w.start < soon && !upcoming.includes(w)), 1, 0.3);
-  upcoming.push(...near);
+  for (const system of ['Vimshottari', 'Yogini', 'Chara'] as const) {
+    const near = scored.filter((window) => window.system === system && window.start < soon && window.relative >= 0.3)
+      .sort((left, right) => left.start.localeCompare(right.start))[0];
+    if (near && !upcoming.includes(near)) upcoming.push(near);
+  }
   upcoming.sort((x, y) => x.start.localeCompare(y.start));
-  const past = o.earlier ? topWindows(scoreWindows(ctx, sigs, o.from, ctx.today, o.division).filter((w) => w.past), o.earlier, o.min) : [];
+  const past = o.earlier ? balancedWindows(scoreWindows(ctx, sigs, o.from, ctx.today, o.division, o.houses).filter((w) => w.past), o.earlier, o.min) : [];
+  const missing = (['Vimshottari', 'Yogini', 'Chara'] as const).filter((system) => !upcoming.some((window) => window.system === system));
+  for (const window of [...upcoming, ...past]) window.relative = Math.min(window.activationScore ?? 0, o.promiseScore) / 100;
   peaksFor(ctx, upcoming, o);
   peaksFor(ctx, past, o);
-  const groups: WindowGroup[] = [{ title: labels.upcoming, blurb: `${DASHA_INTRO} ${labels.blurb}`, tone: 'good', windows: upcoming }];
+  const groups: WindowGroup[] = [{ title: labels.upcoming, blurb: `${promiseTimingNote(o.promiseScore)} ${DASHA_INTRO} ${labels.blurb}${missing.length ? ` No window reached the selection threshold for ${missing.join(', ')} in this horizon, or its period data is unavailable; this is not a denial.` : ''}`, tone: 'good', windows: upcoming }];
   if (past.length) groups.push({ title: labels.earlier, blurb: 'Stretches in the past that fit the same pattern. Compare them with your own history to see how well the method fits you.', tone: 'good', windows: past });
   explain(groups, () => sigs);
   return groups;
@@ -221,9 +353,12 @@ function supportGroups(ctx: Context, sigs: Sigs, o: TimingOptions, labels: { upc
 
 /** Windows where the stress significators outweigh the supportive ones. */
 function cautionGroup(ctx: Context, support: Sigs, stress: Sigs, o: TimingOptions, title: string, blurb: string): WindowGroup {
-  const s = scoreWindows(ctx, support, o.from, o.to, o.division);
-  const t = scoreWindows(ctx, stress, o.from, o.to, o.division);
-  const net = t.map((w, i) => ({ ...w, score: s[i].relative >= 0.6 ? 0 : Math.max(0, w.score - 0.6 * s[i].score), peaks: [] as Window['peaks'] }));
+  const s = scoreWindows(ctx, support, o.from, o.to, o.division, o.houses);
+  const t = scoreWindows(ctx, stress, o.from, o.to, o.division, o.houses);
+  const net = t.map((w) => {
+    const supportive = s.find((other) => other.system === w.system && other.start === w.start && other.end === w.end);
+    return { ...w, score: (supportive?.relative ?? 0) >= 0.6 ? 0 : Math.max(0, w.score - 0.6 * (supportive?.score ?? 0)), peaks: [] as Window['peaks'] };
+  });
   const best = Math.max(0.0001, ...net.map((w) => w.score));
   for (const w of net) w.relative = w.score / best;
   const picked = topWindows(net.filter((w) => !w.past), o.upcoming, o.min);
@@ -242,20 +377,29 @@ function currentMood(ctx: Context, support: Sigs, stress: Sigs | null, division?
   if (s[cur].relative >= 0.6) return 'supportive';
   if (stress) {
     const t = scoreWindows(ctx, stress, ctx.today, to, division);
-    const net = t.map((w, i) => Math.max(0, w.score - 0.6 * s[i].score));
+    const net = t.map((w) => {
+      const supportive = s.find((other) => other.system === w.system && other.start === w.start && other.end === w.end);
+      return Math.max(0, w.score - 0.6 * (supportive?.score ?? 0));
+    });
     const best = Math.max(0.0001, ...net);
-    if (net[cur] / best >= 0.6) return 'testing';
+    if (t.some((w, index) => w.current && net[index] / best >= 0.6)) return 'testing';
   }
   return 'steady';
 }
 
 function currentPeriod(ctx: Context): string {
-  for (const md of ctx.chart.dashas) {
-    for (const ad of md.antardashas) {
-      if (ad.start.slice(0, 10) <= ctx.today && ctx.today < ad.end.slice(0, 10)) return `${md.lord}–${ad.lord}`;
+  const systems = [
+    ['Vimshottari', ctx.chart.dashas], ['Yogini', ctx.chart.yoginiDashas], ['Chara', ctx.chart.charaDashas],
+  ] as const;
+  const active: string[] = [];
+  for (const [name, dashas] of systems) {
+    for (const md of dashas) {
+      for (const ad of md.antardashas) {
+        if (ad.start.slice(0, 10) <= ctx.today && ctx.today < ad.end.slice(0, 10)) active.push(`${name} ${md.lord}–${ad.lord}`);
+      }
     }
   }
-  return '';
+  return active.join(' · ');
 }
 
 // ------------------------------------------------------------------ divisional chart plans
@@ -297,6 +441,7 @@ function vargaLines(ctx: Context, plan: VargaPlan): string[] {
     const lord = vargaLord(ctx, plan.division, h);
     const here = vargaOccupants(ctx, plan.division, h);
     lines.push(`${plan.label} ${ordinal(h)} house is ${signName(sign)} (${SIGN_TRAITS[sign - 1]}); its lord ${lord} is ${STATUS_TEXT[vargaStatus(ctx, lord, plan.division)]} in ${signName(vargaSign(ctx, lord, plan.division))}, the ${ordinal(vargaHouseOf(ctx, lord, plan.division))} house${here.length ? `; ${here.join(', ')} occupy${here.length === 1 ? 'ies' : ''} it` : ''}.`);
+    lines.push(...assessVarga(ctx, plan.division, h, plan.karaka, plan.label, plan.upachaya).evidence.map((item) => item.text));
   }
   if (plan.karaka) lines.push(`${plan.karaka} in the ${plan.label}: ${signName(vargaSign(ctx, plan.karaka, plan.division))}, ${STATUS_TEXT[vargaStatus(ctx, plan.karaka, plan.division)]}.`);
   return lines;
@@ -304,16 +449,78 @@ function vargaLines(ctx: Context, plan: VargaPlan): string[] {
 
 /** Everyday-language reading of how the divisional chart looks. */
 function vargaPlain(ctx: Context, plan: VargaPlan, theme: string, assessment: Assessment): string {
-  const house = plan.houses[0];
-  const lord = vargaLord(ctx, plan.division, house);
-  const status = vargaStatus(ctx, lord, plan.division);
-  const mood = assessment.score >= 60 ? `It supports ${theme}` : assessment.score >= 45 ? `It gives mixed signals for ${theme}` : `It shows some strain around ${theme}`;
-  const strong = vargottama(ctx, lord, plan.division) ? ', and it keeps the same sign as in your main chart, which adds strength' : '';
-  const karaka = plan.karaka ? ` The natural significator ${plan.karaka} is ${STATUS_PLAIN[vargaStatus(ctx, plan.karaka, plan.division)]} there.` : '';
-  return `I also checked your ${plan.label} (${plan.division}) chart, which astrologers use as ${plan.why}. ${mood}: the planet ruling that area, ${lord}, is ${STATUS_PLAIN[status]}${strong}.${karaka}`;
+  const pressureCount = assessment.evidence.filter((item) => item.tone === 'bad').length;
+  const mood = assessment.score >= 60 ? `It has support for ${theme}${pressureCount >= 2 ? ', alongside important pressures' : ''}` : assessment.score >= 45 ? `It gives mixed signals for ${theme}` : `It shows some strain around ${theme}`;
+  const sources = new Set<string>();
+  for (const house of plan.houses) {
+    const lord = vargaLord(ctx, plan.division, house);
+    for (const name of ctx.chart.planets) {
+      if (assessment.evidence.some((item) => item.text.includes(`${name.name} aspects ${lord}`))) sources.add(name.name);
+    }
+  }
+  const mitigations = new Map<string, string[]>();
+  for (const position of ctx.chart.planets.filter((item) => vargaStatus(ctx, item.name, plan.division) === 'Debilitated')) {
+    for (const item of assessPlanetInfluences(ctx, position.name, plan.division).evidence.filter((entry) => entry.tone === 'good')) {
+      const source = item.text.match(/:\s*(\w+) aspects/)?.[1];
+      if (!source || sources.has(source)) continue;
+      mitigations.set(source, [...new Set([...(mitigations.get(source) ?? []), position.name])]);
+    }
+  }
+  const mitigation = [...mitigations].slice(0, 2).map(([source, receivers]) => `${STATUS_TEXT[vargaStatus(ctx, source, plan.division)]} ${source} supports debilitated ${receivers.join(' and ')}`).join('; ');
+  const factors = plan.houses.map((house) => houseFactorSummary(ctx, house, plan.division)).join(' ');
+  return `${plan.label} (${plan.division}): ${mood}. ${factors}${mitigation ? ` Elsewhere in this division, ${mitigation}; mitigation does not erase debility.` : ''}`;
 }
 
 const vargaBlurb = (plan: VargaPlan) => ` Each planet's strength in your ${plan.label} chart is also taken into account.`;
+
+export function synthesizeAnswer(ctx: Context, answer: Answer): Answer {
+  const plan = PLANS[answer.domain];
+  const main = PRIMARY_HOUSES[answer.domain].map((house) => assessHouse(ctx, house, plan.karaka, [3, 6, 10, 11].includes(house)));
+  const division = vargaAssess(ctx, plan);
+  const evidence = [...main.flatMap((part) => part.evidence), ...division.evidence];
+  const mainPressure = PRIMARY_HOUSES[answer.domain].some((house) => {
+    const lord = planet(ctx, lordOfHouse(ctx, house));
+    return lord.dignity === 'DEBILITATED' || lord.combust || [6, 8, 12].includes(lord.house)
+      || houseKartari(ctx, house).kind === 'Paap Kartari';
+  });
+  const divisionPressure = plan.houses.some((house) => {
+    const lord = vargaLord(ctx, plan.division, house);
+    const lordHouse = vargaHouseOf(ctx, lord, plan.division);
+    const relativeHouse = ((lordHouse - house + 12) % 12) + 1;
+    return vargaStatus(ctx, lord, plan.division) === 'Debilitated'
+      || [6, 8, 12].includes(lordHouse) || [6, 8, 12].includes(relativeHouse);
+  }) || division.score < 45;
+  const previousLabel = answer.verdict.label;
+  if (answer.verdict.tone === 'good' && mainPressure && divisionPressure) {
+    answer.verdict = { label: `${answer.domainLabel}: support with significant cautions`, tone: 'neutral' };
+    answer.headline = `${answer.verdict.label}. ${answer.headline}`;
+    answer.plain = answer.plain.map((text) => text.startsWith('Overall ')
+      ? `The integrated reading needs qualification because both D1 and ${plan.division} carry structural pressures. ${text.replace(/\b(strong|good) support\b/, 'qualified support')}` : text);
+  }
+  const conclusion = mainPressure && divisionPressure
+    ? `D1 and ${plan.division} both carry structural cautions; supportive dignity, yogas or timing must not erase them.`
+    : mainPressure || divisionPressure
+      ? `D1 and ${plan.division} differ in ease: preserve the strengths while addressing the weaker layer.`
+      : 'Neither layer has the structural cautions checked here; this does not imply an effortless or certain outcome.';
+  const unique = (items: Evidence[]) => [...new Map(items.map((item) => [item.text, item])).values()];
+  const extraPlain = answer.plain.filter((text) => !/^(Overall |D1 \d|I also checked|Navamsa \(D9\)|Dasamsa \(D10\)|Chaturthamsa \(D4\)|Vimshamsa \(D20\)|Trimsamsa \(D30\)|Marriage needs a qualified reading|The checks of the 7th lord)/.test(text)
+    && !answer.headline.includes(text)
+    && !answer.groups.some((group) => group.tone === 'caution' && group.windows.some((window) => text.includes(formatRange(window.start, window.end)))));
+  answer.plain = [
+    `Integrated ${answer.domainLabel.toLowerCase()} assessment: ${conclusion}`,
+    ...PRIMARY_HOUSES[answer.domain].map((house) => houseFactorSummary(ctx, house)),
+    vargaPlain(ctx, plan, answer.domainLabel.toLowerCase(), division),
+    ...extraPlain,
+  ];
+  answer.plain = [...new Set(answer.plain)];
+  answer.technical = [...new Set([...answer.technical, ...evidence.map((item) => item.text), ...answer.evidence.map((item) => item.text)])];
+  answer.evidence = unique(answer.evidence);
+  const repeatedVerdict = `${answer.verdict.label} (${answer.score}/100).`;
+  if (answer.headline.startsWith(repeatedVerdict) && answer.headline.length > repeatedVerdict.length) answer.headline = answer.headline.slice(repeatedVerdict.length).trim();
+  if (answer.focus === 'nature') answer.headline = '';
+  if (previousLabel !== answer.verdict.label) answer.notes.push('The verdict is qualified by the combined natal and divisional reading; the score is a heuristic summary, not a probability.');
+  return answer;
+}
 
 function base(ctx: Context, domain: DomainId, domainLabel: string, question: string, focus: Focus): Answer {
   const plan = PLANS[domain];
@@ -329,8 +536,14 @@ const COMMON_NOTE = 'These are astrological indications, not certainties. They c
 const TRANSIT_NOTE = 'Transit data was unavailable, so the timing relies on planetary periods alone.';
 
 function topEvidence(a: Assessment, n = 6): Evidence[] {
-  const ordered = [...a.evidence.filter((e) => e.tone !== 'neutral'), ...a.evidence.filter((e) => e.tone === 'neutral')];
-  return ordered.slice(0, n);
+  const bad = a.evidence.filter((item) => item.tone === 'bad');
+  const good = a.evidence.filter((item) => item.tone === 'good');
+  const selected: Evidence[] = [];
+  for (let index = 0; index < Math.max(bad.length, good.length) && selected.length < n; index++) {
+    if (bad[index]) selected.push(bad[index]);
+    if (good[index] && selected.length < n) selected.push(good[index]);
+  }
+  return [...selected, ...a.evidence.filter((item) => item.tone === 'neutral')].slice(0, n);
 }
 
 /** Jaimini yogas relevant to a theme, with a small effect on the score. */
@@ -345,6 +558,7 @@ function jaiminiFor(ctx: Context, tags: JaiminiYoga['tags']): { list: JaiminiYog
 
 /** Adds the timing sentence to the plain text unless the headline already says it. */
 function pushTiming(a: Answer, timing: string | null, fallback: string) {
+  if (a.focus === 'nature') return;
   if (!timing) a.plain.push(fallback);
   else if (!a.headline.includes(timing)) a.plain.push(timing);
 }
@@ -365,8 +579,9 @@ function marriage(ctx: Context, question: string, focus: Focus): Answer {
   const ul = ctx.padas[11];
   const ulLord = SIGN_LORDS[ul.sign - 1];
   const dk = ctx.karakas[6];
-  const evidence = [...combined.evidence, ...jai.evidence];
-  let score = combined.score + jai.adjust;
+  const interchart = interchartRead(ctx, 'marriage');
+  const evidence = [...combined.evidence, ...jai.evidence, ...interchart.evidence];
+  let score = combined.score + jai.adjust + interchart.adjustment;
 
   const mangal = ctx.chart.yogas.find((y) => y.name.startsWith('Mangal Dosha') && !y.name.includes('Bhanga'));
   const bhanga = ctx.chart.yogas.some((y) => y.name.startsWith('Mangal Dosha Bhanga'));
@@ -377,6 +592,17 @@ function marriage(ctx: Context, question: string, focus: Focus): Answer {
 
   const delay: string[] = [];
   const sevenOccupants = occupants(ctx, 7);
+  const pressuredOccupants = sevenOccupants.filter((name) => MALEFICS.includes(name) || functionalNature(ctx, name) === 'malefic');
+  if (lord7Pos.dignity === 'DEBILITATED') delay.push(`${lord7}, your 7th lord, is debilitated in ${lord7Pos.sign}${hasNeechaBhanga(ctx, lord7) ? '; Neecha Bhanga factors mitigate but do not erase this weakness' : ''}`);
+  if (lord7Pos.combust) delay.push(`the 7th lord ${lord7} is combust`);
+  if (pressuredOccupants.length) delay.push(`${pressuredOccupants.join(', ')} ${pressuredOccupants.length === 1 ? 'occupies' : 'occupy'} the 7th house with natural or functional malefic influence`);
+  const lordShift = signDistance(lord7Pos.signNumber, vargaSign(ctx, lord7, 'D9'));
+  if ([6, 8, 12].includes(lordShift)) delay.push(`the 7th lord ${lord7} moves to the ${ordinal(lordShift)} sign from D1 to D9, adding a cross-chart caution`);
+  const venusShift = signDistance(planet(ctx, 'Venus').signNumber, vargaSign(ctx, 'Venus', 'D9'));
+  if ([6, 8, 12].includes(venusShift)) delay.push(`Venus moves to the ${ordinal(venusShift)} sign from D1 to D9`);
+  const d9Pressures = [...new Set([lord7, vargaLord(ctx, 'D9', 7), 'Venus'])]
+    .flatMap((name) => assessPlanetInfluences(ctx, name, 'D9').evidence.filter((item) => item.tone === 'bad'));
+  if (d9Pressures.length) delay.push(`D9 has additional pressure on marriage indicators: ${d9Pressures.map((item) => item.text).join(' ')}`);
   if (sevenOccupants.includes('Saturn') || aspectors(ctx, 7).includes('Saturn')) delay.push('Saturn, the planet of delay and patience, influences your marriage area');
   if (sevenOccupants.includes('Rahu') || sevenOccupants.includes('Ketu')) delay.push('a shadow planet (Rahu or Ketu) sits in your marriage area, which can bring unusual circumstances or postponements');
   if (sevenOccupants.includes('Mars')) delay.push('fiery Mars sits in your marriage area, which can add intensity or disagreements');
@@ -385,9 +611,13 @@ function marriage(ctx: Context, question: string, focus: Focus): Answer {
   if (venus.dignity === 'DEBILITATED' || venus.combust) delay.push('Venus, the planet of love, is weakened');
 
   const verdict = verdictFor(score, ['Strong support for marriage', 'Good support for marriage', 'Mixed signals about marriage', 'Marriage may need extra patience']);
+  if (verdict.tone === 'good' && (lord7Pos.dignity === 'DEBILITATED' || d9Pressures.length >= 2 || pressuredOccupants.length >= 2)) {
+    verdict.label = 'Marriage support with significant cautions';
+    verdict.tone = 'neutral';
+  }
   a.verdict = verdict;
-  a.score = Math.round(score);
-  a.evidence = topEvidence({ score, evidence }, 10);
+  a.score = Math.max(5, Math.min(95, Math.round(score)));
+  a.evidence = topEvidence({ score, evidence }, 14);
 
   const fifth = lordOfHouse(ctx, 5);
   const love = linked(ctx, fifth, lord7) || linked(ctx, 'Venus', 'Rahu') || venus.signNumber === planet(ctx, 'Mars').signNumber;
@@ -396,15 +626,15 @@ function marriage(ctx: Context, question: string, focus: Focus): Answer {
   const sign7 = signOfHouse(ctx, 7);
   const traits = SIGN_TRAITS[sign7 - 1];
   const d7Sign = vargaHouseSign(ctx, plan.division, 7);
-  const sentenceDelay = delay.length >= 2 ? `There are a few signs that marriage may come later than average: ${delay.join('; ')}.`
-    : delay.length === 1 ? `One factor may delay things slightly: ${delay[0]}.` : 'There are no strong signs of delay in your chart.';
+  const sentenceDelay = delay.length
+    ? `Marriage needs a qualified reading, with factors that can indicate delay or relationship strain: ${delay.join('; ')}. Supportive placements and cancellation factors must be weighed alongside these pressures; none alone predicts an event.`
+    : 'The checks of the 7th lord, house occupants and D9 indicators did not identify a major delay factor; this is not a guarantee of early or effortless marriage.';
 
   a.plain = [
-    `Overall your chart gives ${promiseWord(verdict)} support for marriage (${a.score} out of 100). Astrologers judge marriage mainly through the 7th house, the area of partnership. In your chart it falls in ${signName(sign7)}, and its ruling planet ${lord7} is ${strengthWord(ctx, lord7)} and sits in the area of ${HOUSE_MEANING[lord7Pos.house]}.`,
-    `Your partner is likely to be ${traits}. The connection often comes through ${HOUSE_THEME[lord7Pos.house]}, and the marriage looks most likely to be ${style}.`,
+    `Overall your chart gives ${promiseWord(verdict)} support for marriage (${a.score} out of 100, a rule-based summary rather than a probability)${delay.length ? ', with important qualifications' : ''}. Astrologers judge marriage mainly through the 7th house, the area of partnership. In your chart it falls in ${signName(sign7)}, and its ruling planet ${lord7} is ${dignityNote(ctx, lord7)}, ${strengthWord(ctx, lord7)} overall, and sits in the area of ${HOUSE_MEANING[lord7Pos.house]}.`,
     vargaPlain(ctx, plan, 'marriage', v),
-    sentenceDelay,
-    ...(mangal ? [bhanga ? 'Your chart has Mangal Dosha (a Mars influence that traditionally asks for care in marriage), but it also has cancelling factors, so it is greatly softened.' : 'Your chart has Mangal Dosha, a Mars influence that traditionally asks for care in marriage. Many families look for a partner with a similar chart, and it is not a reason for alarm.'] : []),
+    interchart.summary,
+    ...(mangal ? [bhanga ? 'Mangal Dosha has cancellation factors that mitigate the Mars-specific concern; they do not cancel separate weaknesses of the 7th lord, Venus or D9.' : 'Your chart has Mangal Dosha, a Mars influence that traditionally asks for care in marriage. Many families look for a partner with a similar chart, and it is not a reason for alarm.'] : []),
   ];
   a.natureTitle = 'What to expect';
   a.nature = [
@@ -412,15 +642,17 @@ function marriage(ctx: Context, question: string, focus: Focus): Answer {
     `How you may meet: through ${HOUSE_THEME[lord7Pos.house]}.`,
     `Type of marriage: ${style}.`,
     `After marriage: in the Navamsa the partnership area is ${signName(d7Sign)}, so the partner's deeper nature tends to come across as ${SIGN_TRAITS[d7Sign - 1]}.`,
-    lord7Pos.house === 7 || ([1, 4, 5, 9, 10, 11].includes(lord7Pos.house) && house7.score >= 55)
+    delay.length === 0 && (lord7Pos.house === 7 || ([1, 4, 5, 9, 10, 11].includes(lord7Pos.house) && house7.score >= 55))
       ? 'Staying power: the planet of marriage is comfortably placed, which supports a lasting partnership.'
       : 'Staying power: the marriage benefits from patience and open communication, especially in periods of the marriage planets.',
   ];
   a.jaimini = jai.list;
   a.technical = [
+    sentenceDelay,
     `The 7th house is ${signName(sign7)}; the 7th lord ${lord7} is ${dignityNote(ctx, lord7)}${lord7Pos.retrograde ? ' and retrograde' : ''} in the ${ordinal(lord7Pos.house)} house.`,
     `Upapada (marriage point): ${signName(ul.sign)}, lorded by ${ulLord} (${dignityNote(ctx, ulLord)}). The Darakaraka is ${dk.planet.name}.`,
     ...vargaLines(ctx, plan),
+    ...interchart.evidence.map((item) => item.text),
   ];
 
   const sigSpec: SigSpec = {
@@ -430,13 +662,13 @@ function marriage(ctx: Context, question: string, focus: Focus): Answer {
   const sigs = significators(ctx, sigSpec);
   const from = addYears(ctx.chart.birthDetails.date, 18);
   const to = addYears(ctx.today, 15);
-  const options: TimingOptions = { from, to, houses: [7], upcoming: 3, earlier: 2, min: 0.5, division: plan.division, note: DOUBLE_NOTE('marriage area') };
+  const options: TimingOptions = { from, to, houses: [7], promiseScore: a.score, upcoming: 3, earlier: 2, min: 0.5, division: plan.division, note: DOUBLE_NOTE('marriage area') };
   a.groups = supportGroups(ctx, sigs, options, { upcoming: 'Likely marriage windows ahead', earlier: 'Earlier windows', blurb: `These are stretches when the planets running your life are closely tied to marriage.${vargaBlurb(plan)}` });
 
   const timing = nextSentence('marriage window', a.groups[0].windows);
   a.headline = focus === 'timing'
     ? (timing ?? 'No clearly favourable marriage window appears in the coming years; read the notes below for what to expect.')
-    : focus === 'nature' ? `The marriage is most likely ${style}, with a partner who tends to be ${traits}.`
+    : focus === 'nature' ? `${delay.length ? 'Marriage has both support and pressure; patience and careful partner selection matter. ' : ''}The chart suggests ${style}, with ${traits} themes in the partner description, not a fixed personality prediction.`
       : `${verdict.label} (${a.score}/100). ${timing ?? ''}`.trim();
   pushTiming(a, timing, 'No strongly favourable marriage window shows up in the next 15 years, so there is no need to feel pressed by the calendar.');
   a.notes = [COMMON_NOTE, 'If you are already married, an earlier window that fits your history is a good check on the method. If not, treat future windows as favourable periods rather than fixed dates.'];
@@ -453,13 +685,15 @@ function relationship(ctx: Context, question: string, focus: Focus): Answer {
   const v = vargaAssess(ctx, plan);
   const seven = blend(assessHouse(ctx, 7, 'Venus'), v, plan.weight);
   const jai = jaiminiFor(ctx, ['marriage']);
-  const score = Math.max(5, Math.min(95, Math.round(0.5 * five.score + 0.5 * seven.score + jai.adjust)));
+  const interchart = interchartRead(ctx, 'relationship');
+  const score = Math.max(5, Math.min(95, Math.round(0.5 * five.score + 0.5 * seven.score + jai.adjust + interchart.adjustment)));
   a.score = score;
   a.verdict = verdictFor(score, ['Strong relationship potential', 'Good relationship potential', 'Mixed relationship signals', 'Relationships need conscious effort']);
   a.evidence = [
     ...topEvidence(five, 4).map((e) => ({ ...e, text: `Romance (5th): ${e.text}` })),
     ...topEvidence(seven, 5).map((e) => ({ ...e, text: `Partnership (7th): ${e.text}` })),
     ...jai.evidence,
+    ...interchart.evidence,
   ];
 
   const venus = planet(ctx, 'Venus');
@@ -469,9 +703,9 @@ function relationship(ctx: Context, question: string, focus: Focus): Answer {
   const bridge = linked(ctx, lord5, lord7);
   a.plain = [
     `Overall your chart shows ${promiseWord(a.verdict)} potential for relationships (${score} out of 100). Astrologers read romance through the 5th house and long-term partnership through the 7th, along with Venus, the planet of love.`,
-    `Your style in love: Venus is in ${venus.sign} and is ${strengthWord(ctx, 'Venus')}, so you tend to love in a ${SIGN_TRAITS[venus.signNumber - 1]} way. Emotionally, your Moon in ${moon.sign} looks for ${SIGN_TRAITS[moon.signNumber - 1]} companionship.`,
     bridge ? 'The planets of romance and commitment are connected in your chart, so a romance can naturally grow into something lasting.' : 'The planets of romance and commitment are not directly connected, so falling in love and committing may happen as two separate steps, and that is perfectly workable.',
     vargaPlain(ctx, plan, 'lasting partnership', v),
+    interchart.summary,
   ];
   a.natureTitle = 'What to expect';
   a.nature = [
@@ -480,13 +714,13 @@ function relationship(ctx: Context, question: string, focus: Focus): Answer {
     `Where connections arise: through ${HOUSE_THEME[planet(ctx, lord5).house]} (romance) and ${HOUSE_THEME[planet(ctx, lord7).house]} (commitment).`,
   ];
   a.jaimini = jai.list;
-  a.technical = vargaLines(ctx, plan);
+  a.technical = [...vargaLines(ctx, plan), ...interchart.evidence.map((item) => item.text)];
 
   const sigs = significators(ctx, { primary: [5, 7], secondary: [11], karakas: [['Venus', 2], ['Moon', 1]], extras: vargaExtras(ctx, plan.division, plan.houses, plan.label) });
   const stress = significators(ctx, { primary: [6, 8, 12], secondary: [], karakas: [['Saturn', 1], ['Rahu', 1], ['Mars', 1]] });
   const from = ctx.today;
   const to = addYears(ctx.today, 12);
-  const options: TimingOptions = { from, to, houses: [5, 7], upcoming: 3, min: 0.5, division: plan.division, note: DOUBLE_NOTE('romance and partnership areas') };
+  const options: TimingOptions = { from, to, houses: [5, 7], promiseScore: score, upcoming: 3, min: 0.5, division: plan.division, note: DOUBLE_NOTE('romance and partnership areas') };
   a.groups = [
     ...supportGroups(ctx, sigs, options, { upcoming: 'Favourable periods for new or deeper relationships', earlier: '', blurb: 'These are stretches when the planets in charge are linked with romance and partnership.' }),
     cautionGroup(ctx, sigs, stress, { ...options, upcoming: 2, min: 0.6, note: PRESSURE_NOTE('romance and partnership areas') }, 'Periods that call for care in relationships', 'Here the planets tied to conflict, change and loss outweigh the supportive ones. These are times for patience and clear communication, not a prediction of break-ups.'),
@@ -512,10 +746,11 @@ function career(ctx: Context, question: string, focus: Focus): Answer {
   const ten = blend(assessHouse(ctx, 10, null, true), v, plan.weight);
   const eleven = assessHouse(ctx, 11, 'Jupiter', true);
   const jai = jaiminiFor(ctx, ['career', 'wealth']);
-  const score = Math.max(5, Math.min(95, Math.round(0.65 * ten.score + 0.35 * eleven.score + jai.adjust)));
+  const interchart = interchartRead(ctx, 'career');
+  const score = Math.max(5, Math.min(95, Math.round(0.65 * ten.score + 0.35 * eleven.score + jai.adjust + interchart.adjustment)));
   a.score = score;
   a.verdict = verdictFor(score, ['Strong career prospects', 'Good career prospects', 'Mixed career signals', 'Career needs persistence']);
-  a.evidence = [...topEvidence(ten, 6), ...topEvidence(eleven, 3).map((e) => ({ ...e, text: `Gains (11th): ${e.text}` })), ...jai.evidence];
+  a.evidence = [...topEvidence(ten, 6), ...topEvidence(eleven, 3).map((e) => ({ ...e, text: `Gains (11th): ${e.text}` })), ...jai.evidence, ...interchart.evidence];
 
   const amk = ctx.karakas[1].planet.name;
   const lord10 = lordOfHouse(ctx, 10);
@@ -542,8 +777,8 @@ function career(ctx: Context, question: string, focus: Focus): Answer {
 
   a.plain = [
     `Overall your career prospects look ${promiseWord(a.verdict)} (${score} out of 100). Astrologers read career through the 10th house. Yours is ${signName(signOfHouse(ctx, 10))}, ruled by ${lord10}, which is ${strengthWord(ctx, lord10)} and placed in the area of ${HOUSE_MEANING[lord10Pos.house]}. So your success is closely tied to ${HOUSE_THEME[lord10Pos.house]}.`,
-    `Fields that suit you: ${top.map((n) => `${PLANET_FIELDS[n]} (because ${why(n)})`).join('; ')}.`,
     vargaPlain(ctx, plan, 'professional life', v),
+    interchart.summary,
     `Right now you are in the ${currentPeriod(ctx) || 'current'} period, which looks like ${moodText}.`,
     ctx.chart.transits.sadeSati.active ? 'Saturn is currently passing over your Moon sign (Sade Sati). This is often a demanding but ultimately disciplining phase that builds lasting career foundations.' : '',
   ].filter(Boolean);
@@ -558,11 +793,12 @@ function career(ctx: Context, question: string, focus: Focus): Answer {
     `The 10th house is ${signName(signOfHouse(ctx, 10))}; the 10th lord ${lord10} is ${dignityNote(ctx, lord10)} in the ${ordinal(lord10Pos.house)} house.`,
     `The Arudha of the 10th (Rajya pada, A10) is in ${signName(ctx.padas[9].sign)}.`,
     ...vargaLines(ctx, plan),
+    ...interchart.evidence.map((item) => item.text),
   ];
 
   const from = ctx.today;
   const to = addYears(ctx.today, 12);
-  const options: TimingOptions = { from, to, houses: [10], upcoming: 3, min: 0.55, division: plan.division, note: DOUBLE_NOTE('career area') };
+  const options: TimingOptions = { from, to, houses: [10], promiseScore: score, upcoming: 3, min: 0.55, division: plan.division, note: DOUBLE_NOTE('career area') };
   const rise = supportGroups(ctx, sigs, options, { upcoming: 'Career growth windows', earlier: '', blurb: `These are stretches when the planets in charge are strongly tied to career, income and recognition.${vargaBlurb(plan)}` });
   const fall = cautionGroup(ctx, sigs, stress, { ...options, upcoming: 3, min: 0.55, note: PRESSURE_NOTE('career area') }, 'Periods of pressure or change', 'In these stretches the planets tied to endings, hidden matters and effort outweigh the supportive ones. Expect restructuring, delays or transitions rather than certain loss, and use the time to prepare.');
   a.groups = [...rise, fall];
@@ -587,10 +823,11 @@ function property(ctx: Context, question: string, focus: Focus): Answer {
   const four = blend(assessHouse(ctx, 4, 'Mars'), v, plan.weight);
   const eleven = assessHouse(ctx, 11, null, true);
   const jai = jaiminiFor(ctx, ['wealth']);
-  const score = Math.max(5, Math.min(95, Math.round(0.7 * four.score + 0.3 * eleven.score + jai.adjust)));
+  const interchart = interchartRead(ctx, 'property');
+  const score = Math.max(5, Math.min(95, Math.round(0.7 * four.score + 0.3 * eleven.score + jai.adjust + interchart.adjustment)));
   a.score = score;
   a.verdict = verdictFor(score, ['Strong support for owning property', 'Good support for owning property', 'Mixed signals about property', 'Property comes with effort or delay']);
-  a.evidence = [...topEvidence(four, 8), ...topEvidence(eleven, 2).map((e) => ({ ...e, text: `Gains (11th): ${e.text}` })), ...jai.evidence];
+  a.evidence = [...topEvidence(four, 8), ...topEvidence(eleven, 2).map((e) => ({ ...e, text: `Gains (11th): ${e.text}` })), ...jai.evidence, ...interchart.evidence];
 
   const mars = planet(ctx, 'Mars');
   const venus = planet(ctx, 'Venus');
@@ -609,18 +846,18 @@ function property(ctx: Context, question: string, focus: Focus): Answer {
 
   a.plain = [
     `Overall your chart gives ${promiseWord(a.verdict)} support for owning property (${score} out of 100). Astrologers read home and property through the 4th house. Yours is ${signName(signOfHouse(ctx, 4))}, ruled by ${lord4}, which is ${strengthWord(ctx, lord4)} and placed in the area of ${HOUSE_MEANING[lord4Pos.house]}.`,
-    points.length ? `What kind of property fits: ${points.slice(0, 3).join(' ')}` : 'No single planet dominates the property picture, so timing (below) matters more than type.',
     vargaPlain(ctx, plan, 'property', v),
+    interchart.summary,
   ];
   a.natureTitle = 'What kind of property fits';
   a.nature = points.length ? points : ['No single planet dominates, so property decisions depend mostly on the timing below.'];
   a.jaimini = jai.list;
-  a.technical = [`The 4th house is ${signName(signOfHouse(ctx, 4))}; the 4th lord ${lord4} is ${dignityNote(ctx, lord4)} in the ${ordinal(lord4Pos.house)} house.`, ...vargaLines(ctx, plan)];
+  a.technical = [`The 4th house is ${signName(signOfHouse(ctx, 4))}; the 4th lord ${lord4} is ${dignityNote(ctx, lord4)} in the ${ordinal(lord4Pos.house)} house.`, ...vargaLines(ctx, plan), ...interchart.evidence.map((item) => item.text)];
 
   const sigs = significators(ctx, { primary: [4], secondary: [2, 9, 11], karakas: [['Mars', 2], ['Venus', 1], ['Moon', 1]], extras: vargaExtras(ctx, plan.division, plan.houses, plan.label) });
   const from = ctx.today;
   const to = addYears(ctx.today, 12);
-  const options: TimingOptions = { from, to, houses: [4], upcoming: 3, earlier: 0, min: 0.5, division: plan.division, note: DOUBLE_NOTE('home and property area') };
+  const options: TimingOptions = { from, to, houses: [4], promiseScore: score, upcoming: 3, earlier: 0, min: 0.5, division: plan.division, note: DOUBLE_NOTE('home and property area') };
   a.groups = supportGroups(ctx, sigs, options, { upcoming: 'Windows favourable for buying property', earlier: '', blurb: `These are stretches when the planets in charge are tied to home, land and gains.${vargaBlurb(plan)}` });
   const timing = nextSentence('window for property', a.groups[0].windows);
   a.headline = focus === 'timing' ? (timing ?? 'No strong property window appears within 12 years.') : `${a.verdict.label} (${score}/100). ${timing ?? ''}`.trim();
@@ -639,10 +876,11 @@ function spiritual(ctx: Context, question: string, focus: Focus): Answer {
   const nine = blend(assessHouse(ctx, 9, 'Jupiter'), v, plan.weight);
   const twelve = assessHouse(ctx, 12, 'Ketu', true);
   const jai = jaiminiFor(ctx, ['spiritual']);
-  const score = Math.max(5, Math.min(95, Math.round(0.6 * nine.score + 0.4 * twelve.score + jai.adjust)));
+  const interchart = interchartRead(ctx, 'spiritual');
+  const score = Math.max(5, Math.min(95, Math.round(0.6 * nine.score + 0.4 * twelve.score + jai.adjust + interchart.adjustment)));
   a.score = score;
   a.verdict = verdictFor(score, ['Strong spiritual current', 'Clear spiritual inclination', 'Developing spiritual interest', 'Subtle or late-blooming spirituality']);
-  a.evidence = [...topEvidence(nine, 5).map((e) => ({ ...e, text: `Dharma (9th): ${e.text}` })), ...topEvidence(twelve, 3).map((e) => ({ ...e, text: `Liberation (12th): ${e.text}` })), ...jai.evidence];
+  a.evidence = [...topEvidence(nine, 5).map((e) => ({ ...e, text: `Dharma (9th): ${e.text}` })), ...topEvidence(twelve, 3).map((e) => ({ ...e, text: `Liberation (12th): ${e.text}` })), ...jai.evidence, ...interchart.evidence];
 
   const p = (n: string) => planet(ctx, n);
   const strong = (n: string) => (ctx.strength[n] ?? 0) >= 1 || p(n).dignity === 'OWN' || p(n).dignity === 'EXALTED';
@@ -658,19 +896,19 @@ function spiritual(ctx: Context, question: string, focus: Focus): Answer {
 
   a.plain = [
     `Overall your chart shows ${a.verdict.label.toLowerCase()} (${score} out of 100). Astrologers look at the 9th house (faith, wisdom and teachers), the 12th house (letting go and inner life), Jupiter and Ketu.`,
-    likely.length ? `The path that suits you most naturally: ${likely.map((x) => x[0]).join('; and ')}.` : 'No single path dominates your chart, so exploring several practices is natural for you.',
     vargaPlain(ctx, plan, 'spiritual practice', v),
+    interchart.summary,
     `In Jaimini astrology your soul planet is ${atma}, the planet that shapes your deepest lessons in this life. Ketu, the planet of detachment, sits in ${p('Ketu').sign}.`,
   ];
   a.natureTitle = 'Likely spiritual path';
   a.nature = likely.length ? likely.map((x) => `${x[0]} (${x[2]}).`) : ['No single path dominates; exploring several practices is natural for this chart.'];
   a.jaimini = jai.list;
-  a.technical = [`Ketu is in the ${ordinal(p('Ketu').house)} house (${p('Ketu').sign}); the Atmakaraka is ${atma}.`, ...vargaLines(ctx, plan)];
+  a.technical = [`Ketu is in the ${ordinal(p('Ketu').house)} house (${p('Ketu').sign}); the Atmakaraka is ${atma}.`, ...vargaLines(ctx, plan), ...interchart.evidence.map((item) => item.text)];
 
   const sigs = significators(ctx, { primary: [9, 12], secondary: [5, 8], karakas: [['Ketu', 2], ['Jupiter', 2], ['Saturn', 1]], extras: [[atma, 1, 'Atmakaraka'], ...vargaExtras(ctx, plan.division, plan.houses, plan.label)] });
   const from = ctx.today;
   const to = addYears(ctx.today, 15);
-  const options: TimingOptions = { from, to, houses: [9, 12], upcoming: 3, min: 0.5, division: plan.division, note: DOUBLE_NOTE('wisdom and inner-life areas') };
+  const options: TimingOptions = { from, to, houses: [9, 12], promiseScore: score, upcoming: 3, min: 0.5, division: plan.division, note: DOUBLE_NOTE('wisdom and inner-life areas') };
   a.groups = supportGroups(ctx, sigs, options, { upcoming: 'Periods that deepen spiritual life', earlier: '', blurb: `These are stretches that tend to turn attention inward.${vargaBlurb(plan)}` });
   const timing = nextSentence('period for spiritual deepening', a.groups[0].windows);
   a.headline = focus === 'timing' ? (timing ?? 'No distinctly strong spiritual window shows in the next 15 years.')
@@ -688,9 +926,10 @@ function health(ctx: Context, question: string, focus: Focus): Answer {
   const plan = PLANS.health;
   const v = vargaAssess(ctx, plan);
   const one = blend(assessHouse(ctx, 1, 'Sun'), v, plan.weight);
+  const interchart = interchartRead(ctx, 'health');
   const moon = planet(ctx, 'Moon');
-  let score = one.score;
-  const evidence = [...one.evidence];
+  let score = one.score + interchart.adjustment;
+  const evidence = [...one.evidence, ...interchart.evidence];
   if ((ctx.strength.Moon ?? 1) >= 1) { score += 3; evidence.push({ text: 'The Moon (mind and body fluids) has good strength.', tone: 'good' }); }
   else { score -= 3; evidence.push({ text: 'The Moon is on the weaker side, so rest and emotional balance matter.', tone: 'bad' }); }
   const afflictedMoon = ['Saturn', 'Mars', 'Rahu', 'Ketu'].filter((n) => planet(ctx, n).signNumber === moon.signNumber);
@@ -708,20 +947,20 @@ function health(ctx: Context, question: string, focus: Focus): Answer {
 
   a.plain = [
     `Overall your chart shows ${a.verdict.label.toLowerCase()} (${a.score} out of 100). Astrologers look at the rising sign (your body and vitality), the Sun (life force), the Moon (mind and fluids) and the testing areas of the chart.`,
-    `Areas worth keeping an eye on, as general wellness and not a diagnosis: ${[...watch].slice(0, 3).join('; ')}.`,
     dusthana.length ? `Planets in the testing areas of your chart: ${dusthana.join(', ')}. Treat this as a prompt for prevention and regular check-ups.` : 'No planets sit in the testing areas of your chart, which is protective.',
+    interchart.summary,
     `Mars is in ${mars.sign}: take care with accidents, heat and inflammation during Mars-related periods.`,
     vargaPlain(ctx, plan, 'physical resilience', v),
   ];
   a.natureTitle = 'Areas to keep an eye on (general wellness, not diagnosis)';
   a.nature = [...watch].map((w) => `Pay attention to ${w}.`);
-  a.technical = [dusthana.length ? `Planets in the difficult houses: ${dusthana.join(', ')}.` : 'No planets sit in the 6th, 8th or 12th houses.', ...vargaLines(ctx, plan)];
+  a.technical = [dusthana.length ? `Planets in the difficult houses: ${dusthana.join(', ')}.` : 'No planets sit in the 6th, 8th or 12th houses.', ...vargaLines(ctx, plan), ...interchart.evidence.map((item) => item.text)];
 
   const sigs = significators(ctx, { primary: [1], secondary: [], karakas: [['Sun', 2], ['Moon', 1.5], ['Jupiter', 1]], extras: vargaExtras(ctx, plan.division, plan.houses, plan.label) });
   const stress = significators(ctx, { primary: [6, 8], secondary: [12], karakas: [['Mars', 1], ['Saturn', 1], ['Rahu', 0.5]] });
   const from = ctx.today;
   const to = addYears(ctx.today, 12);
-  const options: TimingOptions = { from, to, houses: [1, 6, 8], upcoming: 3, min: 0.55, division: plan.division, note: PRESSURE_NOTE('body, health and recovery areas') };
+  const options: TimingOptions = { from, to, houses: [1, 6, 8], promiseScore: a.score, upcoming: 3, min: 0.55, division: plan.division, note: PRESSURE_NOTE('body, health and recovery areas') };
   a.groups = [
     cautionGroup(ctx, sigs, stress, options, 'Periods that call for extra health care', 'In these stretches the planets tied to illness and endings outweigh the vitality planets. Use them for check-ups and prevention, not worry.'),
     ...supportGroups(ctx, sigs, { ...options, houses: [1], note: DOUBLE_NOTE('body and vitality area') }, { upcoming: 'Periods of strong vitality and recovery', earlier: '', blurb: 'These are stretches when the planets of vitality and recovery are in charge.' }),

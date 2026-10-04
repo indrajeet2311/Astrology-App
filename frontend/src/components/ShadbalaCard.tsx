@@ -12,7 +12,7 @@ export function ShadbalaCard({ chart }: { chart: Chart }) {
     <section className="card">
       <h2>Shadbala (six-fold strength)</h2>
       <p className="muted small">
-        Partial BPHS-style estimate, not a JHora or Parashara Light equivalent. Values use virupas (60 virupas = 1 rupa); the ratio is provisional until the omitted and approximated components below are implemented.
+        Calculated with JHora's conventions, in virupas (60 virupas = 1 rupa). The ratio compares each total with the planet's required minimum.
       </p>
       <div className="table-wrap">
         <table className="shadbala-table">
@@ -109,7 +109,7 @@ export function ShadbalaCard({ chart }: { chart: Chart }) {
         </div>
       </details>
       <p className="muted small">
-        Approximations: Abda, Masa and Yuddha Bala are not included. Cheshta Bala uses the Sun and Moon rules and retrogression for the other planets, without mean-motion data (Mercury and Venus when direct are fixed at 30). Declination for Ayana Bala is taken on the ecliptic. Dig Bala uses whole-sign house angles from the Ascendant.
+        Method: Saptavargaja uses Rasi-chart friendships; Kala Bala includes Abda and Masa lords (B.V. Raman's ahargana) and 60-minute horas from sunrise; Drik Bala uses sphuta drishti. Sun and Moon Cheshta are shown for Ishta/Kashta but not added to the total. Yuddha Bala is not included, and Mercury/Venus Cheshta uses modern mean motions, so small differences from JHora can remain.
       </p>
     </section>
   );
@@ -173,7 +173,7 @@ export function VimshopakaCard({ chart }: { chart: Chart }) {
                   <th scope="row">{r.name}</th>
                   {r.placements.map((p) => (
                     <td key={p.division} title={`${p.status} · ${p.points} points`} className={p.points >= 18 ? 'av-high' : p.points <= 7 ? 'av-low' : ''}>
-                      {p.status === 'Exalted' ? 'Exa' : p.status === 'Own' ? 'Own' : p.status === 'Adhi Mitra' ? 'AMi' : p.status === 'Adhi Shatru' ? 'ASh' : p.status.slice(0, 3)}
+                      {p.status === 'Own' ? 'Own' : p.status === 'Adhi Mitra' ? 'AMi' : p.status === 'Adhi Shatru' ? 'ASh' : p.status.slice(0, 3)}
                     </td>
                   ))}
                 </tr>
@@ -181,7 +181,7 @@ export function VimshopakaCard({ chart }: { chart: Chart }) {
             </tbody>
           </table>
         </div>
-        <p className="muted small">Scoring convention: exalted or own 20 · moolatrikona or great friend 18 · friend 15 · neutral 10 · enemy 7 · great enemy 5 · debilitated 0. Some Jyotish software uses different dignity or varga-weight conventions, so totals can differ.</p>
+        <p className="muted small">JHora convention: own 20 · great friend 18 · friend 15 · neutral 10 · enemy 7 · great enemy 5, using the five-fold friendship within each divisional chart. Exaltation and debilitation are not scored separately.</p>
       </details>
     </section>
   );

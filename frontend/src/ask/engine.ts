@@ -1,4 +1,4 @@
-import { DOMAIN_BUILDERS } from './answers';
+import { DOMAIN_BUILDERS, synthesizeAnswer } from './answers';
 import type { Answer, DomainId, Focus } from './answers';
 import type { Context } from './core';
 
@@ -49,5 +49,5 @@ export const SUGGESTED_QUESTIONS: { label: string; question: string; domain: Dom
 export function answerQuestion(ctx: Context, question: string, forced?: DomainId): Answer | null {
   const { domain, focus } = classify(question);
   const chosen = forced ?? domain;
-  return chosen ? DOMAIN_BUILDERS[chosen](ctx, question, focus) : null;
+  return chosen ? synthesizeAnswer(ctx, DOMAIN_BUILDERS[chosen](ctx, question, focus)) : null;
 }

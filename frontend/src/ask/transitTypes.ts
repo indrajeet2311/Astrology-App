@@ -1,5 +1,6 @@
 export interface SlowSegment {
   signNumber: number;
+  nakshatraIndex?: number;
   start: string;
   end: string;
 }

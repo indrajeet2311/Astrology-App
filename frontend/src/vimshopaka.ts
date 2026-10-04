@@ -1,7 +1,5 @@
 import type { Chart } from './types';
-import {
-  EXALTATION_SIGN, MOOLATRIKONA, SEVEN, compoundRelations, signRelation, vargaSign,
-} from './vargas';
+import { SEVEN, compoundRelations, signRelation, vargaSign } from './vargas';
 import type { Relation, Seven } from './vargas';
 
 export type SchemeName = 'Shadvarga' | 'Saptavarga' | 'Dashavarga' | 'Shodashavarga';
@@ -9,7 +7,7 @@ export type SchemeName = 'Shadvarga' | 'Saptavarga' | 'Dashavarga' | 'Shodashava
 // Varga weights per Brihat Parashara Hora Shastra; each scheme sums to 20.
 export const SCHEMES: Record<SchemeName, Record<string, number>> = {
   Shadvarga: { D1: 6, D2: 2, D3: 4, D9: 5, D12: 2, D30: 1 },
-  Saptavarga: { D1: 5, D2: 2, D3: 3, D7: 2.5, D9: 4.5, D12: 2, D30: 1 },
+  Saptavarga: { D1: 5, D2: 2, D3: 3, D7: 1, D9: 2.5, D12: 4.5, D30: 2 },
   Dashavarga: { D1: 3, D2: 1.5, D3: 1.5, D7: 1.5, D9: 1.5, D10: 1.5, D12: 1.5, D16: 1.5, D30: 1.5, D60: 5 },
   Shodashavarga: {
     D1: 3.5, D2: 1, D3: 1, D4: 0.5, D7: 0.5, D9: 3, D10: 0.5, D12: 0.5, D16: 2, D20: 0.5, D24: 0.5,
@@ -17,11 +15,10 @@ export const SCHEMES: Record<SchemeName, Record<string, number>> = {
   },
 };
 
-// Points (out of 20) a planet earns in a varga by the dignity of the sign it occupies.
-type VargaStatus = Relation | 'Exalted' | 'Moolatrikona' | 'Debilitated';
+// JHora scores only the five-fold relationship to the varga sign lord; exaltation is not counted.
+type VargaStatus = Relation;
 const POINTS: Record<VargaStatus, number> = {
-  Exalted: 20, Moolatrikona: 18, Own: 20, 'Adhi Mitra': 18, Mitra: 15, Sama: 10, Shatru: 7, 'Adhi Shatru': 5,
-  Debilitated: 0,
+  Own: 20, 'Adhi Mitra': 18, Mitra: 15, Sama: 10, Shatru: 7, 'Adhi Shatru': 5,
 };
 
 export interface VargaPlacement {
@@ -38,16 +35,12 @@ export interface Vimshopaka {
 }
 
 export function vimshopaka(chart: Chart): Vimshopaka[] {
+  const relations = Object.fromEntries(Object.keys(SCHEMES.Shodashavarga)
+    .map((division) => [division, compoundRelations(chart, division)]));
   return SEVEN.map((name) => {
     const placements: VargaPlacement[] = Object.keys(SCHEMES.Shodashavarga).map((division) => {
       const signNumber = vargaSign(chart, name, division);
-      const divisionRelations = compoundRelations(chart, division);
-      const planet = chart.planets.find((p) => p.name === name)!;
-      const moola = MOOLATRIKONA[name];
-      const status: VargaStatus = signNumber === EXALTATION_SIGN[name] ? 'Exalted'
-        : division === 'D1' && signNumber === moola.sign && planet.degreeInSign >= moola.from && planet.degreeInSign < moola.to ? 'Moolatrikona'
-          : signNumber === ((EXALTATION_SIGN[name] + 5) % 12) + 1 ? 'Debilitated'
-            : signRelation(name, signNumber, divisionRelations);
+      const status = signRelation(name, signNumber, relations[division]);
       return { division, signNumber, status, points: POINTS[status] };
     });
     const pointsOf = (division: string) => placements.find((p) => p.division === division)!.points;

@@ -6,8 +6,8 @@ import {
 } from './vargas';
 import type { Seven } from './vargas';
 
-// Minimum Shadbala in rupas needed for a planet to be considered well-placed (BPHS).
-const REQUIRED: Record<Seven, number> = { Sun: 6.5, Moon: 6, Mars: 5, Mercury: 7, Jupiter: 6.5, Venus: 5.5, Saturn: 5 };
+// Minimum Shadbala in rupas; the Sun's 5 follows JHora (some texts give 6.5).
+const REQUIRED: Record<Seven, number> = { Sun: 5, Moon: 6, Mars: 5, Mercury: 7, Jupiter: 6.5, Venus: 5.5, Saturn: 5 };
 const DEBILITATION: Record<Seven, number> = { Sun: 190, Moon: 213, Mars: 118, Mercury: 345, Jupiter: 275, Venus: 177, Saturn: 20 };
 const DIG_POINT: Record<Seven, number> = { Jupiter: 0, Mercury: 0, Moon: 90, Venus: 90, Saturn: 180, Sun: 270, Mars: 270 };
 const NAISARGIKA: Record<Seven, number> = {
@@ -24,7 +24,8 @@ export interface Shadbala {
   sthana: { uchcha: number; saptavargaja: number; ojayugma: number; kendradi: number; drekkana: number; total: number };
   dig: number;
   kala: {
-    nathonnata: number; paksha: number; tribhaga: number; vara: number; hora: number; ayana: number; total: number;
+    nathonnata: number; paksha: number; tribhaga: number; abda: number; masa: number; vara: number; hora: number;
+    ayana: number; total: number;
   };
   cheshta: number;
   naisargika: number;
@@ -44,19 +45,62 @@ const arc = (a: number, b: number) => {
   return d > 180 ? 360 - d : d;
 };
 
-/** Aspect strength in virupas (0-60) of a planet aspecting a point `d` degrees ahead of it. */
-function drishti(planet: Seven, d: number): number {
-  if (planet === 'Mars' && ((d >= 90 && d < 120) || (d >= 210 && d < 240))) return 60;
-  if (planet === 'Jupiter' && ((d >= 120 && d < 150) || (d >= 240 && d < 270))) return 60;
-  if (planet === 'Saturn' && ((d >= 60 && d < 90) || (d >= 270 && d < 300))) return 60;
-  if (d < 30) return 0;
-  if (d < 60) return (d - 30) / 2;
-  if (d < 90) return d - 60 + 15;
-  if (d < 120) return (120 - d) / 2 + 30;
-  if (d < 150) return 150 - d;
-  if (d < 180) return (d - 150) * 2;
-  if (d <= 300) return (300 - d) / 2;
+/** Sphuta drishti in virupas of a planet aspecting a point `a` degrees ahead of it (BPHS ch. 26). */
+function drishti(planet: Seven, a: number): number {
+  if (planet === 'Mars') {
+    if (a >= 90 && a < 120) return 45 + (a - 90) / 2;
+    if (a >= 120 && a < 150) return 2 * (150 - a);
+    if (a >= 180 && a < 210) return 60;
+    if (a >= 210 && a < 240) return 270 - a;
+  }
+  if (planet === 'Jupiter') {
+    if (a >= 90 && a < 120) return 45 + (a - 90) / 2;
+    if (a >= 120 && a < 150) return 2 * (150 - a);
+    if (a >= 210 && a < 240) return 45 + (a - 210) / 2;
+    if (a >= 240 && a < 270) return 15 + (2 * (270 - a)) / 3;
+  }
+  if (planet === 'Saturn') {
+    if (a >= 30 && a < 60) return (a - 30) * 2;
+    if (a >= 60 && a < 90) return 45 + (90 - a) / 2;
+    if (a >= 240 && a < 270) return a - 210;
+    if (a >= 270 && a < 330) return Math.max(0, 2 * (300 - a));
+  }
+  if (a < 30) return 0;
+  if (a < 60) return (a - 30) / 2;
+  if (a < 90) return a - 45;
+  if (a < 120) return 30 + (120 - a) / 2;
+  if (a < 150) return 150 - a;
+  if (a < 180) return 2 * (a - 150);
+  if (a < 300) return (300 - a) / 2;
   return 0;
+}
+
+const CHALDEAN: Seven[] = ['Saturn', 'Jupiter', 'Mars', 'Sun', 'Venus', 'Mercury', 'Moon'];
+// Weekday lords from Tuesday, as used by B.V. Raman's ahargana for Abda and Masa Bala.
+const AHARGANA_LORDS: Seven[] = ['Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn', 'Sun', 'Moon'];
+
+/** B.V. Raman's ahargana: 174 days at the start of 1952 plus the days elapsed since. */
+function ahargana(date: string): number {
+  const [y, m, d] = date.split('-').map(Number);
+  return 174 + (Date.UTC(y, m - 1, d) - Date.UTC(1952, 0, 1)) / 86400000 + 1;
+}
+
+// Tropical mean longitudes at J2000 and motion per Julian century (Meeus); planets are heliocentric.
+const MEAN_ELEMENTS: Record<'Sun' | 'Mercury' | 'Venus' | 'Mars' | 'Jupiter' | 'Saturn', [number, number]> = {
+  Sun: [280.46646, 36000.76983], Mercury: [252.250906, 149472.6746358], Venus: [181.979801, 58517.815676],
+  Mars: [355.433, 19141.6964471], Jupiter: [34.351519, 3036.3027748], Saturn: [50.077444, 1222.1137943],
+};
+const norm360 = (v: number) => ((v % 360) + 360) % 360;
+
+/** Cheshta Bala from the cheshta kendra: sighrochcha minus the mean of the mean and true planet. */
+function cheshtaKendraBala(name: 'Mercury' | 'Venus' | 'Mars' | 'Jupiter' | 'Saturn', trueTropical: number, t: number): number {
+  const mean = (key: keyof typeof MEAN_ELEMENTS) => norm360(MEAN_ELEMENTS[key][0] + MEAN_ELEMENTS[key][1] * t);
+  const inner = name === 'Mercury' || name === 'Venus';
+  const meanPlanet = inner ? mean('Sun') : mean(name);
+  const sighra = inner ? mean(name) : mean('Sun');
+  const diff = ((trueTropical - meanPlanet + 540) % 360) - 180;
+  const kendra = norm360(sighra - (meanPlanet + diff / 2));
+  return (kendra > 180 ? 360 - kendra : kendra) / 3;
 }
 
 function addDays(iso: string, days: number): string {
@@ -90,20 +134,28 @@ export function shadbala(chart: Chart): Shadbala[] {
     const nextSunrise = dayTimings(addDays(effectiveDate, 1), b.latitude, b.longitude)?.sunrise.getTime()
       ?? sunrise + 86400000;
     const t = birth.getTime();
-    const noon = (sunrise + sunset) / 2;
-    const diff = Math.abs(t - noon) / 3600000;
-    unnata = clamp(60 * (1 - Math.min(diff, 24 - diff) / 12), 0, 60);
     const isDay = t >= sunrise && t < sunset;
     const part = isDay
       ? Math.floor(((t - sunrise) / (sunset - sunrise)) * 3)
       : Math.floor(((t - sunset) / (nextSunrise - sunset)) * 3);
+    // Day planets score 60 at mid-day, 30 at sunrise/sunset and 0 at mid-night, linear within day and night.
+    const fraction = isDay ? (t - sunrise) / (sunset - sunrise) : (t - sunset) / (nextSunrise - sunset);
+    const fromMiddle = Math.abs(2 * clamp(fraction, 0, 1) - 1);
+    unnata = isDay ? 60 - 30 * fromMiddle : 30 * fromMiddle;
     tribhagaLord = (isDay ? ['Mercury', 'Sun', 'Saturn'] : ['Moon', 'Venus', 'Mars'])[clamp(part, 0, 2)] as Seven;
     varaLord = WEEKDAY_LORDS[timings.weekday];
-    const slots = isDay ? timings.hora.day : timings.hora.night;
-    horaLord = slots.find((s) => t >= s.start.getTime() && t < s.end.getTime())?.label ?? null;
+    // Hora Bala uses 60-minute horas counted from sunrise.
+    const hour = Math.floor((t - sunrise) / 3600000);
+    horaLord = CHALDEAN[(CHALDEAN.indexOf(varaLord as Seven) + hour) % 7];
   }
+  const days = ahargana(b.date);
+  const abdaLord = AHARGANA_LORDS[(Math.floor(days / 360) * 3 + 1) % 7];
+  const masaLord = AHARGANA_LORDS[(Math.floor(days / 30) * 2 + 1) % 7];
+  const moonBenefic = elongation > 90;
+  const benefic = (n: Seven) => (n === 'Moon' ? moonBenefic : BENEFICS.includes(n));
+  const d1Relations = compoundRelations(chart, 'D1');
 
-  const sunLon = planet('Sun').longitude;
+  const centuries = (birth.getTime() - Date.UTC(2000, 0, 1, 12)) / 86400000 / 36525;
   const declination = (lon: number) => {
     const tropical = (lon + b.ayanamsaDegrees) % 360;
     return (Math.asin(Math.sin((23.4393 * Math.PI) / 180) * Math.sin((tropical * Math.PI) / 180)) * 180) / Math.PI;
@@ -120,10 +172,10 @@ export function shadbala(chart: Chart): Shadbala[] {
     const uchcha = arc(p.longitude, DEBILITATION[name]) / 3;
     const saptavargaja = SAPTAVARGAJA_VARGAS.reduce((sum, division) => {
       const sign = vargaSign(chart, name, division);
-      const divisionRelations = compoundRelations(chart, division);
       const mt = MOOLATRIKONA[name];
       const inMoola = division === 'D1' && sign === mt.sign && p.degreeInSign >= mt.from && p.degreeInSign < mt.to;
-      return sum + SAPTAVARGAJA_POINTS[inMoola ? 'Moolatrikona' : signRelation(name, sign, divisionRelations)];
+      // JHora judges every varga by the Rasi chart's compound friendships.
+      return sum + SAPTAVARGAJA_POINTS[inMoola ? 'Moolatrikona' : signRelation(name, sign, d1Relations)];
     }, 0);
     const odd = (sign: number) => sign % 2 === 1;
     const ojaVarga = name === 'Moon' || name === 'Venus' ? (s: number) => !odd(s) : odd;
@@ -139,35 +191,35 @@ export function shadbala(chart: Chart): Shadbala[] {
 
     const dayPlanet = name === 'Sun' || name === 'Jupiter' || name === 'Venus';
     const nathonnata = name === 'Mercury' ? 60 : dayPlanet ? unnata : 60 - unnata;
-    const paksha = BENEFICS.includes(name) ? subha : 60 - subha;
+    const paksha = (benefic(name) ? subha : 60 - subha) * (name === 'Moon' ? 2 : 1);
     const tribhaga = name === 'Jupiter' || name === tribhagaLord ? 60 : 0;
+    const abda = name === abdaLord ? 15 : 0;
+    const masa = name === masaLord ? 30 : 0;
     const vara = name === varaLord ? 45 : 0;
     const hora = name === horaLord ? 60 : 0;
     const ayanaBala = ayana(name);
-    const kalaTotal = nathonnata + paksha + tribhaga + vara + hora + ayanaBala;
+    const kalaTotal = nathonnata + paksha + tribhaga + abda + masa + vara + hora + ayanaBala;
 
-    // Cheshta needs mean motion; Sun and Moon use Ayana and Paksha, others are approximated from elongation and retrogression.
-    const sunDistance = arc(p.longitude, sunLon);
-    const cheshta = name === 'Sun' ? ayanaBala : name === 'Moon' ? paksha
-      : p.retrograde ? 60 : name === 'Mercury' || name === 'Venus' ? 30 : clamp(sunDistance / 3, 0, 60);
+    // Sun and Moon Cheshta repeat Ayana and Paksha, so they are shown for Ishta/Kashta but not added to the total.
+    const cheshta = name === 'Sun' ? ayanaBala : name === 'Moon' ? subha
+      : cheshtaKendraBala(name, norm360(p.longitude + b.ayanamsaDegrees), centuries);
 
     let drikSum = 0;
     for (const other of SEVEN) {
       if (other === name) continue;
       const value = drishti(other, (p.longitude - planet(other).longitude + 360) % 360);
-      const benefic = other === 'Moon' ? elongation > 90 : BENEFICS.includes(other);
-      drikSum += benefic ? value : -value;
+      drikSum += benefic(other) ? value : -value;
     }
     const drik = drikSum / 4;
 
     const naisargika = NAISARGIKA[name];
-    const total = sthanaTotal + dig + kalaTotal + cheshta + naisargika + drik;
+    const total = sthanaTotal + dig + kalaTotal + (name === 'Sun' || name === 'Moon' ? 0 : cheshta) + naisargika + drik;
     const rupas = total / 60;
     return {
       name,
       sthana: { uchcha, saptavargaja, ojayugma, kendradi, drekkana, total: sthanaTotal },
       dig,
-      kala: { nathonnata, paksha, tribhaga, vara, hora, ayana: ayanaBala, total: kalaTotal },
+      kala: { nathonnata, paksha, tribhaga, abda, masa, vara, hora, ayana: ayanaBala, total: kalaTotal },
       cheshta,
       naisargika,
       drik,

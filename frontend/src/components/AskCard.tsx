@@ -34,19 +34,36 @@ function Windows({ group }: { group: WindowGroup }) {
       <h4>{group.title}</h4>
       <p className="muted small">{group.blurb}</p>
       {group.windows.map((w) => (
-        <div key={`${w.start}-${w.ad}`} className={`win win-${group.tone}`}>
+        <div key={`${w.system}-${w.start}-${w.ad}`} className={`win win-${group.tone}`}>
           <div className="win-head">
             <strong>{formatRange(w.start, w.end)}</strong>
+            <span className="pill">{w.system}</span>
+            {(w.confluence ?? 1) > 1 && <span className="pill">{w.confluence}/3 dasha systems overlap</span>}
             <span className="pill">{ratingWord(w.relative, group.tone)}</span>
             {w.current && <span className="badge-now">now</span>}
           </div>
           {w.peaks.length > 0 && (
             <div className="win-peak">
-              Best months: {w.peaks.slice(0, 3).map((p) => formatRange(p.start, p.end)).join(' · ')}
-              <span className="muted"> ({w.peaks[0].note})</span>
+              {w.peaks.filter((p) => !p.note.startsWith('Navatara:')).slice(0, 2).map((p) => (
+                <div key={`${p.start}-${p.end}-${p.note}`}>Transit confirmation: {formatRange(p.start, p.end)} <span className="muted">({p.note})</span></div>
+              ))}
+              {w.peaks.filter((p) => p.note.startsWith('Navatara:')).slice(0, 2).map((p) => (
+                <div key={`${p.start}-${p.end}-${p.note}`}>{formatRange(p.start, p.end)} <span className="muted">({p.note})</span></div>
+              ))}
             </div>
           )}
           {w.plain && <p className="small muted">{w.plain}</p>}
+          {(w.convergence ?? []).map((interval) => (
+            <p className="small muted" key={`${interval.start}-${interval.end}`}>
+              Agreement: {formatRange(interval.start, interval.end)} · {interval.systems.join(' + ')}
+            </p>
+          ))}
+          {w.reasons.length > 0 && (
+            <details>
+              <summary>Period assessment</summary>
+              <ul>{w.reasons.map((reason, index) => <li className="small" key={`${index}-${reason}`}>{reason}</li>)}</ul>
+            </details>
+          )}
         </div>
       ))}
     </div>
@@ -57,7 +74,7 @@ function AnswerView({ answer }: { answer: Answer }) {
   return (
     <article className="answer" aria-live="polite">
       <p className="answer-q">{answer.domainLabel} · “{answer.question}”</p>
-      <p className="answer-headline">{answer.headline}</p>
+      {answer.headline && <p className="answer-headline">{answer.headline}</p>}
       <div className="answer-verdict">
         <strong>{answer.verdict.label}</strong>
         <div className="answer-score" role="img" aria-label={`Score ${answer.score} of 100`}><span style={{ width: `${answer.score}%` }} /></div>
@@ -91,12 +108,11 @@ function AnswerView({ answer }: { answer: Answer }) {
         </>
       )}
 
-      <p className="muted small">{answer.vargaNote}</p>
       {answer.groups.map((g) => <Windows key={g.title} group={g} />)}
 
       <details className="shadbala-details">
         <summary>The astrology behind this answer</summary>
-        <ul>{answer.technical.map((t) => <li key={t} className="small">{t}</li>)}</ul>
+        <ul>{answer.technical.filter((text) => !answer.evidence.some((item) => item.text === text)).map((t) => <li key={t} className="small">{t}</li>)}</ul>
         <ul>{answer.evidence.map((e) => <li key={e.text} className={`small ${e.tone === 'good' ? 'ev-good' : e.tone === 'bad' ? 'ev-bad' : ''}`}>{e.text}</li>)}</ul>
       </details>
       <div className="answer-notes">{answer.notes.map((n) => <p key={n} className="muted small">{n}</p>)}</div>

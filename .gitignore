@@ -4,3 +4,14 @@ target/
 .idea/
 *.iml
 .DS_Store
+
+.vercel/
+.env
+.env.*
+!.env.example
+*.log
+*.tsbuildinfo
+coverage/
+.vite/
+.cache/
+Thumbs.db
