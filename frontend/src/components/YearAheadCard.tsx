@@ -2,11 +2,11 @@ import { useMemo, useState } from 'react';
 import { CalendarRange, Loader2 } from 'lucide-react';
 import { errorMessage, loadSlowTransits } from '../api';
 import { DOMAIN_BUILDERS } from '../ask/answers';
-import type { Answer, DomainId, Window } from '../ask/answers';
+import type { Answer, DomainId } from '../ask/answers';
 import { formatRange, makeContext } from '../ask/core';
+import type { Window } from '../ask/core';
 import type { SlowSegment, SlowTransits } from '../ask/transitTypes';
 import { payloadFromChart } from '../savedCharts';
-import { SIGN_NAMES } from '../constants';
 import type { Chart } from '../types';
 
 const TOPICS: { id: DomainId; title: string; question: string }[] = [
@@ -37,11 +37,6 @@ function todayInZone(timeZone: string): string {
     .formatToParts(new Date());
   const part = (name: string) => parts.find((p) => p.type === name)?.value ?? '01';
   return `${part('year')}-${part('month')}-${part('day')}`;
-}
-
-function addYear(iso: string, n: number): string {
-  const [year, month, day] = iso.split('-').map(Number);
-  return `${year + n}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 }
 
 function dashaAt(chart: Chart, date: string): { main: string; sub: string } {
