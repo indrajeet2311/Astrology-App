@@ -26,13 +26,26 @@ export function ConsultationRequestForm({ chart }: { chart: Chart }) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const [mailFallback, setMailFallback] = useState('');
+
+  const mailDetails = [
+    `Name: ${fields.name}`,
+    `Email: ${fields.email}`,
+    `Phone: ${fields.phone || 'Not provided'}`,
+    `Preferred contact: ${fields.contactMethod}`,
+    `Guidance area: ${fields.topic || 'Not selected'}`,
+    `Timezone: ${fields.timezone}`,
+    `Availability: ${fields.availability || 'To be arranged'}`,
+    '',
+    'Question / context:',
+    fields.question,
+    ...(fields.shareBirthDetails ? ['', `Birth chart: ${chart.birthDetails.date} ${chart.birthDetails.localTime}, ${chart.birthDetails.placeName}`] : []),
+  ].join('\n');
+  const mailtoHref = `mailto:indrajeetbhattacharya5@gmail.com?subject=${encodeURIComponent(`Private consultation request: ${fields.topic || 'Consultation'}`)}&body=${encodeURIComponent(mailDetails)}`;
 
   const update = <K extends keyof RequestFields>(key: K, value: RequestFields[K]) => {
     setFields((current) => ({ ...current, [key]: value }));
     setMessage('');
     setError('');
-    setMailFallback('');
   };
 
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -40,7 +53,6 @@ export function ConsultationRequestForm({ chart }: { chart: Chart }) {
     setBusy(true);
     setMessage('');
     setError('');
-    setMailFallback('');
     try {
       const result = await submitConsultation({
         ...fields,
@@ -51,20 +63,6 @@ export function ConsultationRequestForm({ chart }: { chart: Chart }) {
       setMessage(result.message);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Your request could not be sent. Please try again.');
-      const details = [
-        `Name: ${fields.name}`,
-        `Email: ${fields.email}`,
-        `Phone: ${fields.phone || 'Not provided'}`,
-        `Preferred contact: ${fields.contactMethod}`,
-        `Guidance area: ${fields.topic}`,
-        `Timezone: ${fields.timezone}`,
-        `Availability: ${fields.availability || 'To be arranged'}`,
-        '',
-        'Question / context:',
-        fields.question,
-        ...(fields.shareBirthDetails ? ['', `Birth chart: ${chart.birthDetails.date} ${chart.birthDetails.localTime}, ${chart.birthDetails.placeName}`] : []),
-      ].join('\n');
-      setMailFallback(`mailto:indrajeetbhattacharya5@gmail.com?subject=${encodeURIComponent(`Private consultation request: ${fields.topic}`)}&body=${encodeURIComponent(details)}`);
     } finally {
       setBusy(false);
     }
@@ -131,10 +129,10 @@ export function ConsultationRequestForm({ chart }: { chart: Chart }) {
           {busy ? <LoaderCircle className="spin" size={16} /> : <Send size={16} />}
           {busy ? 'Sending…' : 'Send consultation request'}
         </button>
+        <p className="muted small consultation-wide">No SMTP access? <a href={mailtoHref}>Open a prefilled email to indrajeetbhattacharya5@gmail.com</a>, then press Send in your email app.</p>
       </form>
       {message && <p className="consultation-status" role="status">{message}</p>}
       {error && <p className="consultation-status hint-error" role="alert">{error}</p>}
-      {mailFallback && <p className="consultation-status">You can send the request from your email app: <a href={mailFallback}>Open a prefilled email to indrajeetbhattacharya5@gmail.com</a>. Review it and press Send in your email app.</p>}
     </section>
   );
 }
