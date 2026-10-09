@@ -5,70 +5,62 @@ import com.celestia.astro.model.ConsultationRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientException;
-
-import java.util.List;
-import java.util.Map;
 
 @Service
 public class ConsultationEmailService {
   private static final Logger log = LoggerFactory.getLogger(ConsultationEmailService.class);
-  private static final String RECIPIENT = "ibtnextgen@gmail.com";
+  private static final String RECIPIENT = "indrajeetbhattacharya5@gmail.com";
 
-  private final RestClient resendClient;
+  private final JavaMailSender mailSender;
   private final String fromAddress;
 
-  public ConsultationEmailService(@Value("${celestia.email.resend-api-key:}") String apiKey,
-                                  @Value("${celestia.email.resend-from:}") String fromAddress) {
-    this.resendClient = StringUtils.hasText(apiKey)
-        ? RestClient.builder().baseUrl("https://api.resend.com")
-            .defaultHeader("Authorization", "Bearer " + apiKey).build()
-        : null;
+  public ConsultationEmailService(JavaMailSender mailSender,
+                                  @Value("${spring.mail.username:}") String fromAddress) {
+    this.mailSender = mailSender;
     this.fromAddress = fromAddress;
   }
 
   public void send(ConsultationRequest request) {
-    if (resendClient == null || !StringUtils.hasText(fromAddress)) {
-      throw new ConsultationDeliveryException("Consultation email delivery is not configured.");
-    }
-
+    ensureConfigured();
+    SimpleMailMessage message = new SimpleMailMessage();
+    message.setFrom(fromAddress);
+    message.setTo(RECIPIENT);
+    message.setReplyTo(request.email());
+    message.setSubject("Private consultation request: " + request.topic());
+    message.setText(body(request));
     try {
-      resendClient.post().uri("/emails")
-          .body(Map.of(
-              "from", fromAddress,
-              "to", List.of(RECIPIENT),
-              "reply_to", request.email(),
-              "subject", "Private consultation request: " + request.topic(),
-              "text", body(request)))
-          .retrieve().toBodilessEntity();
-    } catch (RestClientException e) {
+      mailSender.send(message);
+    } catch (MailException e) {
       throw new ConsultationDeliveryException("The consultation request could not be delivered.", e);
     }
   }
 
-  /**
-   * Best-effort notification sent whenever a visitor generates a chart. Unlike {@link #send},
-   * failures (missing config, network issues) are only logged, never thrown — a chart lead
-   * email is a nice-to-have and must never block or fail the chart calculation itself.
-   */
+  /** Best effort notification; chart generation must not depend on email delivery. */
   public void sendChartLead(ChartLeadRequest lead) {
-    if (resendClient == null || !StringUtils.hasText(fromAddress)) {
-      log.debug("Chart lead email skipped: email delivery is not configured.");
+    if (!StringUtils.hasText(fromAddress)) {
+      log.debug("Chart lead email skipped: SMTP is not configured.");
       return;
     }
+    SimpleMailMessage message = new SimpleMailMessage();
+    message.setFrom(fromAddress);
+    message.setTo(RECIPIENT);
+    message.setSubject("New chart generated on NextGenAstro");
+    message.setText(chartLeadBody(lead));
     try {
-      resendClient.post().uri("/emails")
-          .body(Map.of(
-              "from", fromAddress,
-              "to", List.of(RECIPIENT),
-              "subject", "New chart generated on NextGenAstro",
-              "text", chartLeadBody(lead)))
-          .retrieve().toBodilessEntity();
-    } catch (RestClientException e) {
+      mailSender.send(message);
+    } catch (MailException e) {
       log.warn("Chart lead email delivery failed", e);
+    }
+  }
+
+  private void ensureConfigured() {
+    if (!StringUtils.hasText(fromAddress)) {
+      throw new ConsultationDeliveryException("Consultation email delivery is not configured. Set SMTP_USERNAME and SMTP_PASSWORD.");
     }
   }
 

@@ -3,8 +3,14 @@ server:
 spring:
   application:
     name: celestia-backend
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.smtp.starttls.required: true
 celestia:
   geocoder-url: ${CELESTIA_GEOCODER_URL:https://geocoding-api.open-meteo.com/v1/search}
-  email:
-    resend-api-key: ${RESEND_API_KEY:}
-    resend-from: ${RESEND_FROM:}

@@ -26,11 +26,13 @@ export function ConsultationRequestForm({ chart }: { chart: Chart }) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [mailFallback, setMailFallback] = useState('');
 
   const update = <K extends keyof RequestFields>(key: K, value: RequestFields[K]) => {
     setFields((current) => ({ ...current, [key]: value }));
     setMessage('');
     setError('');
+    setMailFallback('');
   };
 
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -38,6 +40,7 @@ export function ConsultationRequestForm({ chart }: { chart: Chart }) {
     setBusy(true);
     setMessage('');
     setError('');
+    setMailFallback('');
     try {
       const result = await submitConsultation({
         ...fields,
@@ -48,6 +51,20 @@ export function ConsultationRequestForm({ chart }: { chart: Chart }) {
       setMessage(result.message);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Your request could not be sent. Please try again.');
+      const details = [
+        `Name: ${fields.name}`,
+        `Email: ${fields.email}`,
+        `Phone: ${fields.phone || 'Not provided'}`,
+        `Preferred contact: ${fields.contactMethod}`,
+        `Guidance area: ${fields.topic}`,
+        `Timezone: ${fields.timezone}`,
+        `Availability: ${fields.availability || 'To be arranged'}`,
+        '',
+        'Question / context:',
+        fields.question,
+        ...(fields.shareBirthDetails ? ['', `Birth chart: ${chart.birthDetails.date} ${chart.birthDetails.localTime}, ${chart.birthDetails.placeName}`] : []),
+      ].join('\n');
+      setMailFallback(`mailto:indrajeetbhattacharya5@gmail.com?subject=${encodeURIComponent(`Private consultation request: ${fields.topic}`)}&body=${encodeURIComponent(details)}`);
     } finally {
       setBusy(false);
     }
@@ -56,7 +73,7 @@ export function ConsultationRequestForm({ chart }: { chart: Chart }) {
   return (
     <section className="card consultation-request">
       <h2>Request a private consultation</h2>
-      <p className="muted small">Your request will be emailed to ibtnextgen@gmail.com.</p>
+      <p className="muted small">Your request will be emailed to indrajeetbhattacharya5@gmail.com.</p>
       <form className="consultation-form" onSubmit={(event) => void submit(event)}>
         <label className="consultation-trap" aria-hidden="true">
           Website
@@ -117,6 +134,7 @@ export function ConsultationRequestForm({ chart }: { chart: Chart }) {
       </form>
       {message && <p className="consultation-status" role="status">{message}</p>}
       {error && <p className="consultation-status hint-error" role="alert">{error}</p>}
+      {mailFallback && <p className="consultation-status">You can send the request from your email app: <a href={mailFallback}>Open a prefilled email to indrajeetbhattacharya5@gmail.com</a>. Review it and press Send in your email app.</p>}
     </section>
   );
 }
