@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { CalendarDays, Loader2 } from 'lucide-react';
 import { calculateAnnualCharts, errorMessage } from '../api';
 import type { AnnualChartsResponse, BirthPayload, Chart } from '../types';
@@ -6,6 +6,8 @@ import { NorthIndianChart } from './NorthIndianChart';
 import { PlanetTable } from './PlanetTable';
 import { SouthIndianChart } from './SouthIndianChart';
 import { SIGN_GLYPHS, SIGN_LORDS, SIGN_NAMES, WEEKDAY_LORDS } from '../constants';
+import { divisionalChart } from '../divisional';
+import { birthTiming } from '../birthTiming';
 
 const TITHI_LORDS = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn', 'Rahu'];
 
@@ -17,12 +19,20 @@ function tithiLord(number: number): string {
 
 type ReturnKind = 'varshaphal' | 'tithiPravesh';
 type ChartStyle = 'north' | 'south';
+const DIVISIONS = [
+  { code: 'D1', name: 'Rashi' },
+  { code: 'D7', name: 'Saptamsa' },
+  { code: 'D9', name: 'Navamsa' },
+  { code: 'D10', name: 'Dasamsa' },
+] as const;
+type Division = (typeof DIVISIONS)[number]['code'];
 
 export function AnnualReturnsCard({ birth, natalAscSign }: { birth: BirthPayload; natalAscSign: number }) {
   const [year, setYear] = useState(new Date().getFullYear());
   const [returns, setReturns] = useState<AnnualChartsResponse | null>(null);
   const [kind, setKind] = useState<ReturnKind>('varshaphal');
   const [style, setStyle] = useState<ChartStyle>('north');
+  const [division, setDivision] = useState<Division>('D1');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -58,6 +68,9 @@ export function AnnualReturnsCard({ birth, natalAscSign }: { birth: BirthPayload
   const age = returns ? returns.year - Number(birth.date.slice(0, 4)) : 0;
   const munthaSign = ((natalAscSign - 1 + age) % 12) + 1;
   const munthaHouse = chart ? ((munthaSign - chart.ascendant.signNumber + 12) % 12) + 1 : 0;
+  const horaTiming = kind === 'tithiPravesh' && chart ? birthTiming(chart) : null;
+  const shown = useMemo(() => (chart ? divisionalChart(chart, division) : null), [chart, division]);
+  const divisionName = DIVISIONS.find((item) => item.code === division)?.name ?? 'Rashi';
 
   return (
     <section className="card annual-card">
@@ -102,6 +115,14 @@ export function AnnualReturnsCard({ birth, natalAscSign }: { birth: BirthPayload
                 South Indian
               </button>
             </div>
+            <label className="division-select">
+              <span className="sr-only">Divisional chart</span>
+              <select aria-label="Divisional chart" value={division} onChange={(event) => setDivision(event.target.value as Division)}>
+                {DIVISIONS.map((item) => (
+                  <option key={item.code} value={item.code}>{item.code} · {item.name}</option>
+                ))}
+              </select>
+            </label>
           </div>
           <h3 className="annual-title">{title} · {returns.year}</h3>
           <p className="muted small">
@@ -130,14 +151,22 @@ export function AnnualReturnsCard({ birth, natalAscSign }: { birth: BirthPayload
                     <small>{weekdayLord.name}</small>
                   </div>
                 )}
+                {horaTiming && (
+                  <div className="fact">
+                    <span className="muted small">Hora lord</span>
+                    <strong>{horaTiming.hora}</strong>
+                    <small>{horaTiming.horaStart ? `${horaTiming.horaStart}–${horaTiming.horaEnd}` : ''}</small>
+                  </div>
+                )}
               </>
             )}
           </div>
           <div className="annual-visual">
-            {style === 'north'
-              ? <NorthIndianChart chart={chart} label={`${title} · ${returns.year}`} />
-              : <SouthIndianChart chart={chart} label={`${title} · ${returns.year}`} />}
-            <PlanetTable bodies={[chart.ascendant, ...chart.planets]} chart={chart} />
+            <h3 className="annual-title">{divisionName} chart ({division})</h3>
+            {shown && (style === 'north'
+              ? <NorthIndianChart chart={shown} label={`${title} · ${returns.year} · ${division}`} />
+              : <SouthIndianChart chart={shown} label={`${title} · ${returns.year} · ${division}`} />)}
+            {shown && <PlanetTable bodies={[shown.ascendant, ...shown.planets]} division={division} chart={chart} />}
           </div>
         </div>
       )}

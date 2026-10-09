@@ -34,13 +34,17 @@ function solarTerms(jd: number) {
   return { decl, eqTime };
 }
 
-/** UTC minutes after 0h UT of the given Julian day; NOAA solar calculator algorithm. */
+/**
+ * UTC minutes after 0h UT of the given Julian day; NOAA solar calculator algorithm, using the
+ * geometric (centre-of-disc) horizon crossing with no refraction or semi-diameter correction.
+ * This matches the sunrise/sunset convention used by Vedic astrology references such as
+ * Jagannatha Hora, rather than the "civil sunrise" convention (which adds ~50' of depression).
+ */
 function eventMinutes(jd0: number, lat: number, lon: number, rise: boolean): number | null {
   let minutes = 720;
   for (let i = 0; i < 3; i++) {
     const { decl, eqTime } = solarTerms(jd0 + minutes / 1440);
-    const cosHa = Math.cos(rad(90.833)) / (Math.cos(rad(lat)) * Math.cos(rad(decl)))
-      - Math.tan(rad(lat)) * Math.tan(rad(decl));
+    const cosHa = -Math.tan(rad(lat)) * Math.tan(rad(decl));
     if (cosHa < -1 || cosHa > 1) return null;
     const ha = deg(Math.acos(cosHa));
     minutes = 720 - 4 * (lon + (rise ? ha : -ha)) - eqTime;
@@ -95,9 +99,16 @@ export function dayTimings(dateIso: string, lat: number, lon: number): DayTiming
       const label = CHOGHADIYA[(first + i) % 7];
       return { label, start: s, end: e, tone: CHOGHADIYA_TONE[label] };
     });
-  const horas = (start: Date, end: Date, first: number): Slot[] =>
-    split(start, end, 12).map(([s, e], i) => ({ label: HORA_ORDER[(first + i) % 7], start: s, end: e }));
+  // Hora is a fixed 60-minute planetary hour counted from sunrise (Chaldean order, starting with
+  // the weekday lord), not a proportional division of day/night length. This matches both the
+  // classical definition and reference tools such as Jagannatha Hora.
   const horaFirst = HORA_ORDER.indexOf(WEEKDAY_LORD[weekday]);
+  const allHoras: Slot[] = [];
+  for (let i = 0, start = sunrise.getTime(); start < nextRise.getTime(); i++) {
+    const end = Math.min(start + 3600000, nextRise.getTime());
+    allHoras.push({ label: HORA_ORDER[(horaFirst + i) % 7], start: new Date(start), end: new Date(end) });
+    start = end;
+  }
 
   return {
     weekday,
@@ -112,8 +123,8 @@ export function dayTimings(dateIso: string, lat: number, lon: number): DayTiming
       night: chogha(sunset, nextRise, (CHOGHADIYA_START[weekday] + 5) % 7),
     },
     hora: {
-      day: horas(sunrise, sunset, horaFirst),
-      night: horas(sunset, nextRise, (horaFirst + 12) % 7),
+      day: allHoras.filter((s) => s.start < sunset),
+      night: allHoras.filter((s) => s.start >= sunset),
     },
   };
 }

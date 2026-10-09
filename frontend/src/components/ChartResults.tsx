@@ -8,10 +8,12 @@ import type { BirthPayload, Chart, KundliMatch } from '../types';
 import { DashaTimeline } from './DashaTimeline';
 import { AnnualReturnsCard } from './AnnualReturnsCard';
 import { InsightsCard } from './InsightsCard';
+import { PersonalityCard } from './PersonalityCard';
 import { AshtakavargaCard } from './AshtakavargaCard';
 import { ShadbalaCard, VimshopakaCard } from './ShadbalaCard';
 import { JaiminiCard } from './JaiminiCard';
 import { AvasthaCard } from './AvasthaCard';
+import { CollapsibleSection } from './CollapsibleSection';
 import { SaturnCyclesCard } from './SaturnCyclesCard';
 import { TransitCalendarCard } from './TransitCalendarCard';
 import { AskCard } from './AskCard';
@@ -270,14 +272,8 @@ export function ChartResults({ chart, onBack, onSave, savedCharts, onMatch, onTr
             <dd>{formatDate(b.date)}</dd>
             <dt>Local time</dt>
             <dd>{b.localTime} (UTC{b.utcOffset})</dd>
-            <dt>Universal time</dt>
-            <dd>{b.utcTime.replace('T', ' ').replace('Z', ' UTC')}</dd>
             <dt>Place</dt>
             <dd>{b.placeName}</dd>
-            <dt>Coordinates</dt>
-            <dd>{b.latitude.toFixed(4)}, {b.longitude.toFixed(4)}</dd>
-            <dt>Timezone</dt>
-            <dd>{b.timeZone} · UTC{b.utcOffset}{birthSun ? ` · ${birthSun.timezoneLabel}${birthSun.daylightSaving ? ' (daylight saving)' : ''}` : ''}</dd>
             {birthSun && <>
               <dt>Sunrise / sunset</dt>
               <dd>{birthSun.sunrise} / {birthSun.sunset} local time · Vedic day beginning {formatDate(birthSun.dayDate)}</dd>
@@ -285,19 +281,34 @@ export function ChartResults({ chart, onBack, onSave, savedCharts, onMatch, onTr
               <dd>{birthSun.hora} Hora{birthSun.horaStart ? ` · ${birthSun.horaStart}–${birthSun.horaEnd}` : ''} local time</dd>
               <dt>Vara (weekday)</dt>
               <dd>{birthSun.weekday} · ruled by {birthSun.weekdayLord}</dd>
-              <dt>Daylight saving</dt>
-              <dd>{birthSun.daylightSaving ? `In effect at birth; offset ${birthSun.offset} was applied automatically` : `Not in effect at birth; offset ${birthSun.offset} was applied`}</dd>
-              {b.laterOffset && <><dt>Repeated local time</dt><dd>Later daylight-saving clock occurrence selected</dd></>}
             </>}
-            <dt>Ayanamsa</dt>
-            <dd>{AYANAMSA_LABEL[b.ayanamsa]} ({b.ayanamsaDegrees.toFixed(4)}°)</dd>
-            <dt>House system</dt>
-            <dd>{b.houseSystem === 'EQUAL' ? 'Equal house' : 'Whole sign'}</dd>
-            <dt>Lunar node</dt>
-            <dd>{b.trueNode ? 'True node' : 'Mean node'}</dd>
           </dl>
+          <details className="inline-details">
+            <summary>Technical calculation details</summary>
+            <dl className="details">
+              <dt>Universal time</dt>
+              <dd>{b.utcTime.replace('T', ' ').replace('Z', ' UTC')}</dd>
+              <dt>Coordinates</dt>
+              <dd>{b.latitude.toFixed(4)}, {b.longitude.toFixed(4)}</dd>
+              <dt>Timezone</dt>
+              <dd>{b.timeZone} · UTC{b.utcOffset}{birthSun ? ` · ${birthSun.timezoneLabel}${birthSun.daylightSaving ? ' (daylight saving)' : ''}` : ''}</dd>
+              {birthSun && <>
+                <dt>Daylight saving</dt>
+                <dd>{birthSun.daylightSaving ? `In effect at birth; offset ${birthSun.offset} was applied automatically` : `Not in effect at birth; offset ${birthSun.offset} was applied`}</dd>
+                {b.laterOffset && <><dt>Repeated local time</dt><dd>Later daylight-saving clock occurrence selected</dd></>}
+              </>}
+              <dt>Ayanamsa</dt>
+              <dd>{AYANAMSA_LABEL[b.ayanamsa]} ({b.ayanamsaDegrees.toFixed(4)}°)</dd>
+              <dt>House system</dt>
+              <dd>{b.houseSystem === 'EQUAL' ? 'Equal house' : 'Whole sign'}</dd>
+              <dt>Lunar node</dt>
+              <dd>{b.trueNode ? 'True node' : 'Mean node'}</dd>
+            </dl>
+          </details>
         </section>
       </div>
+
+      <PersonalityCard chart={chart} />
 
       <PanchangCard panchang={chart.panchang} moon={moon} />
 
@@ -316,15 +327,25 @@ export function ChartResults({ chart, onBack, onSave, savedCharts, onMatch, onTr
       </header>
       <InsightsCard aspects={chart.aspects} yogas={chart.yogas} jaimini={jaimini} />
 
-      <AshtakavargaCard chart={chart} />
+      <CollapsibleSection title="Ashtakavarga" description="A point map of which signs support your transits best. Optional deep-dive.">
+        <AshtakavargaCard chart={chart} />
+      </CollapsibleSection>
 
-      <ShadbalaCard chart={chart} />
+      <CollapsibleSection title="Shadbala (six-fold strength)" description="Numeric strength scores astrologers use to rank your planets. Optional deep-dive.">
+        <ShadbalaCard chart={chart} />
+      </CollapsibleSection>
 
-      <VimshopakaCard chart={chart} />
+      <CollapsibleSection title="Vimshopaka Bala" description="A divisional-chart strength score. Optional deep-dive.">
+        <VimshopakaCard chart={chart} />
+      </CollapsibleSection>
 
-      <JaiminiCard chart={chart} />
+      <CollapsibleSection title="Jaimini: Karakas, Karakamsha and Arudhas" description="Soul-indicator points from the Jaimini system. Optional deep-dive.">
+        <JaiminiCard chart={chart} />
+      </CollapsibleSection>
 
-      <AvasthaCard chart={chart} />
+      <CollapsibleSection title="Planetary states (Avasthas) and Gandanta" description="Finer-grained condition of each planet. Optional deep-dive.">
+        <AvasthaCard chart={chart} />
+      </CollapsibleSection>
       </section>}
 
       {birthSection === 'predictive' && <section id="birth-panel-predictive" role="tabpanel" aria-labelledby="birth-tab-predictive">

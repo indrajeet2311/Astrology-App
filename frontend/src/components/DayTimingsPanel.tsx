@@ -45,7 +45,7 @@ export function DayTimingsPanel({ timings, timeZone }: { timings: DayTimings; ti
         </div>
       </div>
       <SlotGrid slots={slots} timeZone={timeZone} />
-      <p className="muted small">Computed from sunrise and sunset at the chosen location (no atmospheric refraction beyond the standard 0.833°). Times are in the location's timezone.</p>
+      <p className="muted small">Computed from true (geometric) sunrise and sunset at the chosen location, matching standard Vedic astrology references. Times are in the location's timezone.</p>
     </div>
   );
 }

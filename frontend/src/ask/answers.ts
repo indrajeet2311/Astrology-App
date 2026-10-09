@@ -47,13 +47,13 @@ export interface Answer {
   transitsUsed: boolean;
 }
 
-const SIGN_TRAITS = [
+export const SIGN_TRAITS = [
   'energetic, independent and direct', 'steady, sensual and value-minded', 'communicative, curious and youthful',
   'caring, emotional and home-loving', 'warm, proud and generous', 'practical, analytical and service-minded',
   'charming, balanced and partnership-oriented', 'intense, private and loyal', 'optimistic, freedom-loving and philosophical',
   'disciplined, ambitious and reserved', 'unconventional, friendly and independent-minded', 'gentle, imaginative and compassionate',
 ];
-const HOUSE_THEME: Record<number, string> = {
+export const HOUSE_THEME: Record<number, string> = {
   1: 'your own initiative', 2: 'family circles and finances', 3: 'communication, short trips and siblings',
   4: 'home, family and emotional security', 5: 'romance, creativity and friendships', 6: 'work, service or daily routine',
   7: 'direct one-to-one meetings', 8: 'sudden or unusual circumstances', 9: 'higher learning, travel, teachers or faith',
@@ -532,7 +532,7 @@ function base(ctx: Context, domain: DomainId, domainLabel: string, question: str
   };
 }
 
-const COMMON_NOTE = 'These are astrological indications, not certainties. They come from classical rules (house lords, natural significators, planetary periods and the Jupiter–Saturn transit) and are best used as a guide for reflection.';
+const COMMON_NOTE = 'These are astrological indications, not certainties. They come from classical rules (house lords, natural significators, planetary periods and the Jupiter–Saturn transit) and are best used as a guide for reflection. Timing windows below are deliberately limited to the coming 3 years so the guidance stays near-term and actionable.';
 const TRANSIT_NOTE = 'Transit data was unavailable, so the timing relies on planetary periods alone.';
 
 function topEvidence(a: Assessment, n = 6): Evidence[] {
@@ -661,7 +661,7 @@ function marriage(ctx: Context, question: string, focus: Focus): Answer {
   };
   const sigs = significators(ctx, sigSpec);
   const from = addYears(ctx.chart.birthDetails.date, 18);
-  const to = addYears(ctx.today, 15);
+  const to = addYears(ctx.today, 3);
   const options: TimingOptions = { from, to, houses: [7], promiseScore: a.score, upcoming: 3, earlier: 2, min: 0.5, division: plan.division, note: DOUBLE_NOTE('marriage area') };
   a.groups = supportGroups(ctx, sigs, options, { upcoming: 'Likely marriage windows ahead', earlier: 'Earlier windows', blurb: `These are stretches when the planets running your life are closely tied to marriage.${vargaBlurb(plan)}` });
 
@@ -670,7 +670,7 @@ function marriage(ctx: Context, question: string, focus: Focus): Answer {
     ? (timing ?? 'No clearly favourable marriage window appears in the coming years; read the notes below for what to expect.')
     : focus === 'nature' ? `${delay.length ? 'Marriage has both support and pressure; patience and careful partner selection matter. ' : ''}The chart suggests ${style}, with ${traits} themes in the partner description, not a fixed personality prediction.`
       : `${verdict.label} (${a.score}/100). ${timing ?? ''}`.trim();
-  pushTiming(a, timing, 'No strongly favourable marriage window shows up in the next 15 years, so there is no need to feel pressed by the calendar.');
+  pushTiming(a, timing, 'No strongly favourable marriage window shows up in the next 3 years, so there is no need to feel pressed by the calendar.');
   a.notes = [COMMON_NOTE, 'If you are already married, an earlier window that fits your history is a good check on the method. If not, treat future windows as favourable periods rather than fixed dates.'];
   if (!ctx.transits) a.notes.push(TRANSIT_NOTE);
   return a;
@@ -719,7 +719,7 @@ function relationship(ctx: Context, question: string, focus: Focus): Answer {
   const sigs = significators(ctx, { primary: [5, 7], secondary: [11], karakas: [['Venus', 2], ['Moon', 1]], extras: vargaExtras(ctx, plan.division, plan.houses, plan.label) });
   const stress = significators(ctx, { primary: [6, 8, 12], secondary: [], karakas: [['Saturn', 1], ['Rahu', 1], ['Mars', 1]] });
   const from = ctx.today;
-  const to = addYears(ctx.today, 12);
+  const to = addYears(ctx.today, 3);
   const options: TimingOptions = { from, to, houses: [5, 7], promiseScore: score, upcoming: 3, min: 0.5, division: plan.division, note: DOUBLE_NOTE('romance and partnership areas') };
   a.groups = [
     ...supportGroups(ctx, sigs, options, { upcoming: 'Favourable periods for new or deeper relationships', earlier: '', blurb: 'These are stretches when the planets in charge are linked with romance and partnership.' }),
@@ -728,9 +728,9 @@ function relationship(ctx: Context, question: string, focus: Focus): Answer {
   const care = a.groups.find((g) => g.tone === 'caution')?.windows[0];
   const timing = nextSentence('relationship period', a.groups[0].windows);
   a.headline = focus === 'timing'
-    ? (timing ?? 'No distinctly favourable relationship window shows in the next 12 years.')
+    ? (timing ?? 'No distinctly favourable relationship window shows in the next 3 years.')
     : `${a.verdict.label} (${score}/100). ${timing ?? ''}`.trim();
-  pushTiming(a, timing, 'No distinctly favourable relationship period stands out in the next 12 years.');
+  pushTiming(a, timing, 'No distinctly favourable relationship period stands out in the next 3 years.');
   a.plain.push(care ? `Take extra care and communicate openly around ${formatRange(care.start, care.end)}.` : 'No strongly stressful relationship period stands out.');
   a.notes = [COMMON_NOTE];
   if (!ctx.transits) a.notes.push(TRANSIT_NOTE);
@@ -797,7 +797,7 @@ function career(ctx: Context, question: string, focus: Focus): Answer {
   ];
 
   const from = ctx.today;
-  const to = addYears(ctx.today, 12);
+  const to = addYears(ctx.today, 3);
   const options: TimingOptions = { from, to, houses: [10], promiseScore: score, upcoming: 3, min: 0.55, division: plan.division, note: DOUBLE_NOTE('career area') };
   const rise = supportGroups(ctx, sigs, options, { upcoming: 'Career growth windows', earlier: '', blurb: `These are stretches when the planets in charge are strongly tied to career, income and recognition.${vargaBlurb(plan)}` });
   const fall = cautionGroup(ctx, sigs, stress, { ...options, upcoming: 3, min: 0.55, note: PRESSURE_NOTE('career area') }, 'Periods of pressure or change', 'In these stretches the planets tied to endings, hidden matters and effort outweigh the supportive ones. Expect restructuring, delays or transitions rather than certain loss, and use the time to prepare.');
@@ -807,8 +807,8 @@ function career(ctx: Context, question: string, focus: Focus): Answer {
   a.headline = focus === 'riseFall' || focus === 'timing'
     ? `${growth ?? 'No distinctly strong growth window appears soon.'}${nextFall ? ` A more demanding stretch is around ${formatRange(nextFall.start, nextFall.end)}, so plan ahead.` : ''}`
     : `${a.verdict.label} (${score}/100). ${growth ?? ''}`.trim();
-  pushTiming(a, growth, 'No distinctly strong growth window appears in the next 12 years, so steady effort matters more than timing.');
-  a.plain.push(nextFall ? `A more demanding stretch comes around ${formatRange(nextFall.start, nextFall.end)}. That usually means change or extra effort, so it is a good time to build skills and savings.` : 'No strongly demanding career stretch stands out in the next 12 years.');
+  pushTiming(a, growth, 'No distinctly strong growth window appears in the next 3 years, so steady effort matters more than timing.');
+  a.plain.push(nextFall ? `A more demanding stretch comes around ${formatRange(nextFall.start, nextFall.end)}. That usually means change or extra effort, so it is a good time to build skills and savings.` : 'No strongly demanding career stretch stands out in the next 3 years.');
   a.notes = [COMMON_NOTE];
   if (!ctx.transits) a.notes.push(TRANSIT_NOTE);
   return a;
@@ -856,12 +856,12 @@ function property(ctx: Context, question: string, focus: Focus): Answer {
 
   const sigs = significators(ctx, { primary: [4], secondary: [2, 9, 11], karakas: [['Mars', 2], ['Venus', 1], ['Moon', 1]], extras: vargaExtras(ctx, plan.division, plan.houses, plan.label) });
   const from = ctx.today;
-  const to = addYears(ctx.today, 12);
+  const to = addYears(ctx.today, 3);
   const options: TimingOptions = { from, to, houses: [4], promiseScore: score, upcoming: 3, earlier: 0, min: 0.5, division: plan.division, note: DOUBLE_NOTE('home and property area') };
   a.groups = supportGroups(ctx, sigs, options, { upcoming: 'Windows favourable for buying property', earlier: '', blurb: `These are stretches when the planets in charge are tied to home, land and gains.${vargaBlurb(plan)}` });
   const timing = nextSentence('window for property', a.groups[0].windows);
-  a.headline = focus === 'timing' ? (timing ?? 'No strong property window appears within 12 years.') : `${a.verdict.label} (${score}/100). ${timing ?? ''}`.trim();
-  pushTiming(a, timing, 'No strongly favourable property window appears in the next 12 years.');
+  a.headline = focus === 'timing' ? (timing ?? 'No strong property window appears within 3 years.') : `${a.verdict.label} (${score}/100). ${timing ?? ''}`.trim();
+  pushTiming(a, timing, 'No strongly favourable property window appears in the next 3 years.');
   a.notes = [COMMON_NOTE, 'Check your finances, legal title and the market independently. Astrology can point to favourable timing, not guarantee a purchase.'];
   if (!ctx.transits) a.notes.push(TRANSIT_NOTE);
   return a;
@@ -907,13 +907,13 @@ function spiritual(ctx: Context, question: string, focus: Focus): Answer {
 
   const sigs = significators(ctx, { primary: [9, 12], secondary: [5, 8], karakas: [['Ketu', 2], ['Jupiter', 2], ['Saturn', 1]], extras: [[atma, 1, 'Atmakaraka'], ...vargaExtras(ctx, plan.division, plan.houses, plan.label)] });
   const from = ctx.today;
-  const to = addYears(ctx.today, 15);
+  const to = addYears(ctx.today, 3);
   const options: TimingOptions = { from, to, houses: [9, 12], promiseScore: score, upcoming: 3, min: 0.5, division: plan.division, note: DOUBLE_NOTE('wisdom and inner-life areas') };
   a.groups = supportGroups(ctx, sigs, options, { upcoming: 'Periods that deepen spiritual life', earlier: '', blurb: `These are stretches that tend to turn attention inward.${vargaBlurb(plan)}` });
   const timing = nextSentence('period for spiritual deepening', a.groups[0].windows);
-  a.headline = focus === 'timing' ? (timing ?? 'No distinctly strong spiritual window shows in the next 15 years.')
+  a.headline = focus === 'timing' ? (timing ?? 'No distinctly strong spiritual window shows in the next 3 years.')
     : `${a.verdict.label} (${score}/100). ${likely.length ? `The most natural path is ${likely[0][0].split(':')[0]}.` : ''}`.trim();
-  pushTiming(a, timing, 'No distinctly strong spiritual window shows in the next 15 years.');
+  pushTiming(a, timing, 'No distinctly strong spiritual window shows in the next 3 years.');
   a.notes = [COMMON_NOTE];
   if (!ctx.transits) a.notes.push(TRANSIT_NOTE);
   return a;
@@ -959,15 +959,15 @@ function health(ctx: Context, question: string, focus: Focus): Answer {
   const sigs = significators(ctx, { primary: [1], secondary: [], karakas: [['Sun', 2], ['Moon', 1.5], ['Jupiter', 1]], extras: vargaExtras(ctx, plan.division, plan.houses, plan.label) });
   const stress = significators(ctx, { primary: [6, 8], secondary: [12], karakas: [['Mars', 1], ['Saturn', 1], ['Rahu', 0.5]] });
   const from = ctx.today;
-  const to = addYears(ctx.today, 12);
+  const to = addYears(ctx.today, 3);
   const options: TimingOptions = { from, to, houses: [1, 6, 8], promiseScore: a.score, upcoming: 3, min: 0.55, division: plan.division, note: PRESSURE_NOTE('body, health and recovery areas') };
   a.groups = [
     cautionGroup(ctx, sigs, stress, options, 'Periods that call for extra health care', 'In these stretches the planets tied to illness and endings outweigh the vitality planets. Use them for check-ups and prevention, not worry.'),
     ...supportGroups(ctx, sigs, { ...options, houses: [1], note: DOUBLE_NOTE('body and vitality area') }, { upcoming: 'Periods of strong vitality and recovery', earlier: '', blurb: 'These are stretches when the planets of vitality and recovery are in charge.' }),
   ];
   const care = a.groups[0].windows[0];
-  a.headline = `${a.verdict.label} (${a.score}/100). ${care ? `Take extra care around ${formatRange(care.start, care.end)}.` : 'No strongly stressful health period stands out in the next 12 years.'}`;
-  a.plain.push(care ? `A stretch that asks for extra care with health comes around ${formatRange(care.start, care.end)}. Regular check-ups, sleep and moderation help most then.` : 'No strongly stressful health period stands out in the next 12 years.');
+  a.headline = `${a.verdict.label} (${a.score}/100). ${care ? `Take extra care around ${formatRange(care.start, care.end)}.` : 'No strongly stressful health period stands out in the next 3 years.'}`;
+  a.plain.push(care ? `A stretch that asks for extra care with health comes around ${formatRange(care.start, care.end)}. Regular check-ups, sleep and moderation help most then.` : 'No strongly stressful health period stands out in the next 3 years.');
   a.notes = [COMMON_NOTE, 'This is not medical advice. Please consult a qualified doctor for any health concern.'];
   if (!ctx.transits) a.notes.push(TRANSIT_NOTE);
   void focus;
