@@ -40,7 +40,7 @@ export function ConsultationRequestForm({ chart }: { chart: Chart }) {
     fields.question,
     ...(fields.shareBirthDetails ? ['', `Birth chart: ${chart.birthDetails.date} ${chart.birthDetails.localTime}, ${chart.birthDetails.placeName}`] : []),
   ].join('\n');
-  const mailtoHref = `mailto:indrajeetbhattacharya5@gmail.com?subject=${encodeURIComponent(`Private consultation request: ${fields.topic || 'Consultation'}`)}&body=${encodeURIComponent(mailDetails)}`;
+  const mailtoHref = `mailto:ibtnextgen@gmail.com?subject=${encodeURIComponent(`Private consultation request: ${fields.topic || 'Consultation'}`)}&body=${encodeURIComponent(mailDetails)}`;
 
   const update = <K extends keyof RequestFields>(key: K, value: RequestFields[K]) => {
     setFields((current) => ({ ...current, [key]: value }));
@@ -71,7 +71,7 @@ export function ConsultationRequestForm({ chart }: { chart: Chart }) {
   return (
     <section className="card consultation-request">
       <h2>Request a private consultation</h2>
-      <p className="muted small">Your request will be emailed to indrajeetbhattacharya5@gmail.com.</p>
+      <p className="muted small">Your request will be emailed to ibtnextgen@gmail.com.</p>
       <form className="consultation-form" onSubmit={(event) => void submit(event)}>
         <label className="consultation-trap" aria-hidden="true">
           Website
@@ -129,7 +129,7 @@ export function ConsultationRequestForm({ chart }: { chart: Chart }) {
           {busy ? <LoaderCircle className="spin" size={16} /> : <Send size={16} />}
           {busy ? 'Sending…' : 'Send consultation request'}
         </button>
-        <p className="muted small consultation-wide">No SMTP access? <a href={mailtoHref}>Open a prefilled email to indrajeetbhattacharya5@gmail.com</a>, then press Send in your email app.</p>
+        <p className="muted small consultation-wide">Having trouble sending? <a href={mailtoHref}>Open a prefilled email to ibtnextgen@gmail.com</a>, then press Send in your email app.</p>
       </form>
       {message && <p className="consultation-status" role="status">{message}</p>}
       {error && <p className="consultation-status hint-error" role="alert">{error}</p>}

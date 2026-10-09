@@ -3,17 +3,8 @@ server:
 spring:
   application:
     name: celestia-backend
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: ${SMTP_USERNAME:}
-    password: ${SMTP_PASSWORD:}
-    properties:
-      mail.smtp.auth: true
-      mail.smtp.starttls.enable: true
-      mail.smtp.starttls.required: true
-      mail.smtp.connectiontimeout: 10000
-      mail.smtp.timeout: 10000
-      mail.smtp.writetimeout: 10000
 celestia:
   geocoder-url: ${CELESTIA_GEOCODER_URL:https://geocoding-api.open-meteo.com/v1/search}
+  email:
+    apps-script-url: ${GOOGLE_APPS_SCRIPT_URL:}
+    apps-script-token: ${GOOGLE_APPS_SCRIPT_TOKEN:}
