@@ -2,13 +2,16 @@ import { SIGN_LORDS } from '../constants';
 import { rashiAspects } from '../jaiminiYogas';
 import { signStatus } from '../vargas';
 import type { JaiminiYoga } from '../jaiminiYogas';
-import { assessHouse, assessPlanetInfluences, assessVarga, blend, houseFactorSummary, placementComfort, STATUS_TEXT, verdictFor } from './assess';
+import { assessHouse, assessPlanetInfluences, assessVarga, blend, houseFactorSummary, housePlainNote, placementComfort, STATUS_TEXT, verdictFor } from './assess';
 import type { Assessment, Verdict } from './assess';
 import {
   addNavataraPeaks, addPeaks, aspectors, doubleTransit, formatRange, lordOfHouse, occupants, ordinal, planet, saturnPressure,
   scoreWindows, signName, signOfHouse, significators, targetSigns, topWindows, transitIntervals, vargaExtras, vargaHouseOf,
   vargaHouseSign, vargaLord, vargaOccupants, vargaSign, vargaStatus, vargottama, functionalNature, MALEFICS, hasNeechaBhanga, houseKartari,
+  SIGN_TRAITS,
 } from './core';
+
+export { SIGN_TRAITS } from './core';
 import type { Context, Evidence, SigSpec, Sigs, Window } from './core';
 
 export type DomainId = 'marriage' | 'relationship' | 'career' | 'property' | 'spiritual' | 'health';
@@ -47,12 +50,6 @@ export interface Answer {
   transitsUsed: boolean;
 }
 
-export const SIGN_TRAITS = [
-  'energetic, independent and direct', 'steady, sensual and value-minded', 'communicative, curious and youthful',
-  'caring, emotional and home-loving', 'warm, proud and generous', 'practical, analytical and service-minded',
-  'charming, balanced and partnership-oriented', 'intense, private and loyal', 'optimistic, freedom-loving and philosophical',
-  'disciplined, ambitious and reserved', 'unconventional, friendly and independent-minded', 'gentle, imaginative and compassionate',
-];
 export const HOUSE_THEME: Record<number, string> = {
   1: 'your own initiative', 2: 'family circles and finances', 3: 'communication, short trips and siblings',
   4: 'home, family and emotional security', 5: 'romance, creativity and friendships', 6: 'work, service or daily routine',
@@ -303,7 +300,8 @@ interface TimingOptions {
   division?: string;
 }
 
-const DASHA_INTRO = 'Vimshottari and Yogini use planetary main/sub-period lordship, placement, dignity, influences and MD–AD links. Chara adds topic-karaka signs and derived houses (DK and 7th from DK for partnership; AmK and 10th from AmK for career). Agreement is counted only over shared dates, then transits supply secondary corroboration. Scores are heuristics, not event probabilities.';
+/** Kept for the collapsed "astrology behind this answer" section, not shown up front. */
+const DASHA_INTRO = 'These windows are worked out from your planetary periods (Vimshottari, Yogini and Chara dashas) plus Jupiter–Saturn transits. Agreement is counted only over shared dates. Scores are heuristics, not guarantees of an event.';
 const DOUBLE_NOTE = (theme: string) => `Jupiter and Saturn, the two slow-moving planets, are both supporting your ${theme}`;
 const PRESSURE_NOTE = (theme: string) => `Saturn, the planet of pressure and delay, is weighing on your ${theme}`;
 
@@ -315,8 +313,11 @@ function peaksFor(ctx: Context, windows: Window[], o: TimingOptions) {
 }
 
 function promiseTimingNote(score: number): string {
-  const level = score >= 70 ? 'strong' : score >= 55 ? 'good with qualifications' : score >= 40 ? 'mixed, requiring patience' : 'limited, requiring extra care';
-  return `Natal promise is assessed first: ${level} support (${score}/100). Thresholds: 70–100 stronger support, 55–69 good with qualifications, 40–54 mixed/patience, below 40 extra care. Period activation is separate; the timing label cannot exceed this natal support score. Structural cautions may qualify the verdict further.`;
+  const level = score >= 70 ? 'Your chart itself shows strong natural support for this'
+    : score >= 55 ? 'Your chart shows good support for this, with a few things to keep in mind'
+      : score >= 40 ? 'Your chart shows mixed support for this, so patience helps'
+        : 'Your chart shows limited support for this, so it is worth being realistic and giving it extra care';
+  return `${level}. The windows below show when that natural potential is most "switched on" by the planets currently active in your life.`;
 }
 
 function balancedWindows(windows: Window[], count: number, minimum: number): Window[] {
@@ -345,7 +346,7 @@ function supportGroups(ctx: Context, sigs: Sigs, o: TimingOptions, labels: { upc
   for (const window of [...upcoming, ...past]) window.relative = Math.min(window.activationScore ?? 0, o.promiseScore) / 100;
   peaksFor(ctx, upcoming, o);
   peaksFor(ctx, past, o);
-  const groups: WindowGroup[] = [{ title: labels.upcoming, blurb: `${promiseTimingNote(o.promiseScore)} ${DASHA_INTRO} ${labels.blurb}${missing.length ? ` No window reached the selection threshold for ${missing.join(', ')} in this horizon, or its period data is unavailable; this is not a denial.` : ''}`, tone: 'good', windows: upcoming }];
+  const groups: WindowGroup[] = [{ title: labels.upcoming, blurb: `${promiseTimingNote(o.promiseScore)} ${labels.blurb}${missing.length ? ` A couple of the timing methods did not flag a clear window in this period — that is not a bad sign, it just means they had nothing strong to add here.` : ''}`, tone: 'good', windows: upcoming }];
   if (past.length) groups.push({ title: labels.earlier, blurb: 'Stretches in the past that fit the same pattern. Compare them with your own history to see how well the method fits you.', tone: 'good', windows: past });
   explain(groups, () => sigs);
   return groups;
@@ -466,12 +467,52 @@ function vargaPlain(ctx: Context, plan: VargaPlan, theme: string, assessment: As
       mitigations.set(source, [...new Set([...(mitigations.get(source) ?? []), position.name])]);
     }
   }
-  const mitigation = [...mitigations].slice(0, 2).map(([source, receivers]) => `${STATUS_TEXT[vargaStatus(ctx, source, plan.division)]} ${source} supports debilitated ${receivers.join(' and ')}`).join('; ');
-  const factors = plan.houses.map((house) => houseFactorSummary(ctx, house, plan.division)).join(' ');
-  return `${plan.label} (${plan.division}): ${mood}. ${factors}${mitigation ? ` Elsewhere in this division, ${mitigation}; mitigation does not erase debility.` : ''}`;
+  const mitigation = [...mitigations].slice(0, 2).map(([source, receivers]) => `a well-placed ${source} lends some support to a weaker ${receivers.join(' and ')}`).join('; ');
+  const factors = plan.houses.map((house) => housePlainNote(ctx, house, plan.division, theme)).join(' ');
+  return `${plan.label} (a deeper chart used for ${theme}): ${mood}. ${factors}${mitigation ? ` Elsewhere in this chart, ${mitigation} — though that help does not fully cancel out the strain.` : ''}`;
 }
 
 const vargaBlurb = (plan: VargaPlan) => ` Each planet's strength in your ${plan.label} chart is also taken into account.`;
+
+/** Domain-specific closing verdicts, so marriage, career, health etc. each read in their own words instead of one recycled template. */
+const DOMAIN_CONCLUSIONS: Record<DomainId, { qualify: string; both: string; mixed: string; clear: string }> = {
+  marriage: {
+    qualify: 'your main chart and your Navamsa (the chart that shows how a marriage really matures) both show some real pressure around married life',
+    both: 'Both your main chart and your Navamsa show real caution around married life. That does not mean it cannot work — it means patience, honest communication and realistic expectations will matter more than hoping things settle on their own.',
+    mixed: 'Your main chart and your Navamsa do not fully agree on married life: one side looks easier than the other, so lean on the stronger side while giving the weaker one extra care — usually through communication and shared expectations.',
+    clear: 'Neither your main chart nor your Navamsa raises the warning signs checked here for marriage — a good sign, though a happy marriage still takes ongoing effort from both partners.',
+  },
+  relationship: {
+    qualify: 'your main chart and your Navamsa both show some real pressure around forming close bonds',
+    both: 'Both your main chart and your Navamsa show real caution around close relationships. That does not mean bonding cannot happen — it means giving people time to earn your trust and not rushing emotional commitments.',
+    mixed: 'Your main chart and your Navamsa do not fully agree on relationships: one side looks easier than the other, so lean on the stronger side while being a little more patient where the weaker side shows up.',
+    clear: 'Neither chart layer raises the warning signs checked here for relationships — a good sign for forming healthy bonds, though trust and compatibility still need to be built over time.',
+  },
+  career: {
+    qualify: 'your main chart and your Dasamsa (the chart of profession and public standing) both show some real pressure around your career path',
+    both: 'Both your main chart and your Dasamsa show real caution about your career path. That does not mean success is out of reach — it means steady effort, skill-building and patience will matter more than lucky breaks.',
+    mixed: 'Your main chart and your Dasamsa do not fully agree on career: one shows an easier path than the other, so lean on the stronger side while putting extra effort into the area that looks weaker.',
+    clear: 'Neither your main chart nor your Dasamsa raises the warning signs checked here for career — a good sign for professional growth, though real success still depends on consistent effort.',
+  },
+  property: {
+    qualify: 'your main chart and your Chaturthamsa (the chart of home and property) both show some real pressure around property matters',
+    both: 'Both your main chart and your Chaturthamsa show real caution around acquiring or holding property. That does not mean it will not happen — it means careful planning, legal diligence and patience matter more than rushing into a purchase.',
+    mixed: 'Your main chart and your Chaturthamsa do not fully agree on property matters: one side looks easier than the other, so lean on the stronger side while being extra careful — especially with paperwork and timing — on the weaker one.',
+    clear: 'Neither chart layer raises the warning signs checked here for property and home — a good sign, though due diligence always helps when buying or building.',
+  },
+  spiritual: {
+    qualify: 'your main chart and your Vimshamsa (the chart of spiritual practice) both show some real pressure here',
+    both: 'Both your main chart and your Vimshamsa show real caution here. That does not mean a spiritual path is closed to you — it means consistency and patience in practice will matter more than seeking quick results.',
+    mixed: 'Your main chart and your Vimshamsa do not fully agree on your spiritual life: one side looks easier than the other, so lean on the stronger side while being gentle with yourself about the parts that take longer to develop.',
+    clear: 'Neither chart layer raises the warning signs checked here for spiritual growth — a good sign, though steady practice still shapes how deep it goes.',
+  },
+  health: {
+    qualify: 'your main chart and your Trimsamsa (the chart of bodily weak points) both show some real pressure around health',
+    both: 'Both your main chart and your Trimsamsa show real caution about health. That does not mean trouble is guaranteed — it means preventive care, routine check-ups and a steady lifestyle matter more than ignoring small warning signs.',
+    mixed: 'Your main chart and your Trimsamsa do not fully agree on health: one side looks easier than the other, so lean on the stronger side while paying closer attention — through check-ups and healthy habits — to the weaker one.',
+    clear: 'Neither chart layer raises the warning signs checked here for health — a good sign, though a healthy lifestyle is always worth keeping up.',
+  },
+};
 
 export function synthesizeAnswer(ctx: Context, answer: Answer): Answer {
   const plan = PLANS[answer.domain];
@@ -495,25 +536,27 @@ export function synthesizeAnswer(ctx: Context, answer: Answer): Answer {
     answer.verdict = { label: `${answer.domainLabel}: support with significant cautions`, tone: 'neutral' };
     answer.headline = `${answer.verdict.label}. ${answer.headline}`;
     answer.plain = answer.plain.map((text) => text.startsWith('Overall ')
-      ? `The integrated reading needs qualification because both D1 and ${plan.division} carry structural pressures. ${text.replace(/\b(strong|good) support\b/, 'qualified support')}` : text);
+      ? `This needs a little qualification: ${DOMAIN_CONCLUSIONS[answer.domain].qualify}, so treat it as a mixed signal rather than a sure thing. ${text.replace(/\b(strong|good) support\b/, 'qualified support')}` : text);
   }
+  const domainConclusion = DOMAIN_CONCLUSIONS[answer.domain];
   const conclusion = mainPressure && divisionPressure
-    ? `D1 and ${plan.division} both carry structural cautions; supportive dignity, yogas or timing must not erase them.`
+    ? domainConclusion.both
     : mainPressure || divisionPressure
-      ? `D1 and ${plan.division} differ in ease: preserve the strengths while addressing the weaker layer.`
-      : 'Neither layer has the structural cautions checked here; this does not imply an effortless or certain outcome.';
+      ? domainConclusion.mixed
+      : domainConclusion.clear;
   const unique = (items: Evidence[]) => [...new Map(items.map((item) => [item.text, item])).values()];
   const extraPlain = answer.plain.filter((text) => !/^(Overall |D1 \d|I also checked|Navamsa \(D9\)|Dasamsa \(D10\)|Chaturthamsa \(D4\)|Vimshamsa \(D20\)|Trimsamsa \(D30\)|Marriage needs a qualified reading|The checks of the 7th lord)/.test(text)
     && !answer.headline.includes(text)
     && !answer.groups.some((group) => group.tone === 'caution' && group.windows.some((window) => text.includes(formatRange(window.start, window.end)))));
+  const houseTechnicalNotes = PRIMARY_HOUSES[answer.domain].map((house) => houseFactorSummary(ctx, house));
   answer.plain = [
-    `Integrated ${answer.domainLabel.toLowerCase()} assessment: ${conclusion}`,
-    ...PRIMARY_HOUSES[answer.domain].map((house) => houseFactorSummary(ctx, house)),
+    `In short, for ${answer.domainLabel.toLowerCase()}: ${conclusion}`,
+    ...PRIMARY_HOUSES[answer.domain].map((house) => housePlainNote(ctx, house, undefined, HOUSE_THEME[house] ?? answer.domainLabel.toLowerCase())),
     vargaPlain(ctx, plan, answer.domainLabel.toLowerCase(), division),
     ...extraPlain,
   ];
   answer.plain = [...new Set(answer.plain)];
-  answer.technical = [...new Set([...answer.technical, ...evidence.map((item) => item.text), ...answer.evidence.map((item) => item.text)])];
+  answer.technical = [...new Set([DASHA_INTRO, ...answer.technical, ...houseTechnicalNotes, ...evidence.map((item) => item.text), ...answer.evidence.map((item) => item.text)])];
   answer.evidence = unique(answer.evidence);
   const repeatedVerdict = `${answer.verdict.label} (${answer.score}/100).`;
   if (answer.headline.startsWith(repeatedVerdict) && answer.headline.length > repeatedVerdict.length) answer.headline = answer.headline.slice(repeatedVerdict.length).trim();
@@ -634,7 +677,7 @@ function marriage(ctx: Context, question: string, focus: Focus): Answer {
     `Overall your chart gives ${promiseWord(verdict)} support for marriage (${a.score} out of 100, a rule-based summary rather than a probability)${delay.length ? ', with important qualifications' : ''}. Astrologers judge marriage mainly through the 7th house, the area of partnership. In your chart it falls in ${signName(sign7)}, and its ruling planet ${lord7} is ${dignityNote(ctx, lord7)}, ${strengthWord(ctx, lord7)} overall, and sits in the area of ${HOUSE_MEANING[lord7Pos.house]}.`,
     vargaPlain(ctx, plan, 'marriage', v),
     interchart.summary,
-    ...(mangal ? [bhanga ? 'Mangal Dosha has cancellation factors that mitigate the Mars-specific concern; they do not cancel separate weaknesses of the 7th lord, Venus or D9.' : 'Your chart has Mangal Dosha, a Mars influence that traditionally asks for care in marriage. Many families look for a partner with a similar chart, and it is not a reason for alarm.'] : []),
+    ...(mangal ? [bhanga ? 'Your chart has Mangal Dosha (a Mars influence some families check for), but other placements in your chart soften it, so it is less of a concern here. That said, the marriage area still has some separate strain worth keeping in mind, as noted above.' : 'Your chart has Mangal Dosha, a Mars influence that traditionally asks for care in marriage. Many families look for a partner with a similar chart, and it is not a reason for alarm.'] : []),
   ];
   a.natureTitle = 'What to expect';
   a.nature = [

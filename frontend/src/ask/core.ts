@@ -72,6 +72,14 @@ export const MALEFICS = ['Saturn', 'Mars', 'Sun', 'Rahu', 'Ketu'];
 export const ordinal = (n: number) => (n === 1 ? '1st' : n === 2 ? '2nd' : n === 3 ? '3rd' : `${n}th`);
 export const signName = (n: number) => SIGN_NAMES[n - 1];
 
+/** Plain-language personality flavour of each sign (Aries..Pisces), used to translate placements into everyday meaning. */
+export const SIGN_TRAITS = [
+  'energetic, independent and direct', 'steady, sensual and value-minded', 'communicative, curious and youthful',
+  'caring, emotional and home-loving', 'warm, proud and generous', 'practical, analytical and service-minded',
+  'charming, balanced and partnership-oriented', 'intense, private and loyal', 'spontaneous, free-spirited and philosophical',
+  'disciplined, ambitious and reserved', 'unconventional, friendly and independent-minded', 'gentle, imaginative and compassionate',
+];
+
 export function planet(ctx: Context, name: string): Position {
   return ctx.chart.planets.find((p) => p.name === name)!;
 }

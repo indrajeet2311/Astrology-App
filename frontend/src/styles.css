@@ -205,6 +205,11 @@ button:disabled { cursor: not-allowed; opacity: 0.65; }
 .chart-house.is-asc { fill: rgba(226, 184, 87, 0.13); }
 .chart-house-interactive { cursor: pointer; transition: fill 120ms ease, stroke-width 120ms ease; }
 .chart-house-interactive:hover, .chart-house-interactive:focus-visible { fill: rgba(226, 184, 87, 0.2); stroke-width: 2.5; outline: none; }
+/* The clickable house is an <svg><g role="button" tabIndex={0}> — browsers draw a default
+   rectangular focus ring around it on click/focus. Suppress that and let the polygon/rect's
+   own :focus-visible fill (above) show the selection instead, so no stray box appears. */
+.chart-svg g[role='button'] { outline: none; }
+.chart-svg g[role='button']:focus { outline: none; }
 .house-view-note { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; text-align: center; }
 .house-view-note .button-ghost { width: auto; padding: 4px 8px; }
 .chart-sign { fill: var(--muted); font-size: 12px; }

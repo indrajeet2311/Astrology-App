@@ -1,6 +1,9 @@
 package com.celestia.astro.service;
 
+import com.celestia.astro.model.ChartLeadRequest;
 import com.celestia.astro.model.ConsultationRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -12,6 +15,7 @@ import java.util.Map;
 
 @Service
 public class ConsultationEmailService {
+  private static final Logger log = LoggerFactory.getLogger(ConsultationEmailService.class);
   private static final String RECIPIENT = "ibtnextgen@gmail.com";
 
   private final RestClient resendClient;
@@ -43,6 +47,38 @@ public class ConsultationEmailService {
     } catch (RestClientException e) {
       throw new ConsultationDeliveryException("The consultation request could not be delivered.", e);
     }
+  }
+
+  /**
+   * Best-effort notification sent whenever a visitor generates a chart. Unlike {@link #send},
+   * failures (missing config, network issues) are only logged, never thrown — a chart lead
+   * email is a nice-to-have and must never block or fail the chart calculation itself.
+   */
+  public void sendChartLead(ChartLeadRequest lead) {
+    if (resendClient == null || !StringUtils.hasText(fromAddress)) {
+      log.debug("Chart lead email skipped: email delivery is not configured.");
+      return;
+    }
+    try {
+      resendClient.post().uri("/emails")
+          .body(Map.of(
+              "from", fromAddress,
+              "to", List.of(RECIPIENT),
+              "subject", "New chart generated on NextGenAstro",
+              "text", chartLeadBody(lead)))
+          .retrieve().toBodilessEntity();
+    } catch (RestClientException e) {
+      log.warn("Chart lead email delivery failed", e);
+    }
+  }
+
+  private static String chartLeadBody(ChartLeadRequest lead) {
+    return "A visitor just generated a birth chart on NextGenAstro.\n\n"
+        + "Name: " + (StringUtils.hasText(lead.name()) ? lead.name() : "Not provided") + '\n'
+        + "Date of birth: " + lead.date() + '\n'
+        + "Time of birth: " + lead.time() + '\n'
+        + "Birthplace: " + lead.placeName() + '\n'
+        + "Timezone: " + (StringUtils.hasText(lead.timeZone()) ? lead.timeZone() : "Unknown");
   }
 
   private static String body(ConsultationRequest request) {

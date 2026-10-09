@@ -38,6 +38,27 @@ export function calculateChart(payload: BirthPayload): Promise<Chart> {
   });
 }
 
+/**
+ * Fire-and-forget notification sent whenever a visitor generates a chart. Never throws and
+ * never blocks the caller: the chart-calculation flow must succeed regardless of whether this
+ * notification is delivered.
+ */
+export function notifyChartLead(payload: BirthPayload): void {
+  fetch('/api/leads/chart', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: payload.name,
+      date: payload.date,
+      time: payload.time,
+      placeName: payload.placeName,
+      timeZone: payload.timeZone,
+    }),
+  }).catch(() => {
+    // Intentionally ignored: this is a best-effort notification, not user-facing.
+  });
+}
+
 export function matchCharts(bride: BirthPayload, groom: BirthPayload): Promise<KundliMatch> {
   return request<KundliMatch>('/api/chart/match', {
     method: 'POST',

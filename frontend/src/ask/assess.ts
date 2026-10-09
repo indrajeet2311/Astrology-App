@@ -1,10 +1,12 @@
 import {
   planet, lordOfHouse, occupants, aspectors, ordinal, hasNeechaBhanga, BENEFICS, MALEFICS, vargaLord, vargaHouseOf,
   vargaOccupants, vargaStatus, vargottama, functionalNature, housesRuledBy, houseKartari, vargaAspectors, vargaSign, signName, signOfHouse, vargaHouseSign,
+  SIGN_TRAITS,
 } from './core';
 import type { Context, Evidence } from './core';
 import { signStatus } from '../vargas';
 import { SIGN_LORDS } from '../constants';
+import { comboMeaning } from '../planetCombos';
 
 export interface Assessment {
   /** 5-95; 50 is neutral. */
@@ -41,6 +43,48 @@ function dignityStatus(ctx: Context, name: string, division?: string): string {
   return position.dignity === 'DEBILITATED' ? 'Debilitated' : position.dignity === 'EXALTED' ? 'Exalted'
     : position.dignity === 'OWN' ? 'Own' : ['Rahu', 'Ketu'].includes(name) ? 'Node'
       : signStatus(position, ctx.relations)?.compound ?? 'Sama';
+}
+
+/**
+ * Everyday-language note about a house and its ruling planet, with no lordship/aspect jargon.
+ * This is what gets shown to the reader up front; the technical version (houseFactorSummary)
+ * stays in the "astrology behind this answer" section for people who want the detail.
+ */
+export function housePlainNote(ctx: Context, house: number, division: string | undefined, theme: string): string {
+  const sign = division ? vargaHouseSign(ctx, division, house) : signOfHouse(ctx, house);
+  const lord = division ? vargaLord(ctx, division, house) : lordOfHouse(ctx, house);
+  const lordSign = division ? vargaSign(ctx, lord, division) : planet(ctx, lord).signNumber;
+  const lordHouse = division ? vargaHouseOf(ctx, lord, division) : planet(ctx, lord).house;
+  const status = dignityStatus(ctx, lord, division);
+  const strong = ['Exalted', 'Own', 'Adhi Mitra', 'Mitra'].includes(status);
+  const weak = ['Debilitated', 'Shatru', 'Adhi Shatru'].includes(status);
+  const here = (division ? vargaOccupants(ctx, division, house) : occupants(ctx, house)).filter((name) => name !== lord);
+  const flavour = SIGN_TRAITS[lordSign - 1];
+  const tone = strong
+    ? 'which usually works in your favour here'
+    : weak
+      ? 'which can mean extra effort or delay before this area of life settles'
+      : 'which gives a steady, middle-of-the-road feel rather than a dramatic one';
+  // Conjunction: planets sharing the lord's house. Use the canned meaning when we have one,
+  // otherwise fall back to a generic mention so nothing reads as empty.
+  const companyHit = here.map((other) => ({ other, meaning: comboMeaning(lord, other) })).find((item) => item.meaning);
+  const company = here.length
+    ? companyHit
+      ? ` ${lord} shares this space with ${here.join(' and ')} — ${companyHit.meaning}.`
+      : ` This part of the chart also has ${here.join(' and ')} nearby, which adds its own flavour.`
+    : '';
+  // Aspect: a planet elsewhere in the chart casting its gaze on the lord's house. Name the
+  // exact aspect (e.g. Saturn's 10th, Mars's 4th, everyone's 7th) so it reads as a real,
+  // checkable fact rather than vague "reaches in from elsewhere" language.
+  const sourceHouseOf = (name: string) => (division ? vargaHouseOf(ctx, name, division) : planet(ctx, name).house);
+  const aspecting = (division ? vargaAspectors(ctx, division, lordHouse) : aspectors(ctx, lordHouse)).filter((name) => name !== lord && !here.includes(name));
+  const aspectHit = aspecting
+    .map((other) => ({ other, distance: ((lordHouse - sourceHouseOf(other) + 12) % 12) + 1, meaning: comboMeaning(lord, other) }))
+    .find((item) => item.meaning);
+  const aspectNote = aspectHit
+    ? ` ${aspectHit.other}'s ${ordinal(aspectHit.distance)}-house aspect also lands here — ${aspectHit.meaning}.`
+    : '';
+  return `The part of your chart linked to ${theme} falls in ${signName(sign)}. It is guided by ${lord}, who sits in ${signName(lordSign)} — ${flavour} — ${tone}.${company}${aspectNote}`;
 }
 
 function lordshipLabel(ctx: Context, name: string, division?: string): string {
