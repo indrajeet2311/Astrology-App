@@ -29,6 +29,7 @@ import { ChartResults } from './components/ChartResults';
 import { SavedCharts } from './components/SavedCharts';
 import { DailyPanchang } from './components/DailyPanchang';
 import { FestivalCalendarCard } from './components/FestivalCalendarCard';
+import { SeoKnowledgeFaq } from './components/SeoKnowledgeFaq';
 import { ConsultationsInboxModal } from './components/ConsultationsInboxModal';
 import { AuthModal } from './components/AuthModal';
 import { ClientVaultModal } from './components/ClientVaultModal';
@@ -170,7 +171,11 @@ export function App() {
 
   return (
     <div className="page">
-      <div className="brand-wrap">
+      <a href="#main-content" className="skip-to-content">
+        Skip to main content
+      </a>
+
+      <header className="brand-wrap">
         <nav className="brand" aria-label="NextGenAstro">
           <span className="brand-mark" aria-hidden>✦</span>
           <span className="brand-name">NextGen<span className="brand-accent">Astro</span></span>
@@ -283,7 +288,7 @@ export function App() {
             </div>
           )}
         </div>
-      </div>
+      </header>
 
       {/* Admin Consultation Inbox Modal (Only if admin) */}
       {user?.role === 'admin' && (
@@ -315,7 +320,7 @@ export function App() {
 
       <PwaControls />
 
-      <main>
+      <main id="main-content">
         {chart ? (
           <ChartResults
             chart={chart}
@@ -372,6 +377,7 @@ export function App() {
 
             <DailyPanchang />
             <FestivalCalendarCard />
+            <SeoKnowledgeFaq />
           </>
         )}
       </main>
