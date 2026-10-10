@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { LoaderCircle, Send } from 'lucide-react';
-import { submitConsultation } from '../api';
+import { Send } from 'lucide-react';
 import type { Chart } from '../types';
 
 type RequestFields = {
@@ -23,9 +22,6 @@ const EMPTY: RequestFields = {
 
 export function ConsultationRequestForm({ chart }: { chart: Chart }) {
   const [fields, setFields] = useState(EMPTY);
-  const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
 
   const mailDetails = [
     `Name: ${fields.name}`,
@@ -44,35 +40,18 @@ export function ConsultationRequestForm({ chart }: { chart: Chart }) {
 
   const update = <K extends keyof RequestFields>(key: K, value: RequestFields[K]) => {
     setFields((current) => ({ ...current, [key]: value }));
-    setMessage('');
-    setError('');
   };
 
-  const submit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const submit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setBusy(true);
-    setMessage('');
-    setError('');
-    try {
-      const result = await submitConsultation({
-        ...fields,
-        birthDate: chart.birthDetails.date,
-        birthTime: chart.birthDetails.localTime,
-        birthPlace: chart.birthDetails.placeName,
-      });
-      setMessage(result.message);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Your request could not be sent. Please try again.');
-    } finally {
-      setBusy(false);
-    }
+    window.location.href = mailtoHref;
   };
 
   return (
     <section className="card consultation-request">
       <h2>Request a private consultation</h2>
-      <p className="muted small">Your request will be emailed to ibtnextgen@gmail.com.</p>
-      <form className="consultation-form" onSubmit={(event) => void submit(event)}>
+      <p className="muted small">Submit to open a prefilled email to ibtnextgen@gmail.com. Review the draft and press Send in your email app.</p>
+      <form className="consultation-form" onSubmit={submit}>
         <label className="consultation-trap" aria-hidden="true">
           Website
           <input tabIndex={-1} autoComplete="off" value={fields.website} onChange={(event) => update('website', event.target.value)} />
@@ -125,14 +104,11 @@ export function ConsultationRequestForm({ chart }: { chart: Chart }) {
           <input type="checkbox" checked={fields.shareBirthDetails} onChange={(event) => update('shareBirthDetails', event.target.checked)} />
           <span>Include this chart's birth date, time and place in the request.</span>
         </label>
-        <button type="submit" className="button-primary consultation-wide" disabled={busy}>
-          {busy ? <LoaderCircle className="spin" size={16} /> : <Send size={16} />}
-          {busy ? 'Sending…' : 'Send consultation request'}
+        <button type="submit" className="button-primary consultation-wide">
+          <Send size={16} />
+          Open prefilled email
         </button>
-        <p className="muted small consultation-wide">Having trouble sending? <a href={mailtoHref}>Open a prefilled email to ibtnextgen@gmail.com</a>, then press Send in your email app.</p>
       </form>
-      {message && <p className="consultation-status" role="status">{message}</p>}
-      {error && <p className="consultation-status hint-error" role="alert">{error}</p>}
     </section>
   );
 }
