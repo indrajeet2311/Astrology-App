@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NextGenAstro - Vedic Astrology</title>
+    <meta
+      name="description"
+      content="NextGenAstro turns your birth details into an accurate Vedic birth chart and answers your questions about marriage, career, property, relationships, spirituality and health."
+    />
+    <meta
+      name="keywords"
+      content="vedic astrology, kundli calculator, birth chart, janam kundali online, horoscope matching, shodashvarga, navamsha d9, vimshottari dasha, panchang, sade sati, astrologer consultation, d1 rashi chart"
+    />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="author" content="NextGenAstro" />
+    <meta name="theme-color" content="#0b0d1f" />
+
+    <!-- PWA & Mobile Web App Meta -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" type="image/png" href="/icons/icon-192.png" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="NextGenAstro" />
+
+    <!-- OpenGraph Social Metadata -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="NextGenAstro" />
+    <meta property="og:title" content="NextGenAstro - Vedic Astrology" />
+    <meta
+      property="og:description"
+      content="NextGenAstro turns your birth details into an accurate Vedic birth chart and answers your questions about marriage, career, property, relationships, spirituality and health."
+    />
+    <meta property="og:image" content="/icons/icon-512.png" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta property="og:image:alt" content="NextGenAstro - Vedic Astrology and Kundli Calculator" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter / X Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="NextGenAstro - Vedic Astrology" />
+    <meta
+      name="twitter:description"
+      content="NextGenAstro turns your birth details into an accurate Vedic birth chart and answers your questions about marriage, career, property, relationships, spirituality and health."
+    />
+    <meta name="twitter:image" content="/icons/icon-512.png" />
+    <meta name="twitter:image:alt" content="NextGenAstro - Vedic Astrology and Kundli Calculator" />
+
+    <!-- Schema.org Structured Data: WebApplication -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "NextGenAstro",
+      "applicationCategory": "LifestyleApplication",
+      "operatingSystem": "All",
+      "description": "NextGenAstro turns your birth details into an accurate Vedic birth chart and answers your questions about marriage, career, property, relationships, spirituality and health.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "featureList": [
+        "Vedic Birth Chart (Kundli) calculation with Swiss Ephemeris accuracy",
+        "North Indian and South Indian chart views",
+        "16 Divisional Charts (Shodashvarga D1 to D60)",
+        "Vimshottari Dasha calculation with sub-periods",
+        "Daily Panchang and Hindu Festival Calendar",
+        "Sade Sati, transit analysis, and Ashtakavarga scores",
+        "High-resolution PNG Kundli chart download",
+        "Permanent Cloud Vault and local chart storage"
+      ]
+    }
+    </script>
+
+    <!-- Schema.org Structured Data: FAQPage -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How does NextGenAstro calculate my Vedic Kundli?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "NextGenAstro uses high-precision ephemeris algorithms and the Chitrapaksha (Lahiri) Ayanamsa to calculate planetary coordinates, ascendant (Lagna), and house cusps based on your exact date, time, and geographical coordinates."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I view both North and South Indian chart styles?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes! You can instantly switch between the North Indian diamond layout and the South Indian fixed-zodiac square grid layout, complete with house numbers and planetary glyphs."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Are my saved charts kept permanently?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Charts saved on your device are stored permanently in local browser storage, and registered users have permanent backup in their secure Cloud Vault with zero expiration."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I export and download my Kundli as an image?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, you can generate and download high-resolution PNG charts directly to your device with one click, perfect for printing or sharing."
+          }
+        }
+      ]
+    }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
