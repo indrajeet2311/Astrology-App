@@ -31,6 +31,10 @@ npm run dev
 
 The Vite dev server (http://localhost:5173) proxies `/api` to `http://localhost:8080`, so start the backend first.
 
+The deployable UI lives in `frontend/`. It includes client registration and sign-in, the private chart vault, admin access and the consultation inbox. Configure the Vercel project root as `frontend` and set `VITE_API_BASE_URL` to the public Render backend URL. Keep the Render service using `backend/Dockerfile`.
+
+Set `ADMIN_PASSKEY` in Render to enable the Astrologer Admin sign-in. Client accounts and saved charts are stored as JSON below `CELESTIA_DATA_DIR` (defaults to `./data`); attach a Render persistent disk and point this variable at its mount path if this data must survive service redeploys.
+
 ## Place search
 
 Birthplaces are searched through the free [Open-Meteo geocoding API](https://open-meteo.com/en/docs/geocoding-api), which returns coordinates and an IANA timezone with no API key. Celestia skips any result without a timezone and never guesses one.

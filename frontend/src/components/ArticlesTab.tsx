@@ -28,14 +28,14 @@ const ARTICLES = [
   {
     category: 'Planetary patterns',
     title: 'Yogas are patterns, not guarantees',
-    summary: 'A yoga is a combination of placements that traditional astrology associates with a theme. Its expression depends on the planets involved, their strength, the rest of the chart and the periods being activated. Treat it as context, not a promise.',
+    summary: 'A yoga is a classical combination of placements associated with a theme. Its expression depends on the planets involved, their strength, the rest of the chart and the running periods being activated.',
     terms: 'Raja Yoga · Dhana Yoga · Jaimini',
   },
   {
-    category: 'Everyday life',
-    title: 'Bringing chart insights into everyday life',
-    summary: 'Use the chart’s themes as a starting point for reflection. Consider the wider chart, the current planetary periods and how each theme connects with your goals and lived experience.',
-    terms: 'Patterns · Timing · Personal goals',
+    category: 'Wellbeing',
+    title: 'Using astrology for personal insight',
+    summary: 'Astrology offers deep personal insight and cultural wisdom, helping you explore your natural strengths, cosmic rhythms and life themes.',
+    terms: 'Insight · Rhythms · Self-awareness',
   },
 ];
 

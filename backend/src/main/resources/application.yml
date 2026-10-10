@@ -7,6 +7,7 @@ spring:
 
 celestia:
   geocoder-url: ${CELESTIA_GEOCODER_URL:https://geocoding-api.open-meteo.com/v1/search}
+  data-dir: ${CELESTIA_DATA_DIR:./data}
   email:
     apps-script-url: ${GOOGLE_APPS_SCRIPT_URL:}
     apps-script-token: ${GOOGLE_APPS_SCRIPT_TOKEN:}

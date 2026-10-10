@@ -29,6 +29,8 @@ import { SouthIndianChart } from './SouthIndianChart';
 import { KundliMatchCard } from './KundliMatchCard';
 import { payloadFromChart } from '../savedCharts';
 import type { SaveResult, SavedChart } from '../savedCharts';
+import { SaveChartDialog } from './SaveChartDialog';
+import type { AuthUser } from '../api';
 import { downloadChartAsPng } from '../exportChartPng';
 
 type Style = 'north' | 'south';
@@ -55,7 +57,20 @@ const DIVISIONS = [
 ] as const;
 type Division = (typeof DIVISIONS)[number]['code'];
 
-export function ChartResults({ chart, onBack, onSave, savedCharts, onMatch, onTransitDateChange, transitLoading, transitError, onShare }: {
+export function ChartResults({
+  chart,
+  onBack,
+  onSave,
+  savedCharts,
+  onMatch,
+  onTransitDateChange,
+  transitLoading,
+  transitError,
+  onShare,
+  user,
+  onRequestAuth,
+  onCloudSaveSuccess,
+}: {
   chart: Chart;
   onBack: () => void;
   onSave: (chart: Chart) => SaveResult;
@@ -65,6 +80,9 @@ export function ChartResults({ chart, onBack, onSave, savedCharts, onMatch, onTr
   transitLoading: boolean;
   transitError: string;
   onShare: (chart: Chart) => Promise<void>;
+  user?: AuthUser | null;
+  onRequestAuth?: () => void;
+  onCloudSaveSuccess?: () => void;
 }) {
   const [style, setStyle] = useState<Style>('north');
   const [activeTab, setActiveTab] = useState<ResultsTab>('birth');
@@ -73,6 +91,7 @@ export function ChartResults({ chart, onBack, onSave, savedCharts, onMatch, onTr
   const [viewAscSign, setViewAscSign] = useState<number | null>(null);
   const [dashaSystem, setDashaSystem] = useState<DashaSystem>('Vimshottari');
   const [saveMessage, setSaveMessage] = useState('');
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [exportError, setExportError] = useState('');
   const shown = useMemo(() => divisionalChart(chart, division), [chart, division]);
   const chartView = useMemo(() => chartFromAscendantSign(shown, viewAscSign ?? shown.ascendant.signNumber), [shown, viewAscSign]);
@@ -93,18 +112,23 @@ export function ChartResults({ chart, onBack, onSave, savedCharts, onMatch, onTr
     { label: 'Sun sign', value: sun?.sign, sign: sun?.signNumber, detail: sun ? `${sun.nakshatra} · pada ${sun.pada}` : '' },
   ];
 
+  const [exportingPng, setExportingPng] = useState(false);
+
   const exportChart = async () => {
     setExportError('');
+    setExportingPng(true);
     try {
-      const activeDiv = DIVISIONS.find((d) => d.code === division);
       await downloadChartAsPng({
         chart: chartView,
         division,
-        divisionName: activeDiv ? activeDiv.name : division,
+        divisionName,
         style,
       });
-    } catch {
-      setExportError('Could not export the chart image. Use Print to save as PDF.');
+      setSaveMessage('High-resolution Kundli PNG downloaded successfully.');
+    } catch (err: any) {
+      setExportError(err?.message || 'Could not export the chart image. Use Print to save as PDF.');
+    } finally {
+      setExportingPng(false);
     }
   };
 
@@ -122,11 +146,11 @@ export function ChartResults({ chart, onBack, onSave, savedCharts, onMatch, onTr
           <ArrowLeft size={17} /> Edit details
         </button>
         <div className="toolbar-actions">
-          <button type="button" className="button-ghost" onClick={() => setSaveMessage(onSave(chart).message ?? '')}>
+          <button type="button" className="button-ghost" onClick={() => setSaveDialogOpen(true)}>
             <Save size={17} /> Save chart
           </button>
-          <button type="button" className="button-ghost" onClick={exportChart}>
-            <Download size={17} /> PNG
+          <button type="button" className="button-ghost" onClick={exportChart} disabled={exportingPng} title="Download high-resolution Kundli PNG">
+            <Download size={17} /> {exportingPng ? 'Generating...' : 'PNG'}
           </button>
           <button type="button" className="button-ghost" onClick={() => void onShare(chart).then(() => { setExportError(''); setSaveMessage('Share link copied to clipboard.'); }).catch(() => setExportError('Could not copy the share link.'))}>
             <LinkIcon size={17} /> Share link
@@ -184,7 +208,7 @@ export function ChartResults({ chart, onBack, onSave, savedCharts, onMatch, onTr
           <h2>Consultation with an astrologer</h2>
           <p className="muted">Send a focused request with your preferred contact method and availability.</p>
         </header>
-        <ConsultationRequestForm chart={chart} />
+        <ConsultationRequestForm chart={chart} user={user} />
       </section>}
 
       {activeTab === 'birth' && <section id="results-panel-birth" role="tabpanel" aria-labelledby="results-tab-birth">
@@ -404,6 +428,20 @@ export function ChartResults({ chart, onBack, onSave, savedCharts, onMatch, onTr
         <ArticlesTab />
       </section>}
 
+      <SaveChartDialog
+        isOpen={saveDialogOpen}
+        onClose={() => setSaveDialogOpen(false)}
+        payload={payloadFromChart(chart)}
+        user={user ?? null}
+        onSaved={(msg) => {
+          onSave(chart);
+          setSaveMessage(msg);
+          if (onCloudSaveSuccess) onCloudSaveSuccess();
+        }}
+        onRequestAuth={() => {
+          if (onRequestAuth) onRequestAuth();
+        }}
+      />
     </div>
   );
 }

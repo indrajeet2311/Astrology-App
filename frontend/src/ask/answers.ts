@@ -496,7 +496,7 @@ const DOMAIN_CONCLUSIONS: Record<DomainId, { qualify: string; both: string; mixe
   },
   property: {
     qualify: 'your main chart and your Chaturthamsa (the chart of home and property) both show some real pressure around property matters',
-    both: 'Both your main chart and your Chaturthamsa show real caution around acquiring or holding property. That does not mean it will not happen — it means careful planning, legal diligence and patience matter more than rushing into a purchase.',
+    both: 'Both your main chart and your Chaturthamsa show real caution around acquiring or holding property. That does not mean it will not happen — it means careful planning, thorough due diligence and patience matter more than rushing into a purchase.',
     mixed: 'Your main chart and your Chaturthamsa do not fully agree on property matters: one side looks easier than the other, so lean on the stronger side while being extra careful — especially with paperwork and timing — on the weaker one.',
     clear: 'Neither chart layer raises the warning signs checked here for property and home — a good sign, though due diligence always helps when buying or building.',
   },
@@ -575,7 +575,7 @@ function base(ctx: Context, domain: DomainId, domainLabel: string, question: str
   };
 }
 
-const COMMON_NOTE = 'These are astrological indications, not certainties. They come from classical rules (house lords, natural significators, planetary periods and the Jupiter–Saturn transit) and are best used as a guide for reflection. Timing windows below are deliberately limited to the coming 3 years so the guidance stays near-term and actionable.';
+const COMMON_NOTE = 'These indications are drawn from classical rules (house lords, natural significators, planetary periods and the Jupiter–Saturn transit). Timing windows below highlight the coming 3 years to stay near-term and actionable.';
 const TRANSIT_NOTE = 'Transit data was unavailable, so the timing relies on planetary periods alone.';
 
 function topEvidence(a: Assessment, n = 6): Evidence[] {
@@ -905,7 +905,7 @@ function property(ctx: Context, question: string, focus: Focus): Answer {
   const timing = nextSentence('window for property', a.groups[0].windows);
   a.headline = focus === 'timing' ? (timing ?? 'No strong property window appears within 3 years.') : `${a.verdict.label} (${score}/100). ${timing ?? ''}`.trim();
   pushTiming(a, timing, 'No strongly favourable property window appears in the next 3 years.');
-  a.notes = [COMMON_NOTE, 'Check your finances, legal title and the market independently. Astrology can point to favourable timing, not guarantee a purchase.'];
+  a.notes = [COMMON_NOTE];
   if (!ctx.transits) a.notes.push(TRANSIT_NOTE);
   return a;
 }
@@ -1011,7 +1011,7 @@ function health(ctx: Context, question: string, focus: Focus): Answer {
   const care = a.groups[0].windows[0];
   a.headline = `${a.verdict.label} (${a.score}/100). ${care ? `Take extra care around ${formatRange(care.start, care.end)}.` : 'No strongly stressful health period stands out in the next 3 years.'}`;
   a.plain.push(care ? `A stretch that asks for extra care with health comes around ${formatRange(care.start, care.end)}. Regular check-ups, sleep and moderation help most then.` : 'No strongly stressful health period stands out in the next 3 years.');
-  a.notes = [COMMON_NOTE, 'This is not medical advice. Please consult a qualified doctor for any health concern.'];
+  a.notes = [COMMON_NOTE];
   if (!ctx.transits) a.notes.push(TRANSIT_NOTE);
   void focus;
   return a;
