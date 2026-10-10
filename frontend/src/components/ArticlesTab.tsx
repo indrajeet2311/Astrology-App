@@ -32,10 +32,10 @@ const ARTICLES = [
     terms: 'Raja Yoga · Dhana Yoga · Jaimini',
   },
   {
-    category: 'Wellbeing',
-    title: 'Using astrology responsibly',
-    summary: 'Astrology can be used for reflection and cultural practice. It is not scientifically established and should not replace medical, legal, financial or relationship advice from qualified people.',
-    terms: 'Reflection · Context · Real-world advice',
+    category: 'Everyday life',
+    title: 'Bringing chart insights into everyday life',
+    summary: 'Use the chart’s themes as a starting point for reflection. Consider the wider chart, the current planetary periods and how each theme connects with your goals and lived experience.',
+    terms: 'Patterns · Timing · Personal goals',
   },
 ];
 

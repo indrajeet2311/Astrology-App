@@ -97,7 +97,7 @@ export function App() {
                 </p>
                 <ul className="features">
                   <li><MessageCircleQuestion size={20} aria-hidden /><span><strong>Ask anything</strong> about marriage, career, property and more, with likely timing</span></li>
-                  <li><Telescope size={20} aria-hidden /><span><strong>Precise positions</strong> from the Swiss Ephemeris, the standard used by professional astrologers</span></li>
+                  <li><Telescope size={20} aria-hidden /><span><strong>Detailed planetary positions</strong> across your birth chart and divisional charts</span></li>
                   <li><CalendarClock size={20} aria-hidden /><span><strong>Plan ahead</strong> with planetary periods, Sade Sati, transits and a festival calendar</span></li>
                   <li><Orbit size={20} aria-hidden /><span><strong>Your way</strong>: North or South Indian charts and 16 divisional charts</span></li>
                 </ul>

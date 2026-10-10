@@ -12,7 +12,7 @@ export function ShadbalaCard({ chart }: { chart: Chart }) {
     <section className="card">
       <h2>Shadbala (six-fold strength)</h2>
       <p className="muted small">
-        Calculated with JHora's conventions, in virupas (60 virupas = 1 rupa). The ratio compares each total with the planet's required minimum.
+        Six measures combine to show each planet's strength. Scores are shown in virupas (60 virupas = 1 rupa); the ratio compares each total with its traditional minimum.
       </p>
       <div className="table-wrap">
         <table className="shadbala-table">
@@ -108,9 +108,7 @@ export function ShadbalaCard({ chart }: { chart: Chart }) {
           </table>
         </div>
       </details>
-      <p className="muted small">
-        Method: Saptavargaja uses Rasi-chart friendships; Kala Bala includes Abda and Masa lords (B.V. Raman's ahargana) and 60-minute horas from sunrise; Drik Bala uses sphuta drishti. Sun and Moon Cheshta are shown for Ishta/Kashta but not added to the total. Yuddha Bala is not included, and Mercury/Venus Cheshta uses modern mean motions, so small differences from JHora can remain.
-      </p>
+      <p className="muted small">The six components together describe how strongly each planet can express its themes in the chart.</p>
     </section>
   );
 }
@@ -181,7 +179,6 @@ export function VimshopakaCard({ chart }: { chart: Chart }) {
             </tbody>
           </table>
         </div>
-        <p className="muted small">JHora convention: own 20 · great friend 18 · friend 15 · neutral 10 · enemy 7 · great enemy 5, using the five-fold friendship within each divisional chart. Exaltation and debilitation are not scored separately.</p>
       </details>
     </section>
   );

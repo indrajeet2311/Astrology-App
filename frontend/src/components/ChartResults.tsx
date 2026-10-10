@@ -404,11 +404,6 @@ export function ChartResults({ chart, onBack, onSave, savedCharts, onMatch, onTr
         <ArticlesTab />
       </section>}
 
-      <p className="disclaimer">
-        Positions are computed with the Swiss Ephemeris (Moshier mode, sidereal zodiac, mean lunar node). Astrology is a
-        traditional interpretive system and is not scientifically established; nothing here is medical, legal, financial
-        or safety advice.
-      </p>
     </div>
   );
 }
