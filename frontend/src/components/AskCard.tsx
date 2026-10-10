@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Loader2, MessageCircleQuestion } from 'lucide-react';
 import { errorMessage, loadSlowTransits } from '../api';
 import { ratingWord } from '../ask/answers';
@@ -127,56 +127,72 @@ export function AskCard({ chart }: { chart: Chart }) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const transits = useRef<SlowTransits | null>(null);
+  const readingVersion = useRef(0);
   const birth = chart.birthDetails.date;
   const topics = useMemo(() => SUGGESTED_QUESTIONS, []);
 
-  const ensureTransits = async (): Promise<SlowTransits | null> => {
+  useEffect(() => {
+    readingVersion.current += 1;
+    transits.current = null;
+    setAnswers([]);
+    setMessage('');
+    setLoading(false);
+  }, [chart]);
+
+  const ensureTransits = async (version: number): Promise<SlowTransits | null> => {
     if (transits.current) return transits.current;
     const today = new Date().toISOString().slice(0, 10);
     const to = isoYears(today, 25) > '2099-12-31' ? '2099-12-31' : isoYears(today, 25);
     const earliest = isoYears(to, -79);
     const from = isoYears(birth, 16) > earliest ? isoYears(birth, 16) : earliest;
     try {
-      transits.current = await loadSlowTransits(payloadFromChart(chart), from, to);
+      const loaded = await loadSlowTransits(payloadFromChart(chart), from, to);
+      if (version === readingVersion.current) transits.current = loaded;
+      return loaded;
     } catch (e) {
-      setMessage(errorMessage(e, 'Transit data was unavailable; answers use planetary periods only.'));
+      if (version === readingVersion.current) setMessage(errorMessage(e, 'Transit data was unavailable; answers use planetary periods only.'));
     }
-    return transits.current;
+    return null;
   };
 
   const ask = async (text: string, forcedDomain: DomainId | '' = domain) => {
     const q = text.trim();
-    if (!forcedDomain) {
-      setMessage('Choose a topic first: marriage, relationships, career, property, spirituality or health.');
-      return;
-    }
     if (!q) {
       setMessage('Add a question so the reading can focus on what you want to know.');
       return;
     }
     const classified = classify(q);
-    const answerDomain = forcedDomain || classified.domain;
-    if (!answerDomain) return;
+    const answerDomain = classified.domain || forcedDomain;
+    if (!answerDomain) {
+      setMessage('Choose a topic or mention marriage, relationships, career, property, spirituality or health in your question.');
+      return;
+    }
+    setDomain(answerDomain);
+    const version = ++readingVersion.current;
     setMessage('');
     setLoading(true);
     try {
-      const ctx = makeContext(chart, await ensureTransits());
+      const slowTransits = await ensureTransits(version);
+      if (version !== readingVersion.current) return;
+      const ctx = makeContext(chart, slowTransits);
       const answer = answerQuestion(ctx, q, answerDomain);
       if (answer) setAnswers((prev) => [answer, ...prev]);
       setQuestion('');
+    } catch (e) {
+      if (version === readingVersion.current) setMessage(errorMessage(e, 'Could not read your chart. Please try again.'));
     } finally {
-      setLoading(false);
+      if (version === readingVersion.current) setLoading(false);
     }
   };
 
   return (
     <section className="card ask-card">
-      <h2>Chart consultation</h2>
+      <h2>Ask Your Chart</h2>
       <p className="muted small">Choose the area you want guidance on, then ask a specific question. Your answer uses your birth chart, relevant divisional chart, planetary periods and transits.</p>
       <form className="ask-form" onSubmit={(e) => { e.preventDefault(); void ask(question); }}>
         <label className="field ask-topic-field">
           <span className="label">What would you like guidance on?</span>
-          <select aria-label="Consultation topic" value={domain} onChange={(event) => setDomain(event.target.value as DomainId | '')}>
+          <select aria-label="Chart question topic" value={domain} onChange={(event) => setDomain(event.target.value as DomainId | '')}>
             <option value="">Choose a topic</option>
             <option value="marriage">Marriage</option>
             <option value="relationship">Relationships</option>

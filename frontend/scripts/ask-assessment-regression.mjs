@@ -5,7 +5,7 @@ import { build } from 'esbuild';
 const root = fileURLToPath(new URL('../', import.meta.url));
 const bundle = await build({
   stdin: {
-    contents: "export * from './src/ask/core'; export * from './src/ask/assess'; export * from './src/ask/engine'; export { compoundRelations } from './src/vargas'; export { arudhaPadas, charaKarakas } from './src/jaimini';",
+    contents: "export * from './src/ask/core'; export * from './src/ask/assess'; export * from './src/ask/engine'; export { HOUSE_THEME } from './src/ask/answers'; export { compoundRelations } from './src/vargas'; export { arudhaPadas, charaKarakas } from './src/jaimini';",
     resolveDir: root,
   },
   bundle: true, write: false, platform: 'node', format: 'esm',
@@ -106,7 +106,7 @@ const mutualReading = rules.houseFactorSummary(mutual, 1);
 assert(mutualReading.includes('Saturn aspects Mars by its 10th aspect'));
 assert(mutualReading.includes('mutual aspect: Mars returns its 4th aspect to Saturn'));
 assert(mutualReading.includes('D1 lord of 10th/11th'));
-assert(rules.answerQuestion(mutual, 'How is my health?', 'health').plain.includes(mutualReading));
+assert(rules.answerQuestion(mutual, 'How is my health?', 'health').technical.includes(mutualReading));
 mutual.chart.aspects[0].houses = [];
 const oneWayReading = rules.houseFactorSummary(mutual, 1);
 assert(oneWayReading.includes('Saturn aspects Mars by its 10th aspect'));
@@ -142,10 +142,11 @@ for (let ascendant = 1; ascendant <= 12; ascendant++) {
     domains.forEach((domain, index) => {
       const result = rules.answerQuestion(generated, 'How is the outlook?', domain);
       assert(Number.isFinite(result.score) && result.score >= 5 && result.score <= 95, `${domain}: score`);
-      assert(result.plain.some((text) => text.startsWith(`Integrated ${result.domainLabel.toLowerCase()} assessment:`)), `${domain}: common synthesis`);
+      assert(result.plain.some((text) => text.startsWith(`In short, for ${result.domainLabel.toLowerCase()}:`)), `${domain}: common synthesis`);
       for (const house of primaryHouses[index]) {
         const summary = rules.houseFactorSummary(generated, house);
-        assert(result.plain.includes(summary), `${domain}: mandatory D1 house and lord reading`);
+        assert(result.technical.includes(summary), `${domain}: mandatory D1 house and lord reading`);
+        assert(result.plain.some((text) => text.includes(rules.housePlainNote(generated, house, undefined, rules.HOUSE_THEME[house]))), `${domain}: plain-language house reading`);
         for (const name of rules.occupants(generated, house)) assert(summary.includes(`${name} (`), `${domain}: occupant identity`);
         const lord = rules.lordOfHouse(generated, house);
         for (const name of rules.aspectors(generated, rules.planet(generated, lord).house).filter((source) => source !== lord)) {
@@ -155,8 +156,8 @@ for (let ascendant = 1; ascendant <= 12; ascendant++) {
           assert(rules.assessHouse(generated, house, null).evidence.some((item) => item.text.includes(`${name} aspects the ${rules.ordinal(house)} house by`)), `${domain}: every house aspect recorded`);
         }
       }
-      for (const house of divisionalHouses[index]) assert(result.plain.some((text) => text.includes(rules.houseFactorSummary(generated, house, divisions[index]))), `${domain}: mandatory divisional house and lord reading`);
-      assert.equal(result.plain.filter((text) => text.includes(`${divisions[index]}):`)).length, 1, `${domain}: one divisional summary`);
+      for (const house of divisionalHouses[index]) assert(result.plain.some((text) => text.includes(rules.housePlainNote(generated, house, divisions[index], result.domainLabel.toLowerCase()))), `${domain}: mandatory divisional house and lord reading`);
+      assert.equal(result.plain.filter((text) => text.includes('(a deeper chart used for')).length, 1, `${domain}: one divisional summary`);
       assert(!result.plain.some((text) => text.startsWith('Overall ') || text.includes('D1-to-D9 check:')), `${domain}: no repeated chart-wide recap`);
       assert.equal(new Set(result.technical).size, result.technical.length, `${domain}: unique reasoning`);
       assert(result.technical.some((text) => text.includes(`(${divisions[index]})`)), `${domain}: divisional chart`);
@@ -197,6 +198,32 @@ const natureAnswer = rules.answerQuestion(timing, 'How will my marriage be?', 'm
 assert.equal(natureAnswer.headline, '', 'Nature guidance must not repeat in the headline');
 assert(natureAnswer.nature.length > 0, 'Nature guidance remains available');
 assert(!natureAnswer.plain.some((text) => text.startsWith('The currently active') || text.startsWith('The nearest')), 'Nature reading must not repeat timing summaries');
+assert.equal(natureAnswer.groups.length, 0, 'Partner qualities must not reuse event-timing panels');
+assert.equal(rules.classify('What practices support my spiritual growth?').focus, 'nature');
+assert.equal(rules.classify('Which field suits my career?').focus, 'nature');
+assert.equal(rules.classify('When may a job change or promotion be favorable?').focus, 'timing');
+const incomeAnswer = rules.answerQuestion(timing, 'When could my career and income improve?', 'career');
+const jobAnswer = rules.answerQuestion(timing, 'When may a job change be favorable?', 'career');
+const promotionAnswer = rules.answerQuestion(timing, 'When may a promotion be favorable?', 'career');
+const fieldAnswer = rules.answerQuestion(timing, 'What kind of career suits me?', 'career');
+assert(incomeAnswer.plain[0].includes('2nd house') && incomeAnswer.plain[0].includes('11th'), 'Income must examine resources and gains');
+assert(jobAnswer.plain[0].includes('6th house') && jobAnswer.plain[0].includes('10th'), 'Job changes must examine employment and direction');
+assert(promotionAnswer.plain[0].includes('10th house') && promotionAnswer.plain[0].includes('11th'), 'Promotion must examine standing and rewards');
+assert(incomeAnswer.groups[0].blurb.includes('houses 2, 11'), 'Income timing uses income houses');
+assert(jobAnswer.groups[0].blurb.includes('houses 6, 10'), 'Transition timing uses employment houses');
+assert(promotionAnswer.groups[0].blurb.includes('houses 10, 11'), 'Promotion timing uses standing and gains');
+assert.equal(fieldAnswer.groups.length, 0, 'Suitable fields must not show timing windows');
+assert(fieldAnswer.plain[0].includes('strongest career indicators'));
+const substantive = (answer) => JSON.stringify({ plain: answer.plain, nature: answer.nature, groups: answer.groups });
+assert.equal(new Set([incomeAnswer, jobAnswer, promotionAnswer, fieldAnswer].map(substantive)).size, 4, 'Same-chart career intents must differ beyond the echoed question');
+const practiceAnswer = rules.answerQuestion(timing, 'What practices may support my spiritual growth?', 'spiritual');
+assert(practiceAnswer.plain[0].includes('sustainable practice'));
+assert.equal(practiceAnswer.groups.length, 0);
+for (const suggested of rules.SUGGESTED_QUESTIONS) {
+  assert.equal(rules.classify(suggested.question).domain, suggested.domain, `Correct topic routing for ${suggested.label}`);
+  const answer = rules.answerQuestion(timing, suggested.question, suggested.domain);
+  assert(answer && answer.plain.length > 0 && answer.plain.every((text) => !text.includes('undefined')), `Runnable answer for ${suggested.label}`);
+}
 const selected = timingAnswer.groups[0].windows;
 for (const system of ['Vimshottari', 'Yogini', 'Chara']) assert(selected.some((window) => window.system === system), `${system}: representation`);
 for (const window of selected) assert(window.relative * 100 <= timingAnswer.score + 0.0001, 'Timing label must respect natal support');
@@ -205,3 +232,4 @@ console.log(`Ask assessment regressions passed: ${generatedAnswers} generated an
 console.log('Three-dasha timing passed: planetary AD activation, DK/AmK derived houses, dated confluence, system representation and natal-limited labels.');
 console.log('Influence and repetition checks passed: node hosts, independent conjunctions, source dignity, mutual aspects, debility mitigation and concise summaries.');
 console.log('House/lord coverage passed: all primary houses and divisional houses, occupant lordships, incoming lord aspects and true versus one-way mutual links.');
+console.log('Question-intent checks passed: distinct income, transition, promotion and suitable-field readings; focused practice/partner guidance; all 13 suggested questions.');

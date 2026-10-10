@@ -35,6 +35,12 @@ The deployable UI lives in `frontend/`. It includes client registration and sign
 
 Set `ADMIN_PASSKEY` in Render to enable the Astrologer Admin sign-in. Client accounts and saved charts are stored as JSON below `CELESTIA_DATA_DIR` (defaults to `./data`); attach a Render persistent disk and point this variable at its mount path if this data must survive service redeploys.
 
+## Ask Your Chart
+
+Questions use chart-based rules rather than canned replies. Recognized topics in a typed question override the previous topic selection; the selector remains a fallback for ambiguous questions. Career questions distinguish income, job transitions, promotion, business and suitable fields, using relevant houses for timing. Questions about qualities or practices focus on guidance instead of repeating event-date panels. Different wording of the same intent can legitimately produce the same chart indications.
+
+Run the question-intent and chart-assessment regressions with `node scripts/ask-assessment-regression.mjs` from `frontend/`.
+
 ## Place search
 
 Birthplaces are searched through the free [Open-Meteo geocoding API](https://open-meteo.com/en/docs/geocoding-api), which returns coordinates and an IANA timezone with no API key. Celestia skips any result without a timezone and never guesses one.

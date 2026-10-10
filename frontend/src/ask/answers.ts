@@ -546,6 +546,7 @@ export function synthesizeAnswer(ctx: Context, answer: Answer): Answer {
       : domainConclusion.clear;
   const unique = (items: Evidence[]) => [...new Map(items.map((item) => [item.text, item])).values()];
   const extraPlain = answer.plain.filter((text) => !/^(Overall |D1 \d|I also checked|Navamsa \(D9\)|Dasamsa \(D10\)|Chaturthamsa \(D4\)|Vimshamsa \(D20\)|Trimsamsa \(D30\)|Marriage needs a qualified reading|The checks of the 7th lord)/.test(text)
+    && !text.includes('(a deeper chart used for')
     && !answer.headline.includes(text)
     && !answer.groups.some((group) => group.tone === 'caution' && group.windows.some((window) => text.includes(formatRange(window.start, window.end)))));
   const houseTechnicalNotes = PRIMARY_HOUSES[answer.domain].map((house) => houseFactorSummary(ctx, house));
@@ -562,6 +563,54 @@ export function synthesizeAnswer(ctx: Context, answer: Answer): Answer {
   if (answer.headline.startsWith(repeatedVerdict) && answer.headline.length > repeatedVerdict.length) answer.headline = answer.headline.slice(repeatedVerdict.length).trim();
   if (answer.focus === 'nature') answer.headline = '';
   if (previousLabel !== answer.verdict.label) answer.notes.push('The verdict is qualified by the combined natal and divisional reading; the score is a heuristic summary, not a probability.');
+  return answer;
+}
+
+function careerGoal(question: string): { label: string; houses: number[]; guidance: string } {
+  if (/\b(income|salary|earnings|pay|money)\b/i.test(question)) {
+    return { label: 'Income improvement', houses: [2, 11], guidance: 'Income is read through savings and resources (2nd house) and gains (11th), alongside the career chart. A supportive period is not a guaranteed pay increase; compare it with your skills, compensation and opportunities.' };
+  }
+  if (/\b(job change|change (?:my |a )?job|switch|resign|new job)\b/i.test(question)) {
+    return { label: 'Job transition', houses: [6, 10], guidance: 'A job transition needs support for employment (6th house) and professional direction (10th). Use these periods to apply, interview and compare offers, not as a reason to resign without an alternative.' };
+  }
+  if (/\b(promotion|recognition|leadership)\b/i.test(question)) {
+    return { label: 'Promotion and recognition', houses: [10, 11], guidance: 'Promotion is read through professional standing (10th house) and rewards (11th). Look for opportunities to demonstrate responsibility and negotiate recognition during supportive periods.' };
+  }
+  if (/\b(business|startup|entrepreneur)\b/i.test(question)) {
+    return { label: 'Business direction', houses: [7, 10, 11], guidance: 'Business combines clients and partnerships (7th house), professional direction (10th) and gains (11th). Validate demand, agreements and cash flow before acting on a chart indication.' };
+  }
+  return { label: 'Career growth', houses: [10], guidance: '' };
+}
+
+export function focusAnswer(ctx: Context, answer: Answer): Answer {
+  const q = answer.question.toLowerCase();
+  let direct = '';
+  if (answer.domain === 'career') {
+    const goal = careerGoal(q);
+    if (goal.guidance) {
+      direct = `${goal.label}: ${goal.guidance} ${goal.houses.map((house) => housePlainNote(ctx, house, undefined, HOUSE_THEME[house])).join(' ')}`;
+    } else if (answer.focus === 'nature') {
+      direct = `For suitable work, your strongest career indicators point to: ${answer.nature.slice(0, 3).join(' ')}`;
+    }
+  } else if (answer.domain === 'marriage' && /\b(love|arranged|match)\b/.test(q)) {
+    direct = answer.nature.find((text) => text.startsWith('Type of marriage:')) ?? '';
+  } else if ((answer.domain === 'marriage' || answer.domain === 'relationship') && answer.focus === 'nature') {
+    direct = `For partner qualities and emotional compatibility: ${answer.nature.slice(0, 2).join(' ')} These are symbolic tendencies, not a description of a specific future person.`;
+  } else if (answer.domain === 'property' && /\b(buy|buying|mortgage|purchase)\b/.test(q) && answer.focus !== 'timing') {
+    direct = `For a home purchase: ${answer.nature.join(' ')} Compare these indications with affordability, title checks and loan terms; astrology cannot establish whether a particular purchase is financially sound.`;
+  } else if (answer.domain === 'spiritual' && /\b(practice|practices|support|meditation|mantra)\b/.test(q)) {
+    direct = `For a sustainable practice, the chart points to: ${answer.nature.join(' ')} Start with a modest routine and choose a trustworthy teacher rather than treating timing as a prerequisite.`;
+  }
+  const lead = answer.focus === 'timing' || answer.focus === 'riseFall' ? answer.headline : '';
+  answer.plain = [...new Set([direct, lead, ...answer.plain].filter(Boolean))];
+  if (answer.focus === 'nature') {
+    answer.groups = [];
+    answer.notes = answer.notes.filter((note) => note !== COMMON_NOTE && note !== TRANSIT_NOTE);
+    answer.notes.push('This answer focuses on chart tendencies and choices, not event dates. Astrology is interpretive guidance, not a certainty.');
+  } else if (answer.focus === 'timing') {
+    answer.nature = [];
+    answer.natureTitle = '';
+  }
   return answer;
 }
 
@@ -784,6 +833,7 @@ function relationship(ctx: Context, question: string, focus: Focus): Answer {
 
 function career(ctx: Context, question: string, focus: Focus): Answer {
   const a = base(ctx, 'career', 'Career', question, focus);
+  const goal = careerGoal(question);
   const plan = PLANS.career;
   const v = vargaAssess(ctx, plan);
   const ten = blend(assessHouse(ctx, 10, null, true), v, plan.weight);
@@ -811,7 +861,7 @@ function career(ctx: Context, question: string, focus: Focus): Answer {
   const why = (n: string) => n === lord10 ? `${n} rules your career area` : n === amk ? `${n} is your career planet in Jaimini astrology` : n === vargaLord(ctx, plan.division, 10) ? `${n} rules the career area in your Dasamsa chart` : `${n} is strong or placed in your career area`;
 
   const sigs = significators(ctx, {
-    primary: [10], secondary: [1, 2, 6, 9, 11], karakas: [['Sun', 1.5], ['Saturn', 1.5], ['Mercury', 1]],
+    primary: goal.houses, secondary: [1, 2, 6, 9, 10, 11].filter((house) => !goal.houses.includes(house)), karakas: [['Sun', 1.5], ['Saturn', 1.5], ['Mercury', 1]],
     extras: [[amk, 2, 'Amatyakaraka'], [SIGN_LORDS[signOfHouse(ctx, 10, true) - 1], 1.5, 'lord of the 10th from the Moon'], ...vargaExtras(ctx, plan.division, plan.houses, plan.label)],
   });
   const stress = significators(ctx, { primary: [8, 12], secondary: [6], karakas: [] });
@@ -841,12 +891,12 @@ function career(ctx: Context, question: string, focus: Focus): Answer {
 
   const from = ctx.today;
   const to = addYears(ctx.today, 3);
-  const options: TimingOptions = { from, to, houses: [10], promiseScore: score, upcoming: 3, min: 0.55, division: plan.division, note: DOUBLE_NOTE('career area') };
-  const rise = supportGroups(ctx, sigs, options, { upcoming: 'Career growth windows', earlier: '', blurb: `These are stretches when the planets in charge are strongly tied to career, income and recognition.${vargaBlurb(plan)}` });
+  const options: TimingOptions = { from, to, houses: goal.houses, promiseScore: score, upcoming: 3, min: 0.55, division: plan.division, note: DOUBLE_NOTE(goal.label.toLowerCase()) };
+  const rise = supportGroups(ctx, sigs, options, { upcoming: `${goal.label} windows`, earlier: '', blurb: `These periods emphasize houses ${goal.houses.join(', ')} for ${goal.label.toLowerCase()}, rather than treating every career question as the same event.${vargaBlurb(plan)}` });
   const fall = cautionGroup(ctx, sigs, stress, { ...options, upcoming: 3, min: 0.55, note: PRESSURE_NOTE('career area') }, 'Periods of pressure or change', 'In these stretches the planets tied to endings, hidden matters and effort outweigh the supportive ones. Expect restructuring, delays or transitions rather than certain loss, and use the time to prepare.');
   a.groups = [...rise, fall];
   const nextFall = fall.windows[0];
-  const growth = nextSentence('growth window', rise[0].windows);
+  const growth = nextSentence(`${goal.label.toLowerCase()} window`, rise[0].windows);
   a.headline = focus === 'riseFall' || focus === 'timing'
     ? `${growth ?? 'No distinctly strong growth window appears soon.'}${nextFall ? ` A more demanding stretch is around ${formatRange(nextFall.start, nextFall.end)}, so plan ahead.` : ''}`
     : `${a.verdict.label} (${score}/100). ${growth ?? ''}`.trim();
