@@ -35,6 +35,25 @@ The deployable UI lives in `frontend/`. It includes client registration and sign
 
 Set `ADMIN_PASSKEY` in Render to enable the Astrologer Admin sign-in. Client accounts and saved charts are stored as JSON below `CELESTIA_DATA_DIR` (defaults to `./data`); attach a Render persistent disk and point this variable at its mount path if this data must survive service redeploys.
 
+### PostgreSQL persistence (optional)
+
+The default `CELESTIA_STORAGE=file` retains local JSON storage. For external PostgreSQL (for example Neon), set these **backend-only** environment variables:
+
+```text
+CELESTIA_STORAGE=postgres
+CELESTIA_DATABASE_URL=jdbc:postgresql://YOUR_HOST/YOUR_DATABASE?sslmode=require
+CELESTIA_DATABASE_USERNAME=YOUR_DATABASE_USER
+CELESTIA_DATABASE_PASSWORD=YOUR_DATABASE_PASSWORD
+```
+
+Never put database credentials in Git, Vercel frontend variables, or `VITE_*` variables. Database mode fails on connection/storage errors; it does not fall back to ephemeral files. The app creates `celestia_user_documents` and stores the four existing JSON documents in PostgreSQL to preserve API behavior, IDs and password hashes. Read/modify/write flows run in transactions with a shared PostgreSQL advisory lock, including across backend instances. This document-oriented storage is intended for the current small app, not high-volume workloads.
+
+**Migration must happen before redeploying the old ephemeral service.** Obtain a consistent, private backup of all four files (`users.json`, `sessions.json`, `user_charts.json`, `consultations.json`) while writes are stopped. Render Free has no Shell/SSH; do not assume a redeploy can recover those files. Do not switch production until the backup is available.
+
+To import a backup into an empty database, make the backup directory available to the backend and set `CELESTIA_IMPORT_DIR` to that path for the first startup. Import validates all four document shapes and commits atomically; it refuses to overwrite nonempty database documents. Remove `CELESTIA_IMPORT_DIR` after a successful import and securely remove temporary backup copies. Verify existing login, chart ownership and consultation records before reopening writes. Keep the original backup for recovery; never enable both file and database backends for production writes.
+
+`mvn test` covers file-mode persistence and delivery. To also run real PostgreSQL migration/persistence tests, set `CELESTIA_TEST_DATABASE_URL` (JDBC URL), `CELESTIA_TEST_DATABASE_USERNAME`, and `CELESTIA_TEST_DATABASE_PASSWORD` for a test database where the user can create/drop schemas. Tests isolate each run in a random schema and remove only that schema. Without those variables, PostgreSQL integration tests are explicitly skipped; passing file-mode tests does not certify PostgreSQL deployment.
+
 Consultation requests are emailed through the Google Apps Script web app configured by `GOOGLE_APPS_SCRIPT_URL`. If the web app checks a shared secret, also set its matching `GOOGLE_APPS_SCRIPT_TOKEN`; the token is optional for deployments that do not require one. The backend follows the Apps Script result redirect and requires a JSON `{"status":"success"}` acknowledgment before saving the request and reporting it as sent. Unconfigured delivery, HTTP failures, and unsuccessful acknowledgments return an error. A successful acknowledgment confirms webhook acceptance, not final mailbox delivery.
 
 ## Ask Your Chart

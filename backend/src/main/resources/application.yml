@@ -2,10 +2,14 @@ server:
   port: ${PORT:8080}
 
 spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
   application:
     name: celestia-backend
 
 celestia:
+  storage: ${CELESTIA_STORAGE:file}
   geocoder-url: ${CELESTIA_GEOCODER_URL:https://geocoding-api.open-meteo.com/v1/search}
   data-dir: ${CELESTIA_DATA_DIR:./data}
   email:

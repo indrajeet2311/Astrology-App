@@ -5,66 +5,46 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.*;
 
 @Service
+@Transactional
 public class UserDataService {
   private static final String ADMIN_EMAIL = "indrajeetbhattacharya5@gmail.com";
   private static final long SESSION_LIFETIME_MS = 30L * 24 * 60 * 60 * 1000;
   private static final SecureRandom RANDOM = new SecureRandom();
   private final ObjectMapper json;
-  private final Path dataDir;
+  private final UserDocumentStore store;
   private final String adminPasskey;
 
   public UserDataService(ObjectMapper json,
-                         @Value("${celestia.data-dir:./data}") String dataDir,
+                         UserDocumentStore store,
                          @Value("${ADMIN_PASSKEY:}") String adminPasskey) {
     this.json = json;
-    this.dataDir = Path.of(dataDir).toAbsolutePath().normalize();
+    this.store = store;
     this.adminPasskey = adminPasskey;
-    initialize();
   }
 
-  private void initialize() {
-    try {
-      Files.createDirectories(dataDir);
-      for (String file : List.of("users.json", "sessions.json", "user_charts.json", "consultations.json")) {
-        Path path = dataDir.resolve(file);
-        if (!Files.exists(path)) Files.writeString(path, file.equals("sessions.json") ? "{}" : "[]", StandardCharsets.UTF_8);
-      }
-    } catch (Exception e) {
-      throw new IllegalStateException("Could not initialize user data storage.", e);
-    }
-  }
-
-  private synchronized <T> T read(String file, TypeReference<T> type, T fallback) {
-    try { return json.readValue(dataDir.resolve(file).toFile(), type); }
-    catch (Exception e) { return fallback; }
+  private synchronized <T> T read(String file, TypeReference<T> type) {
+    return store.read(file, type);
   }
 
   private synchronized void write(String file, Object value) {
-    try {
-      Path target = dataDir.resolve(file);
-      Path temp = dataDir.resolve(file + ".tmp");
-      json.writerWithDefaultPrettyPrinter().writeValue(temp.toFile(), value);
-      try { Files.move(temp, target, java.nio.file.StandardCopyOption.REPLACE_EXISTING, java.nio.file.StandardCopyOption.ATOMIC_MOVE); }
-      catch (java.nio.file.AtomicMoveNotSupportedException e) { Files.move(temp, target, java.nio.file.StandardCopyOption.REPLACE_EXISTING); }
-    } catch (Exception e) { throw new IllegalStateException("Could not save user data.", e); }
+    store.write(file, value);
   }
 
-  private List<Map<String, Object>> users() { return read("users.json", new TypeReference<>() {}, new ArrayList<>()); }
-  private List<Map<String, Object>> charts() { return read("user_charts.json", new TypeReference<>() {}, new ArrayList<>()); }
-  private Map<String, Map<String, Object>> sessions() { return read("sessions.json", new TypeReference<>() {}, new LinkedHashMap<>()); }
-  private List<Map<String, Object>> consultations() { return read("consultations.json", new TypeReference<>() {}, new ArrayList<>()); }
+  private List<Map<String, Object>> users() { return read("users.json", new TypeReference<>() {}); }
+  private List<Map<String, Object>> charts() { return read("user_charts.json", new TypeReference<>() {}); }
+  private Map<String, Map<String, Object>> sessions() { return read("sessions.json", new TypeReference<>() {}); }
+  private List<Map<String, Object>> consultations() { return read("consultations.json", new TypeReference<>() {}); }
 
   public synchronized Map<String, Object> register(String name, String email, String password) {
     String cleanEmail = cleanEmail(email);
