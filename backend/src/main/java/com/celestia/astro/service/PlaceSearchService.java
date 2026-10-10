@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ public class PlaceSearchService {
   private static final int MAX_RESULTS = 8;
 
   private final String baseUrl;
-  private final RestClient client = RestClient.create();
+  private RestClient client;
 
   public PlaceSearchService(@Value("${celestia.geocoder-url}") String baseUrl) {
     this.baseUrl = baseUrl;
@@ -43,6 +44,9 @@ public class PlaceSearchService {
 
     Response response;
     try {
+      if (client == null) client = RestClient.builder()
+          .requestFactory(new SimpleClientHttpRequestFactory())
+          .build();
       response = client.get().uri(uri).retrieve().body(Response.class);
     } catch (RestClientException e) {
       throw new PlaceLookupException("Place search is temporarily unavailable. Please try again.", e);

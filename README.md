@@ -35,6 +35,8 @@ The deployable UI lives in `frontend/`. It includes client registration and sign
 
 Set `ADMIN_PASSKEY` in Render to enable the Astrologer Admin sign-in. Client accounts and saved charts are stored as JSON below `CELESTIA_DATA_DIR` (defaults to `./data`); attach a Render persistent disk and point this variable at its mount path if this data must survive service redeploys.
 
+Consultation requests are emailed through the Google Apps Script web app configured by `GOOGLE_APPS_SCRIPT_URL`. If the web app checks a shared secret, also set its matching `GOOGLE_APPS_SCRIPT_TOKEN`; the token is optional for deployments that do not require one. The backend follows the Apps Script result redirect and requires a JSON `{"status":"success"}` acknowledgment before saving the request and reporting it as sent. Unconfigured delivery, HTTP failures, and unsuccessful acknowledgments return an error. A successful acknowledgment confirms webhook acceptance, not final mailbox delivery.
+
 ## Ask Your Chart
 
 Questions use chart-based rules rather than canned replies. Recognized topics in a typed question override the previous topic selection; the selector remains a fallback for ambiguous questions. Career questions distinguish income, job transitions, promotion, business and suitable fields, using relevant houses for timing. Questions about qualities or practices focus on guidance instead of repeating event-date panels. Different wording of the same intent can legitimately produce the same chart indications.

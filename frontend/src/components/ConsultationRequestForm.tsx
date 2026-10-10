@@ -96,7 +96,6 @@ export function ConsultationRequestForm({ chart, user }: { chart: Chart; user?: 
       setMessage(result.message);
       if (result.id) {
         setSubmittedId(result.id);
-        window.location.assign(mailtoHref(result.id));
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Your request could not be sent. Please try again.');
@@ -116,7 +115,7 @@ export function ConsultationRequestForm({ chart, user }: { chart: Chart; user?: 
     <section className="card consultation-request">
       <h2>Request a private consultation</h2>
       <p className="muted small">
-        Share your question for a personalized reading. Submitting saves a reference in your account and opens a prefilled email to the astrologer.
+        Share your question for a personalized reading. Submitting emails your request to the astrologer and saves a reference in your account.
       </p>
 
       {submittedId ? (
@@ -124,17 +123,17 @@ export function ConsultationRequestForm({ chart, user }: { chart: Chart; user?: 
           <div className="success-icon-wrap">
             <CheckCircle2 size={36} color="#52c41a" />
           </div>
-          <h3>Request Prepared</h3>
+          <h3>Request Sent</h3>
           <p className="success-lead">
-            Thank you, <strong>{fields.name}</strong>. Your consultation request has been received and saved under reference <strong>#{submittedId}</strong>.
+            Thank you, <strong>{fields.name}</strong>. Your consultation request was emailed to the astrologer and saved under reference <strong>#{submittedId}</strong>.
           </p>
           <p className="muted small">
-            Your email app should open with the request addressed to {ASTROLOGER_EMAIL}. Send that email to complete your request.
+            Use the link below if you would also like to send a follow-up email.
           </p>
 
           <div className="success-actions">
             <a href={mailtoHref()} className="button-ghost" target="_blank" rel="noopener noreferrer">
-              <Mail size={16} /> Open in Email App ({ASTROLOGER_EMAIL})
+              <Mail size={16} /> Send a follow-up email ({ASTROLOGER_EMAIL})
             </a>
             <button className="button-ghost" onClick={resetForm}>
               Submit Another Request
@@ -257,12 +256,12 @@ export function ConsultationRequestForm({ chart, user }: { chart: Chart; user?: 
           </label>
 
           <p className="muted small consultation-wide">
-            Submitting saves a tracking reference and opens a prefilled email to {ASTROLOGER_EMAIL}.
+            Submitting emails your request to {ASTROLOGER_EMAIL} and saves a tracking reference.
           </p>
 
           <button type="submit" className="button-primary consultation-wide" disabled={busy}>
             {busy ? <LoaderCircle className="spin" size={16} /> : <Send size={16} />}
-            {busy ? 'Preparing…' : 'Open prefilled email'}
+            {busy ? 'Sending…' : 'Send consultation request'}
           </button>
 
           <p className="muted small consultation-wide">

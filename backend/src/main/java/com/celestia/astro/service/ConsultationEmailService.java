@@ -2,10 +2,14 @@ package com.celestia.astro.service;
 
 import com.celestia.astro.model.ChartLeadRequest;
 import com.celestia.astro.model.ConsultationRequest;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
@@ -13,11 +17,16 @@ import org.springframework.web.client.RestClientException;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.io.IOException;
+import java.net.URI;
 
 @Service
 public class ConsultationEmailService {
   private static final Logger log = LoggerFactory.getLogger(ConsultationEmailService.class);
-  private final RestClient http = RestClient.create();
+  // Create the HTTP client only when delivery is actually configured and used.
+  // This keeps the application able to start when local email delivery is disabled.
+  private RestClient http;
+  private final ObjectMapper json = new ObjectMapper();
   private final String appsScriptUrl;
   private final String token;
 
@@ -70,20 +79,46 @@ public class ConsultationEmailService {
 
   private void requireConfigured() {
     if (!configured()) {
-      throw new ConsultationDeliveryException("Consultation email delivery is not configured. Set GOOGLE_APPS_SCRIPT_URL and GOOGLE_APPS_SCRIPT_TOKEN.");
+      throw new ConsultationDeliveryException("Consultation email delivery is not configured. Set GOOGLE_APPS_SCRIPT_URL.");
     }
   }
 
   private boolean configured() {
-    return StringUtils.hasText(appsScriptUrl) && StringUtils.hasText(token);
+    return StringUtils.hasText(appsScriptUrl);
   }
 
   private void post(Map<String, Object> payload, String description) {
     try {
-      http.post().uri(appsScriptUrl).contentType(MediaType.APPLICATION_JSON).body(payload)
-          .retrieve().toBodilessEntity();
-    } catch (RestClientException e) {
+      RestClient client = client();
+      URI uri = URI.create(appsScriptUrl);
+      ResponseEntity<String> response = client.post().uri(uri).contentType(MediaType.APPLICATION_JSON).body(payload)
+          .exchange((request, reply) -> ResponseEntity.status(reply.getStatusCode()).headers(reply.getHeaders()).body(reply.bodyTo(String.class)));
+      // Apps Script redirects to the GET-only ContentService result after executing doPost.
+      for (int redirects = 0; redirects < 3 && (response.getStatusCode().value() == 302 || response.getStatusCode().value() == 303); redirects++) {
+        URI location = response.getHeaders().getLocation();
+        if (location == null) throw new ConsultationDeliveryException("The " + description + " returned a redirect without a result URL.");
+        uri = uri.resolve(location);
+        response = client.get().uri(uri).exchange((request, reply) -> ResponseEntity.status(reply.getStatusCode()).headers(reply.getHeaders()).body(reply.bodyTo(String.class)));
+      }
+      if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
+        throw new ConsultationDeliveryException("The " + description + " did not return a successful delivery acknowledgment.");
+      }
+      JsonNode acknowledgment = json.readTree(response.getBody());
+      if (acknowledgment == null || !"success".equals(acknowledgment.path("status").asText())) {
+        throw new ConsultationDeliveryException("The " + description + " was not accepted by the email service.");
+      }
+    } catch (RestClientException | IOException | IllegalArgumentException e) {
       throw new ConsultationDeliveryException("The " + description + " could not be delivered.", e);
     }
+  }
+
+  private synchronized RestClient client() {
+    if (http == null) {
+      SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+      factory.setConnectTimeout(10_000);
+      factory.setReadTimeout(30_000);
+      http = RestClient.builder().requestFactory(factory).build();
+    }
+    return http;
   }
 }
