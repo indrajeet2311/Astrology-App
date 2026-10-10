@@ -1,0 +1,19 @@
+[
+  {
+    "name": "Ananya Sharma",
+    "email": "indrajeetbhattacharya5@gmail.com",
+    "phone": "+91 98765 43210",
+    "contactMethod": "email",
+    "topic": "Career & Financial Outlook",
+    "question": "What planetary period will bring promotion and stability in late 2026?",
+    "availability": "Weekday evenings IST",
+    "timezone": "Asia/Kolkata",
+    "birthDate": "1994-08-15",
+    "birthTime": "06:45",
+    "birthPlace": "Mumbai, India",
+    "shareBirthDetails": true,
+    "id": "CR-20261010-5826",
+    "createdAt": "2026-10-10T05:02:27.566Z",
+    "status": "pending"
+  }
+]

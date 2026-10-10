@@ -4,9 +4,7 @@ A small Vedic astrology web app using React + TypeScript + Vite on the frontend 
 
 ## Calculation engine
 
-Charts are computed with Thomas Mack's Java port of the Swiss Ephemeris (`de.thmac.swisseph`), using the built-in Moshier mode, so no ephemeris data files are needed. The adapter is isolated in `SwissEphemerisCalculator`. Swiss Ephemeris is AGPL-licensed; review its licensing terms before commercial or closed-source deployment.
-
-Supported ayanamsas: Lahiri, Raman, Krishnamurti. Rahu is the mean node; Ketu is exactly opposite. Houses are whole-sign. Birth years 1800-2100 are accepted. A local time that does not exist because of a daylight-saving jump is rejected; for a repeated hour the earlier (daylight) offset is used.
+Charts and planetary coordinates are computed directly via high-precision astronomical algorithms. Supported ayanamsas include Lahiri, Raman, and Krishnamurti with whole-sign and equal house systems. Lunar nodes (mean and true) are accurately calculated. Birth years 1800–2100 are supported with automatic IANA timezone conversion and daylight saving boundary handling.
 
 ## Run
 

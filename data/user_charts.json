@@ -1,0 +1,37 @@
+[
+  {
+    "id": "ch_3c47f998addb7a39",
+    "userId": "usr_ec779c929d1bceec",
+    "label": "Rohit Natal Chart",
+    "relationship": "self",
+    "notes": "First cloud chart test",
+    "savedAt": "2026-10-10T05:43:07.856Z",
+    "payload": {
+      "name": "Rohit Verma",
+      "date": "1994-06-15",
+      "time": "14:30",
+      "latitude": 28.6139,
+      "longitude": 77.209,
+      "timezone": 5.5,
+      "placeName": "New Delhi, India"
+    }
+  },
+  {
+    "id": "ch_b726d74f459ff207",
+    "userId": "usr_38cc7f5b70594196",
+    "label": "My Birth Chart",
+    "relationship": "self",
+    "notes": "Ascendant in Scorpio, Moon in Rohini nakshatra",
+    "savedAt": "2026-10-10T05:28:43.881Z",
+    "payload": {
+      "name": "Ananya Sharma",
+      "date": "1994-11-20",
+      "time": "08:15",
+      "placeName": "Kolkata, West Bengal, India",
+      "latitude": 22.5726,
+      "longitude": 88.3639,
+      "timeZone": "Asia/Kolkata",
+      "ayanamsa": "LAHIRI"
+    }
+  }
+]

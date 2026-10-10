@@ -1,0 +1,7 @@
+{
+  "name": "NextGenAstro",
+  "description": "NextGenAstro turns your birth details into an accurate Vedic birth chart and answers your questions about marriage, career, property, relationships, spirituality and health.",
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
