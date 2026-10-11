@@ -324,6 +324,32 @@ tbody tr:last-child > * { border-bottom: 0; }
 .win-peak { margin-top: 6px; color: var(--gold); font-size: 0.88rem; }
 .pill { padding: 2px 9px; border-radius: 999px; border: 1px solid var(--card-border); font-size: 0.75rem; color: var(--muted); }
 .answer-notes { margin-top: 16px; display: grid; gap: 4px; }
+.reading-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin: 14px 0; }
+.reading-card { min-width: 0; padding: 20px; border: 1px solid var(--card-border); border-radius: 14px; background: linear-gradient(135deg, rgba(128, 102, 216, 0.09), rgba(255, 255, 255, 0.025)); overflow-wrap: anywhere; }
+.reading-card-heading { display: flex; align-items: center; gap: 9px; color: var(--gold); margin-bottom: 10px; }
+.reading-card-heading svg { flex: none; }
+.reading-card h3 { margin: 0; font-size: 1rem; font-weight: 600; color: var(--text); }
+.reading-card p { font-size: 0.94rem; line-height: 1.7; }
+.reading-summary { margin: 14px 0; border-color: var(--gold-dim); background: linear-gradient(125deg, rgba(226, 184, 87, 0.1), rgba(128, 102, 216, 0.1)); }
+.reading-summary p { font-size: 1.08rem; }
+.reading-card-good { border-top: 3px solid #7fe0a8; }
+.reading-card-bad { border-top: 3px solid var(--gold); }
+.reading-label { display: block; margin-bottom: 9px; color: var(--muted); font-size: 0.76rem; font-weight: 600; letter-spacing: 0.03em; }
+.reading-period-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 12px; }
+.reading-period { min-width: 0; padding: 14px; border: 1px solid var(--card-border); border-radius: 10px; background: rgba(255, 255, 255, 0.025); }
+.reading-period strong { display: block; margin-bottom: 8px; }
+.reading-period-good strong { color: #9be3b8; }
+.reading-period-caution strong { color: var(--gold); }
+.answer .reading-footnote { margin-top: 14px; color: var(--muted); font-size: 0.8rem; line-height: 1.6; }
+.reading-guidance { margin-top: 14px; }
+@media (max-width: 600px) {
+  .reading-grid { grid-template-columns: 1fr; }
+  .answer { padding: 14px; }
+  .reading-card { padding: 16px; }
+}
+@media print {
+  .reading-card, .reading-period { break-inside: avoid; }
+}
 .jaimini-charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; margin: 12px 0; }
 .check-row { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.85rem; color: var(--muted); }
 .manglik-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin: 12px 0; }

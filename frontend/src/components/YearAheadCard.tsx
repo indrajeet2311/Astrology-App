@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
 import { CalendarRange, Loader2 } from 'lucide-react';
 import { errorMessage, loadSlowTransits } from '../api';
-import { DOMAIN_BUILDERS } from '../ask/answers';
-import type { Answer, DomainId } from '../ask/answers';
+import { answerQuestion } from '../ask/engine';
+import type { UserAnswer } from '../ask/engine';
+import type { DomainId } from '../ask/answers';
 import { formatRange, makeContext } from '../ask/core';
-import type { Window } from '../ask/core';
+import type { BookTiming } from '../ask/bookRules';
 import type { SlowSegment, SlowTransits } from '../ask/transitTypes';
 import { payloadFromChart } from '../savedCharts';
 import type { Chart } from '../types';
@@ -12,6 +13,7 @@ import type { Chart } from '../types';
 const TOPICS: { id: DomainId; title: string; question: string }[] = [
   { id: 'marriage', title: 'Marriage', question: 'Marriage outlook for this year and next year' },
   { id: 'relationship', title: 'Relationships', question: 'Relationship outlook this year and next year' },
+  { id: 'children', title: 'Children and parenting', question: 'Children and parenting outlook this year and next year' },
   { id: 'career', title: 'Career', question: 'Career rise or fall this year and next year' },
   { id: 'property', title: 'Property', question: 'Property outlook for this year and next year' },
   { id: 'spiritual', title: 'Spiritual growth', question: 'Spiritual outlook this year and next year' },
@@ -20,9 +22,9 @@ const TOPICS: { id: DomainId; title: string; question: string }[] = [
 
 interface TopicOutlook {
   topic: typeof TOPICS[number];
-  answer: Answer;
-  favourable: Window[];
-  careful: Window[];
+  answer: UserAnswer;
+  favourable: BookTiming[];
+  careful: BookTiming[];
 }
 
 interface YearOutlook {
@@ -54,17 +56,18 @@ function houseFrom(sign: number | null, base: number): string {
   return sign === null ? '—' : `H${((sign - base + 12) % 12) + 1}`;
 }
 
-function ranges(windows: Window[], from: string, to: string): Window[] {
+function ranges(windows: BookTiming[], from: string, to: string): BookTiming[] {
   return windows.filter((w) => w.start < to && from < w.end)
     .map((w) => ({ ...w, start: w.start < from ? from : w.start, end: w.end > to ? to : w.end }));
 }
 
 function makeOutlook(chart: Chart, slow: SlowTransits, from: string, to: string): YearOutlook[] {
   const ctx = makeContext(chart, slow);
-  const answers = TOPICS.map((topic) => ({
-    topic,
-    answer: DOMAIN_BUILDERS[topic.id](ctx, topic.question, topic.id === 'career' ? 'riseFall' : 'timing'),
-  }));
+  const answers = TOPICS.map((topic) => {
+    const answer = answerQuestion(ctx, topic.question, topic.id);
+    if (!answer) throw new Error(`Could not generate the ${topic.title} outlook.`);
+    return { topic, answer };
+  });
   const firstYear = Number(from.slice(0, 4));
   const lastYear = Number(to.slice(0, 4)) - 1;
   return Array.from({ length: lastYear - firstYear + 1 }, (_, i) => {
@@ -74,8 +77,8 @@ function makeOutlook(chart: Chart, slow: SlowTransits, from: string, to: string)
     const topics = answers.map(({ topic, answer }) => ({
       topic,
       answer,
-      favourable: answer.groups.filter((g) => g.tone === 'good').flatMap((g) => ranges(g.windows, yearFrom, yearTo)).slice(0, 2),
-      careful: answer.groups.filter((g) => g.tone === 'caution').flatMap((g) => ranges(g.windows, yearFrom, yearTo)).slice(0, 1),
+      favourable: ranges(answer.outcome.timing.filter((period) => period.tone === 'good'), yearFrom, yearTo).slice(0, 2),
+      careful: ranges(answer.outcome.timing.filter((period) => period.tone === 'caution'), yearFrom, yearTo).slice(0, 1),
     }));
     return { year, from: yearFrom, to: yearTo, topics };
   });
@@ -86,18 +89,19 @@ function TopicRow({ item }: { item: TopicOutlook }) {
     <article className="year-topic">
       <div className="year-topic-heading">
         <strong>{item.topic.title}</strong>
-        <span className="pill">{item.answer.verdict.label}</span>
+        <span className="pill">Planning guidance</span>
       </div>
-      <p className="muted small">{item.answer.plain[0]}</p>
+      <p className="muted small">{item.answer.outcome.summary}</p>
+      {item.answer.outcome.cards[0] && <p className="muted small">{item.answer.outcome.cards[0].text}</p>}
       {item.favourable.length > 0 ? (
         <ul className="year-window-list">
           {item.favourable.map((window, i) => (
-            <li key={`good-${i}`}><span className="ev-good">Favourable: {formatRange(window.start, window.end)}</span>{window.md && ` · ${window.system} ${window.md}–${window.ad}`}</li>
+            <li key={`good-${i}`}><span className="ev-good">More supportive: {formatRange(window.start, window.end)}</span></li>
           ))}
         </ul>
-      ) : <p className="muted small">No standout favourable dasha window identified in this period.</p>}
+      ) : <p className="muted small">No standout supportive period identified here. This does not mean an opportunity is ruled out.</p>}
       {item.careful.map((window, i) => (
-        <p className="year-caution small" key={`care-${i}`}>Plan with extra care: {formatRange(window.start, window.end)} · {window.system} {window.md}–{window.ad}</p>
+        <p className="year-caution small" key={`care-${i}`}>Plan with extra care: {formatRange(window.start, window.end)}</p>
       ))}
     </article>
   );
@@ -150,7 +154,7 @@ export function YearAheadCard({ chart }: { chart: Chart }) {
       <div className="transit-head">
         <div>
           <h2>This year and next</h2>
-          <p className="muted small">A plain-language outlook across relationships, marriage, career, property, spiritual life and wellbeing, using your current planetary periods and Jupiter, Saturn and Rahu transits.</p>
+          <p className="muted small">An outcome-focused guide to relationships, marriage, parenting, career, property, spiritual life and wellbeing.</p>
         </div>
         <button type="button" className="button-primary no-print" disabled={loading} onClick={() => void generate()}>
           {loading ? <Loader2 className="spin" size={17} /> : <CalendarRange size={17} />}
@@ -160,7 +164,7 @@ export function YearAheadCard({ chart }: { chart: Chart }) {
       {error && <p className="alert" role="alert">{error}</p>}
       {outlooks.length > 0 && (
         <div aria-live="polite">
-          <p className="muted small">Coverage: {formatRange(outlooks[0].from, outlooks[outlooks.length - 1].to)} · transit houses are counted from your natal Lagna.</p>
+          <p className="muted small">Coverage: {formatRange(outlooks[0].from, outlooks[outlooks.length - 1].to)}. Dates are broad opportunities to plan, not guarantees.</p>
           <div className="year-report-grid">
             {outlooks.map((year) => (
               <section className="year-report" key={year.year}>
@@ -171,6 +175,8 @@ export function YearAheadCard({ chart }: { chart: Chart }) {
               </section>
             ))}
           </div>
+          <details>
+          <summary>Technical timing calendar (optional)</summary>
           <h3 className="av-title">Dasha and slow-transit calendar</h3>
           <div className="table-wrap">
             <table>
@@ -186,6 +192,7 @@ export function YearAheadCard({ chart }: { chart: Chart }) {
             </table>
           </div>
           <p className="muted small">This timing guide shows when planetary factors and transits align with your birth chart.</p>
+          </details>
         </div>
       )}
     </section>

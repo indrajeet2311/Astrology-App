@@ -1,0 +1,1086 @@
+%PDF-1.3
+%‚„œ”
+1 0 obj
+<<
+/Producer (pypdf)
+/Title (Extracted rule\055reference index and coverage guide)
+>>
+endobj
+2 0 obj
+<<
+/Type /Pages
+/Count 8
+/Kids [ 5 0 R 7 0 R 9 0 R 11 0 R 13 0 R 15 0 R 17 0 R 19 0 R ]
+>>
+endobj
+3 0 obj
+<<
+/Type /Catalog
+/Pages 2 0 R
+>>
+endobj
+4 0 obj
+<<
+/Type /Font
+/Subtype /Type1
+/BaseFont /Helvetica
+>>
+endobj
+5 0 obj
+<<
+/Type /Page
+/Resources <<
+/Font <<
+/F1 4 0 R
+>>
+>>
+/MediaBox [ 0.0 0.0 612 792 ]
+/Parent 2 0 R
+/Contents 6 0 R
+>>
+endobj
+6 0 obj
+<<
+/Length 3252
+>>
+stream
+BT
+/F1 9 Tf
+12 TL
+40 752 Td
+(ORIGINAL-PAGE RULE REFERENCE COLLECTION) Tj
+T*
+() Tj
+T*
+(Scope: six supplied books, 1,338 original PDF pages.) Tj
+T*
+(This collection extracts original pages. It is not a rewritten,) Tj
+T*
+(machine-readable rule catalog and makes no new predictions.) Tj
+T*
+(Whole chapters retain formulas, charts, exceptions, counterexamples) Tj
+T*
+(and rules embedded in case studies. Focused extracts overlap them.) Tj
+T*
+(No source page is omitted across the complete reference set.) Tj
+T*
+(No originals or application files were changed by this extraction.) Tj
+T*
+() Tj
+T*
+(HOW TO USE) Tj
+T*
+(01 marriage/Navamsa: promise, quality, timing, matching, spouse) Tj
+T*
+(   appearance/status/care, affairs and further D9 applications.) Tj
+T*
+(02 career/D10: field, service/business, status, rise/fall, partnership) Tj
+T*
+(   and milestones/timing.) Tj
+T*
+(03 children/D7: promise, Beeja/Kshetra, bonds, adoption, twins,) Tj
+T*
+(   sex/number and childbirth timing.) Tj
+T*
+(04 every divisional chapter and higher/linked divisions.) Tj
+T*
+(05 Jaimini basics, Argala and all sign-dasha chapters.) Tj
+T*
+(06 Vimshottari/event-timing book, including case-study methods.) Tj
+T*
+(07 available progressed Yogini marriage/childbirth material.) Tj
+T*
+(08 title pages, contents and prefaces; Vimshottari introductory) Tj
+T*
+(   discussion is preserved because it contains methodological material.) Tj
+T*
+() Tj
+T*
+(PROVENANCE AND LIMITATIONS) Tj
+T*
+(Each PDF bookmark identifies the book section and original PDF range.) Tj
+T*
+(coverage-manifest.json maps every extract page back to a source page.) Tj
+T*
+(References use 1-based PDF page numbers, NOT printed page numbers.) Tj
+T*
+(Contents-page printed start labels are recorded separately where) Tj
+T*
+(available. Navamsa has shifting numbering; no fixed offset is assumed.) Tj
+T*
+(Page extraction preserves the scanned pages and existing OCR.) Tj
+T*
+(OCR spelling, numbers and chart notation have NOT been corrected.) Tj
+T*
+(Some pages begin/end another subtopic; these are kept for context.) Tj
+T*
+(No standalone Yogini book is among the six supplied files.) Tj
+T*
+(The timing chapters explicitly refer readers to a separate Snapshot) Tj
+T*
+(Prediction by/using Yogini Dasha book for the progression method.) Tj
+T*
+(Included Yogini applications are not a complete independent manual.) Tj
+T*
+(Page coverage does NOT establish that each statement is a universal) Tj
+T*
+(rule, or that examples, alternative methods and contradictions agree.) Tj
+T*
+(Astrological claims are source material, not established scientific) Tj
+T*
+(facts or medical advice; no factual conclusions about people are made.) Tj
+T*
+(Keep this as a local reference to the supplied books, with attribution.) Tj
+T*
+() Tj
+T*
+(VERIFICATION) Tj
+T*
+(All output page counts, extracted text, page dimensions and decoded) Tj
+T*
+(drawing streams were compared with the corresponding source pages.) Tj
+T*
+(Coverage is 100% for each source, including source context.) Tj
+T*
+() Tj
+T*
+(SOURCE KEY) Tj
+T*
+(divisions: Comprehensive_Prediction_By_Divisional_Charts_by_V.P._Goel-1.pdf) Tj
+T*
+(  389 pages; covered: 389) Tj
+T*
+(navamsa: pdfcoffee.com_jyotish-2017-vp-goel-predict-with-navamsha-1-pdf-free.pdf) Tj
+T*
+(  140 pages; covered: 140) Tj
+T*
+ET
+endstream
+endobj
+7 0 obj
+<<
+/Type /Page
+/Resources <<
+/Font <<
+/F1 4 0 R
+>>
+>>
+/MediaBox [ 0.0 0.0 612 792 ]
+/Parent 2 0 R
+/Contents 8 0 R
+>>
+endobj
+8 0 obj
+<<
+/Length 2452
+>>
+stream
+BT
+/F1 9 Tf
+12 TL
+40 752 Td
+(career: Predict_With_Dashamsha_by_V.P._Goel.pdf) Tj
+T*
+(  210 pages; covered: 210) Tj
+T*
+(children: Jyotish_2017_V.P. Goel_Predict with saptamsha.pdf) Tj
+T*
+(  241 pages; covered: 241) Tj
+T*
+(jaimini: Jyotish_2017_V.P. Goel_Predicting Through Jaimini Astrology.pdf) Tj
+T*
+(  232 pages; covered: 232) Tj
+T*
+(vimshottari: Jyotish_KN Rao_Timing events through Vimshottari dasha.pdf) Tj
+T*
+(  126 pages; covered: 126) Tj
+T*
+() Tj
+T*
+(EXTRACT INDEX - paths relative to this folder) Tj
+T*
+() Tj
+T*
+(01-marriage-navamsa/01-d9-basics.pdf) Tj
+T*
+(  D9 calculation, Pushkar, Vargottam, Vish and deities) Tj
+T*
+(  navamsa: original PDF 5-17; extract 1-13) Tj
+T*
+() Tj
+T*
+(01-marriage-navamsa/02-marriage-promise-quality-delay-denial.pdf) Tj
+T*
+(  Marriage promise, quality, early/timely/late marriage, denial, foreign marriage and) Tj
+T*
+(separation) Tj
+T*
+(  navamsa: original PDF 18-44; extract 1-27) Tj
+T*
+() Tj
+T*
+(01-marriage-navamsa/03-matchmaking.pdf) Tj
+T*
+(  Matchmaking and compatibility) Tj
+T*
+(  navamsa: original PDF 45-60; extract 1-16) Tj
+T*
+() Tj
+T*
+(01-marriage-navamsa/04-multiple-marriages-and-affairs.pdf) Tj
+T*
+(  Multiple marriages, affairs and relationship patterns) Tj
+T*
+(  navamsa: original PDF 61-79; extract 1-19) Tj
+T*
+() Tj
+T*
+(01-marriage-navamsa/05-marriage-timing-all-methods.pdf) Tj
+T*
+(  Marriage timing: Vimshottari, Chara, progressed Yogini, transits, Saham and other) Tj
+T*
+(methods) Tj
+T*
+(  navamsa: original PDF 80-106; extract 1-27) Tj
+T*
+() Tj
+T*
+(01-marriage-navamsa/06-rashi-tulya-navamsha.pdf) Tj
+T*
+(  Rashi Tulya Navamsha and dasha assessment) Tj
+T*
+(  navamsa: original PDF 107-113; extract 1-7) Tj
+T*
+() Tj
+T*
+(01-marriage-navamsa/07-64th-navamsha.pdf) Tj
+T*
+(  64th Navamsha and sensitive transits) Tj
+T*
+(  navamsa: original PDF 114-121; extract 1-8) Tj
+T*
+() Tj
+T*
+(01-marriage-navamsa/08-devotion-and-worship.pdf) Tj
+T*
+(  Devotion, worship, spiritual timing and astrology) Tj
+T*
+(  navamsa: original PDF 122-140; extract 1-19) Tj
+T*
+() Tj
+T*
+(01-marriage-navamsa/09-spouse-appearance-status-and-care.pdf) Tj
+T*
+(  Spouse appearance, status and caring nature) Tj
+T*
+(  divisions: original PDF 151-155; extract 1-5) Tj
+T*
+() Tj
+T*
+(01-marriage-navamsa/10-married-life-quality-and-after-marriage.pdf) Tj
+T*
+(  Married-life quality, attraction and life after marriage) Tj
+T*
+(  navamsa: original PDF 19-24; extract 1-6) Tj
+T*
+(  divisions: original PDF 143-144; extract 7-8) Tj
+T*
+ET
+endstream
+endobj
+9 0 obj
+<<
+/Type /Page
+/Resources <<
+/Font <<
+/F1 4 0 R
+>>
+>>
+/MediaBox [ 0.0 0.0 612 792 ]
+/Parent 2 0 R
+/Contents 10 0 R
+>>
+endobj
+10 0 obj
+<<
+/Length 2221
+>>
+stream
+BT
+/F1 9 Tf
+12 TL
+40 752 Td
+(  divisions: original PDF 153-160; extract 9-16) Tj
+T*
+() Tj
+T*
+(01-marriage-navamsa/11-marriage-promise-early-late-multiple.pdf) Tj
+T*
+(  Marriage promise, early/late and multiple marriage - comprehensive book) Tj
+T*
+(  divisions: original PDF 143-150; extract 1-8) Tj
+T*
+() Tj
+T*
+(01-marriage-navamsa/12-comprehensive-d9-marriage-complete.pdf) Tj
+T*
+(  Complete marriage section from the divisional-chart book) Tj
+T*
+(  divisions: original PDF 143-160; extract 1-18) Tj
+T*
+() Tj
+T*
+(02-career-d10/01-construction-classic.pdf) Tj
+T*
+(  D10 construction, classical methods and deities) Tj
+T*
+(  career: original PDF 5-13; extract 1-9) Tj
+T*
+() Tj
+T*
+(02-career-d10/02-houses-tenth-lord-and-argala.pdf) Tj
+T*
+(  D10 basics, houses, twelve tenth-lord placements and Argala) Tj
+T*
+(  career: original PDF 14-39; extract 1-26) Tj
+T*
+() Tj
+T*
+(02-career-d10/03-profession-and-avocation.pdf) Tj
+T*
+(  Profession, livelihood and avocation) Tj
+T*
+(  career: original PDF 40-63; extract 1-24) Tj
+T*
+() Tj
+T*
+(02-career-d10/04-self-employed-versus-service.pdf) Tj
+T*
+(  Self-employment versus service) Tj
+T*
+(  career: original PDF 64-76; extract 1-13) Tj
+T*
+() Tj
+T*
+(02-career-d10/05-status.pdf) Tj
+T*
+(  Professional and social status) Tj
+T*
+(  career: original PDF 77-100; extract 1-24) Tj
+T*
+() Tj
+T*
+(02-career-d10/06-rise.pdf) Tj
+T*
+(  Career rise and advancement) Tj
+T*
+(  career: original PDF 101-128; extract 1-28) Tj
+T*
+() Tj
+T*
+(02-career-d10/07-fall.pdf) Tj
+T*
+(  Career fall, loss of status and setbacks) Tj
+T*
+(  career: original PDF 129-148; extract 1-20) Tj
+T*
+() Tj
+T*
+(02-career-d10/08-inter-relations.pdf) Tj
+T*
+(  D10 inter-relations and related charts) Tj
+T*
+(  career: original PDF 149-160; extract 1-12) Tj
+T*
+() Tj
+T*
+(02-career-d10/09-partnership.pdf) Tj
+T*
+(  Business partnership) Tj
+T*
+(  career: original PDF 161-176; extract 1-16) Tj
+T*
+() Tj
+T*
+(02-career-d10/10-career-graph-and-timing.pdf) Tj
+T*
+(  Career milestones and timing) Tj
+T*
+(  career: original PDF 177-210; extract 1-34) Tj
+T*
+() Tj
+T*
+(03-children-d7/01-natal-promise-and-progeny.pdf) Tj
+T*
+(  Natal promise of children and progeny combinations) Tj
+T*
+(  children: original PDF 5-28; extract 1-24) Tj
+T*
+ET
+endstream
+endobj
+11 0 obj
+<<
+/Type /Page
+/Resources <<
+/Font <<
+/F1 4 0 R
+>>
+>>
+/MediaBox [ 0.0 0.0 612 792 ]
+/Parent 2 0 R
+/Contents 12 0 R
+>>
+endobj
+12 0 obj
+<<
+/Length 2255
+>>
+stream
+BT
+/F1 9 Tf
+12 TL
+40 752 Td
+() Tj
+T*
+(03-children-d7/02-d7-construction-houses-examination.pdf) Tj
+T*
+(  D7 construction, houses and examination) Tj
+T*
+(  children: original PDF 29-64; extract 1-36) Tj
+T*
+() Tj
+T*
+(03-children-d7/03-beeja-kshetra-and-luxury.pdf) Tj
+T*
+(  Luxury chapter: Beeja Sphuta and Kshetra Sphuta) Tj
+T*
+(  children: original PDF 65-84; extract 1-20) Tj
+T*
+() Tj
+T*
+(03-children-d7/04-renanubandhan.pdf) Tj
+T*
+(  Renanubandhan and parent-child bonds) Tj
+T*
+(  children: original PDF 85-108; extract 1-24) Tj
+T*
+() Tj
+T*
+(03-children-d7/05-worthy-children.pdf) Tj
+T*
+(  Worthy children and care of parents) Tj
+T*
+(  children: original PDF 109-120; extract 1-12) Tj
+T*
+() Tj
+T*
+(03-children-d7/06-adoption.pdf) Tj
+T*
+(  Adoption and related progeny methods) Tj
+T*
+(  children: original PDF 121-136; extract 1-16) Tj
+T*
+() Tj
+T*
+(03-children-d7/07-twins.pdf) Tj
+T*
+(  Twins and multiple births) Tj
+T*
+(  children: original PDF 137-161; extract 1-25) Tj
+T*
+() Tj
+T*
+(03-children-d7/08-sex-and-number.pdf) Tj
+T*
+(  Sex and number of children) Tj
+T*
+(  children: original PDF 162-202; extract 1-41) Tj
+T*
+() Tj
+T*
+(03-children-d7/09-childbirth-timing.pdf) Tj
+T*
+(  Childbirth timing: Vimshottari, Chara and progressed Yogini) Tj
+T*
+(  children: original PDF 203-241; extract 1-39) Tj
+T*
+() Tj
+T*
+(04-all-divisional-charts/01-general-rules-and-strength.pdf) Tj
+T*
+(  General divisional rules, strength, Vimshopak Bala and longitudes) Tj
+T*
+(  divisions: original PDF 8-19; extract 1-12) Tj
+T*
+() Tj
+T*
+(04-all-divisional-charts/02-d1-birth-chart.pdf) Tj
+T*
+(  D1 birth chart, houses, signs, planets and examination) Tj
+T*
+(  divisions: original PDF 20-51; extract 1-32) Tj
+T*
+() Tj
+T*
+(04-all-divisional-charts/03-d2-hora.pdf) Tj
+T*
+(  D2 Hora: all construction methods and wealth interpretation) Tj
+T*
+(  divisions: original PDF 52-73; extract 1-22) Tj
+T*
+() Tj
+T*
+(04-all-divisional-charts/04-d3-drekkana.pdf) Tj
+T*
+(  D3 Drekkana: siblings, nature and all methods) Tj
+T*
+(  divisions: original PDF 74-98; extract 1-25) Tj
+T*
+() Tj
+T*
+(04-all-divisional-charts/05-d4-chaturthamsha.pdf) Tj
+T*
+(  D4 Chaturthamsha: property, fortune, residence and settlement abroad) Tj
+T*
+(  divisions: original PDF 99-112; extract 1-14) Tj
+T*
+() Tj
+T*
+ET
+endstream
+endobj
+13 0 obj
+<<
+/Type /Page
+/Resources <<
+/Font <<
+/F1 4 0 R
+>>
+>>
+/MediaBox [ 0.0 0.0 612 792 ]
+/Parent 2 0 R
+/Contents 14 0 R
+>>
+endobj
+14 0 obj
+<<
+/Length 2468
+>>
+stream
+BT
+/F1 9 Tf
+12 TL
+40 752 Td
+(04-all-divisional-charts/06-d7-saptamsha.pdf) Tj
+T*
+(  D7 Saptamsha: children, houses, sex and Beeja/Kshetra) Tj
+T*
+(  divisions: original PDF 113-127; extract 1-15) Tj
+T*
+() Tj
+T*
+(04-all-divisional-charts/07-d9-navamsha.pdf) Tj
+T*
+(  D9 Navamsha: all methods, marriage and related rules) Tj
+T*
+(  divisions: original PDF 128-163; extract 1-36) Tj
+T*
+() Tj
+T*
+(04-all-divisional-charts/08-d10-dashamsha.pdf) Tj
+T*
+(  D10 Dashamsha: career, houses, deities and tenth lord) Tj
+T*
+(  divisions: original PDF 164-176; extract 1-13) Tj
+T*
+() Tj
+T*
+(04-all-divisional-charts/09-d12-dwadashamsha.pdf) Tj
+T*
+(  D12 Dwadashamsha: parents, ancestors and examination) Tj
+T*
+(  divisions: original PDF 177-190; extract 1-14) Tj
+T*
+() Tj
+T*
+(04-all-divisional-charts/10-d16-shodashamsha.pdf) Tj
+T*
+(  D16 Shodashamsha: vehicles, happiness and comforts) Tj
+T*
+(  divisions: original PDF 191-212; extract 1-22) Tj
+T*
+() Tj
+T*
+(04-all-divisional-charts/11-d20-vimshamsha.pdf) Tj
+T*
+(  D20 Vimshamsha: worship, spirituality and salvation) Tj
+T*
+(  divisions: original PDF 213-228; extract 1-16) Tj
+T*
+() Tj
+T*
+(04-all-divisional-charts/12-d24-chaturvimshamsha.pdf) Tj
+T*
+(  D24 Chaturvimshamsha: education and learning) Tj
+T*
+(  divisions: original PDF 229-245; extract 1-17) Tj
+T*
+() Tj
+T*
+(04-all-divisional-charts/13-d27-saptavimshamsha.pdf) Tj
+T*
+(  D27 Saptavimshamsha: strengths, weaknesses and planets) Tj
+T*
+(  divisions: original PDF 246-257; extract 1-12) Tj
+T*
+() Tj
+T*
+(04-all-divisional-charts/14-d30-trimshamsha.pdf) Tj
+T*
+(  D30 Trimshamsha: houses, deities and examination) Tj
+T*
+(  divisions: original PDF 258-269; extract 1-12) Tj
+T*
+() Tj
+T*
+(04-all-divisional-charts/15-d40-khavedamsha.pdf) Tj
+T*
+(  D40 Khavedamsha: methods, deities and examination) Tj
+T*
+(  divisions: original PDF 270-283; extract 1-14) Tj
+T*
+() Tj
+T*
+(04-all-divisional-charts/16-d45-akshayvedamsha.pdf) Tj
+T*
+(  D45 Akshayvedamsha: methods, deities and examination) Tj
+T*
+(  divisions: original PDF 284-297; extract 1-14) Tj
+T*
+() Tj
+T*
+(04-all-divisional-charts/17-d60-shashtiamsha.pdf) Tj
+T*
+(  D60 Shashtiamsha: methods, deities and examination) Tj
+T*
+(  divisions: original PDF 298-311; extract 1-14) Tj
+T*
+() Tj
+T*
+(04-all-divisional-charts/18-d5-panchamsha.pdf) Tj
+T*
+(  D5 Panchamsha: methods, houses, spirituality and worship) Tj
+T*
+(  divisions: original PDF 312-323; extract 1-12) Tj
+T*
+() Tj
+T*
+(04-all-divisional-charts/19-d6-shashtamsha.pdf) Tj
+T*
+ET
+endstream
+endobj
+15 0 obj
+<<
+/Type /Page
+/Resources <<
+/Font <<
+/F1 4 0 R
+>>
+>>
+/MediaBox [ 0.0 0.0 612 792 ]
+/Parent 2 0 R
+/Contents 16 0 R
+>>
+endobj
+16 0 obj
+<<
+/Length 2305
+>>
+stream
+BT
+/F1 9 Tf
+12 TL
+40 752 Td
+(  D6 Shashtamsha: houses and illness-related examination) Tj
+T*
+(  divisions: original PDF 324-330; extract 1-7) Tj
+T*
+() Tj
+T*
+(04-all-divisional-charts/20-d8-ashtamsha.pdf) Tj
+T*
+(  D8 Ashtamsha: sudden events, methods and examination) Tj
+T*
+(  divisions: original PDF 331-340; extract 1-10) Tj
+T*
+() Tj
+T*
+(04-all-divisional-charts/21-d11-ekdashamsha.pdf) Tj
+T*
+(  D11 Ekdashamsha: gains, methods and examination) Tj
+T*
+(  divisions: original PDF 341-353; extract 1-13) Tj
+T*
+() Tj
+T*
+(04-all-divisional-charts/22-higher-divisions.pdf) Tj
+T*
+(  Higher divisions: D72, D81, D108, D144, Nadi and other amshas) Tj
+T*
+(  divisions: original PDF 354-367; extract 1-14) Tj
+T*
+() Tj
+T*
+(04-all-divisional-charts/23-linking-divisional-charts.pdf) Tj
+T*
+(  Linking charts: individual, family, spouses, property, business and guru/disciple) Tj
+T*
+(  divisions: original PDF 368-389; extract 1-22) Tj
+T*
+() Tj
+T*
+(05-jaimini-and-sign-dashas/01-basics.pdf) Tj
+T*
+(  Jaimini basics, aspects, karakas, Arudha and strengths) Tj
+T*
+(  jaimini: original PDF 5-28; extract 1-24) Tj
+T*
+() Tj
+T*
+(05-jaimini-and-sign-dashas/02-argala.pdf) Tj
+T*
+(  Argala and obstruction) Tj
+T*
+(  jaimini: original PDF 29-42; extract 1-14) Tj
+T*
+() Tj
+T*
+(05-jaimini-and-sign-dashas/03-chara-dasha.pdf) Tj
+T*
+(  Chara Dasha: calculation and applications) Tj
+T*
+(  jaimini: original PDF 43-70; extract 1-28) Tj
+T*
+() Tj
+T*
+(05-jaimini-and-sign-dashas/04-mandook-dasha.pdf) Tj
+T*
+(  Mandook Dasha: methods and applications) Tj
+T*
+(  jaimini: original PDF 71-103; extract 1-33) Tj
+T*
+() Tj
+T*
+(05-jaimini-and-sign-dashas/05-sthira-and-brahma-dasha.pdf) Tj
+T*
+(  Sthira and Brahma Dasha) Tj
+T*
+(  jaimini: original PDF 104-127; extract 1-24) Tj
+T*
+() Tj
+T*
+(05-jaimini-and-sign-dashas/06-narayan-dasha.pdf) Tj
+T*
+(  Narayan Dasha) Tj
+T*
+(  jaimini: original PDF 128-142; extract 1-15) Tj
+T*
+() Tj
+T*
+(05-jaimini-and-sign-dashas/07-navamsha-dasha.pdf) Tj
+T*
+(  Navamsha Dasha and event confirmation) Tj
+T*
+(  jaimini: original PDF 143-165; extract 1-23) Tj
+T*
+() Tj
+T*
+(05-jaimini-and-sign-dashas/08-narayan-shoola-dasha.pdf) Tj
+T*
+(  Narayan Shoola Dasha \(NSD\)) Tj
+T*
+(  jaimini: original PDF 166-182; extract 1-17) Tj
+T*
+() Tj
+T*
+(05-jaimini-and-sign-dashas/09-trikon-dasha.pdf) Tj
+T*
+(  Trikon Dasha) Tj
+T*
+ET
+endstream
+endobj
+17 0 obj
+<<
+/Type /Page
+/Resources <<
+/Font <<
+/F1 4 0 R
+>>
+>>
+/MediaBox [ 0.0 0.0 612 792 ]
+/Parent 2 0 R
+/Contents 18 0 R
+>>
+endobj
+18 0 obj
+<<
+/Length 2270
+>>
+stream
+BT
+/F1 9 Tf
+12 TL
+40 752 Td
+(  jaimini: original PDF 183-216; extract 1-34) Tj
+T*
+() Tj
+T*
+(05-jaimini-and-sign-dashas/10-atmanadi-dasha.pdf) Tj
+T*
+(  Atmanadi Dasha) Tj
+T*
+(  jaimini: original PDF 217-232; extract 1-16) Tj
+T*
+() Tj
+T*
+(06-vimshottari-and-event-timing/01-purpose-and-dasha-relations.pdf) Tj
+T*
+(  Need for the book and dasha relationships) Tj
+T*
+(  vimshottari: original PDF 29-31; extract 1-3) Tj
+T*
+() Tj
+T*
+(06-vimshottari-and-event-timing/02-learning-method.pdf) Tj
+T*
+(  Modern method of learning astrology) Tj
+T*
+(  vimshottari: original PDF 32-36; extract 1-5) Tj
+T*
+() Tj
+T*
+(06-vimshottari-and-event-timing/03-cbi-background-information.pdf) Tj
+T*
+(  First memory tablet: CBI) Tj
+T*
+(  vimshottari: original PDF 37-44; extract 1-8) Tj
+T*
+() Tj
+T*
+(06-vimshottari-and-event-timing/04-task-analysis.pdf) Tj
+T*
+(  Second memory tablet: TASK) Tj
+T*
+(  vimshottari: original PDF 45-48; extract 1-4) Tj
+T*
+() Tj
+T*
+(06-vimshottari-and-event-timing/05-ipc-inference.pdf) Tj
+T*
+(  Third memory tablet: IPC) Tj
+T*
+(  vimshottari: original PDF 49-54; extract 1-6) Tj
+T*
+() Tj
+T*
+(06-vimshottari-and-event-timing/06-prediction-checklist.pdf) Tj
+T*
+(  Prediction checklist) Tj
+T*
+(  vimshottari: original PDF 55-56; extract 1-2) Tj
+T*
+() Tj
+T*
+(06-vimshottari-and-event-timing/07-money-versus-promotion.pdf) Tj
+T*
+(  More money but not higher post) Tj
+T*
+(  vimshottari: original PDF 57-61; extract 1-5) Tj
+T*
+() Tj
+T*
+(06-vimshottari-and-event-timing/08-predictive-case-studies.pdf) Tj
+T*
+(  Predictive tit bits: CBI) Tj
+T*
+(  vimshottari: original PDF 62-65; extract 1-4) Tj
+T*
+() Tj
+T*
+(06-vimshottari-and-event-timing/09-career-timing.pdf) Tj
+T*
+(  Guiding a career and timing events) Tj
+T*
+(  vimshottari: original PDF 66-72; extract 1-7) Tj
+T*
+() Tj
+T*
+(06-vimshottari-and-event-timing/10-difficult-moments.pdf) Tj
+T*
+(  Astrologer's difficult moments) Tj
+T*
+(  vimshottari: original PDF 73-76; extract 1-4) Tj
+T*
+() Tj
+T*
+(06-vimshottari-and-event-timing/11-crfd-approach.pdf) Tj
+T*
+(  CRFD approach to predictions) Tj
+T*
+(  vimshottari: original PDF 77-79; extract 1-3) Tj
+T*
+() Tj
+T*
+(06-vimshottari-and-event-timing/12-interpretation-example.pdf) Tj
+T*
+(  Example of interpretation) Tj
+T*
+(  vimshottari: original PDF 80-84; extract 1-5) Tj
+T*
+ET
+endstream
+endobj
+19 0 obj
+<<
+/Type /Page
+/Resources <<
+/Font <<
+/F1 4 0 R
+>>
+>>
+/MediaBox [ 0.0 0.0 612 792 ]
+/Parent 2 0 R
+/Contents 20 0 R
+>>
+endobj
+20 0 obj
+<<
+/Length 1786
+>>
+stream
+BT
+/F1 9 Tf
+12 TL
+40 752 Td
+() Tj
+T*
+(06-vimshottari-and-event-timing/13-reason-out-yourself.pdf) Tj
+T*
+(  Reason out yourself) Tj
+T*
+(  vimshottari: original PDF 85-96; extract 1-12) Tj
+T*
+() Tj
+T*
+(06-vimshottari-and-event-timing/14-ayanamsha-and-accuracy.pdf) Tj
+T*
+(  Ayanamsha and accuracy) Tj
+T*
+(  vimshottari: original PDF 97-111; extract 1-15) Tj
+T*
+() Tj
+T*
+(06-vimshottari-and-event-timing/15-summary-and-conclusions.pdf) Tj
+T*
+(  Summary, conclusions and further applications) Tj
+T*
+(  vimshottari: original PDF 112-126; extract 1-15) Tj
+T*
+() Tj
+T*
+(07-yogini-material/01-progressed-yogini-marriage-and-childbirth.pdf) Tj
+T*
+(  Available progressed Yogini material: marriage and childbirth) Tj
+T*
+(  navamsa: original PDF 80-106; extract 1-27) Tj
+T*
+(  children: original PDF 203-241; extract 28-66) Tj
+T*
+() Tj
+T*
+(08-source-context/divisions-front-matter.pdf) Tj
+T*
+(  Source context and contents: divisions) Tj
+T*
+(  divisions: original PDF 1-7; extract 1-7) Tj
+T*
+() Tj
+T*
+(08-source-context/navamsa-front-matter.pdf) Tj
+T*
+(  Source context and contents: navamsa) Tj
+T*
+(  navamsa: original PDF 1-4; extract 1-4) Tj
+T*
+() Tj
+T*
+(08-source-context/career-front-matter.pdf) Tj
+T*
+(  Source context and contents: career) Tj
+T*
+(  career: original PDF 1-4; extract 1-4) Tj
+T*
+() Tj
+T*
+(08-source-context/children-front-matter.pdf) Tj
+T*
+(  Source context and contents: children) Tj
+T*
+(  children: original PDF 1-4; extract 1-4) Tj
+T*
+() Tj
+T*
+(08-source-context/jaimini-front-matter.pdf) Tj
+T*
+(  Source context and contents: jaimini) Tj
+T*
+(  jaimini: original PDF 1-4; extract 1-4) Tj
+T*
+() Tj
+T*
+(08-source-context/vimshottari-front-matter.pdf) Tj
+T*
+(  Source context and contents: vimshottari) Tj
+T*
+(  vimshottari: original PDF 1-28; extract 1-28) Tj
+T*
+() Tj
+T*
+ET
+endstream
+endobj
+xref
+0 21
+0000000000 65535 f 
+0000000015 00000 n 
+0000000116 00000 n 
+0000000222 00000 n 
+0000000271 00000 n 
+0000000341 00000 n 
+0000000473 00000 n 
+0000003777 00000 n 
+0000003909 00000 n 
+0000006413 00000 n 
+0000006546 00000 n 
+0000008820 00000 n 
+0000008954 00000 n 
+0000011262 00000 n 
+0000011396 00000 n 
+0000013917 00000 n 
+0000014051 00000 n 
+0000016409 00000 n 
+0000016543 00000 n 
+0000018866 00000 n 
+0000019000 00000 n 
+trailer
+<<
+/Size 21
+/Root 3 0 R
+/Info 1 0 R
+>>
+startxref
+20839
+%%EOF

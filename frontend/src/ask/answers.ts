@@ -4,21 +4,22 @@ import { signStatus } from '../vargas';
 import type { JaiminiYoga } from '../jaiminiYogas';
 import { assessHouse, assessPlanetInfluences, assessVarga, blend, houseFactorSummary, housePlainNote, placementComfort, STATUS_TEXT, verdictFor } from './assess';
 import type { Assessment, Verdict } from './assess';
+import { PLANET_FIELDS } from './outcomes';
 import {
   addNavataraPeaks, addPeaks, aspectors, doubleTransit, formatRange, lordOfHouse, occupants, ordinal, planet, saturnPressure,
   scoreWindows, signName, signOfHouse, significators, targetSigns, topWindows, transitIntervals, vargaExtras, vargaHouseOf,
   vargaHouseSign, vargaLord, vargaOccupants, vargaSign, vargaStatus, vargottama, functionalNature, MALEFICS, hasNeechaBhanga, houseKartari,
-  SIGN_TRAITS,
+  SIGN_TRAITS, careerFieldPlanets,
 } from './core';
 
 export { SIGN_TRAITS } from './core';
 import type { Context, Evidence, SigSpec, Sigs, Window } from './core';
 
-export type DomainId = 'marriage' | 'relationship' | 'career' | 'property' | 'spiritual' | 'health';
+export type DomainId = 'marriage' | 'relationship' | 'children' | 'career' | 'property' | 'spiritual' | 'health';
 export type Focus = 'timing' | 'nature' | 'riseFall' | 'general';
 
 const PRIMARY_HOUSES: Record<DomainId, number[]> = {
-  marriage: [7], relationship: [5, 7], career: [10], property: [4], spiritual: [9, 12], health: [1, 6],
+  marriage: [7], relationship: [5, 7], children: [5], career: [10], property: [4], spiritual: [9, 12], health: [1, 6],
 };
 
 export interface WindowGroup {
@@ -60,13 +61,6 @@ const HOUSE_MEANING: Record<number, string> = {
   1: 'self and health', 2: 'family and money', 3: 'courage and communication', 4: 'home and property',
   5: 'romance and creativity', 6: 'work and service', 7: 'marriage and partnerships', 8: 'sudden change and hidden matters',
   9: 'luck, higher learning and faith', 10: 'career and public life', 11: 'gains and friendships', 12: 'foreign lands, rest and letting go',
-};
-const PLANET_FIELDS: Record<string, string> = {
-  Sun: 'government, administration, leadership or medicine', Moon: 'public-facing, caring, hospitality or food fields',
-  Mars: 'engineering, defence, sports, surgery or real estate', Mercury: 'communication, commerce, technology or analysis',
-  Jupiter: 'teaching, law, advisory, finance or counselling', Venus: 'arts, design, luxury, media or entertainment',
-  Saturn: 'operations, industry, construction, research or long-haul service', Rahu: 'technology, foreign dealings or unconventional work',
-  Ketu: 'research, healing, technical or spiritual work',
 };
 const BODY_AREA = [
   'head and brain', 'throat, neck and thyroid', 'arms, lungs and nerves', 'chest, stomach and breasts',
@@ -111,6 +105,7 @@ function interchartRead(ctx: Context, domain: DomainId): { adjustment: number; e
   const focus = {
     marriage: [lordOfHouse(ctx, 7), 'Venus', 'Jupiter'],
     relationship: [lordOfHouse(ctx, 5), lordOfHouse(ctx, 7), 'Venus', 'Moon'],
+    children: [lordOfHouse(ctx, 1), lordOfHouse(ctx, 5), 'Jupiter', 'Moon'],
     career: [lordOfHouse(ctx, 10), lordOfHouse(ctx, 4), 'Saturn', 'Sun', 'Mercury'],
     property: [lordOfHouse(ctx, 4), lordOfHouse(ctx, 11), 'Mars', 'Venus', 'Moon'],
     spiritual: [lordOfHouse(ctx, 9), lordOfHouse(ctx, 12), 'Jupiter', 'Ketu'],
@@ -124,6 +119,7 @@ function interchartRead(ctx: Context, domain: DomainId): { adjustment: number; e
   const jaiminiPairs = ({
     marriage: [[karaka('AK'), karaka('DK')!, 'Atmakaraka–Darakaraka'], [karaka('DK'), lordOfHouse(ctx, 7), 'Darakaraka–7th lord']],
     relationship: [[karaka('AK'), karaka('DK')!, 'Atmakaraka–Darakaraka'], [karaka('DK'), lordOfHouse(ctx, 5), 'Darakaraka–5th lord']],
+    children: [[karaka('AK'), karaka('PiK')!, 'Atmakaraka–Putrakaraka'], [karaka('PiK'), lordOfHouse(ctx, 5), 'Putrakaraka–5th lord']],
     career: [[karaka('AK'), karaka('AmK')!, 'Atmakaraka–Amatyakaraka'], [karaka('AmK'), lordOfHouse(ctx, 10), 'Amatyakaraka–10th lord']],
     property: [[karaka('MK'), lordOfHouse(ctx, 4), 'Matrikaraka–4th lord']],
     spiritual: [[karaka('AK'), 'Ketu', 'Atmakaraka–Ketu'], [karaka('AK'), lordOfHouse(ctx, 9), 'Atmakaraka–9th lord']],
@@ -139,20 +135,20 @@ function interchartRead(ctx: Context, domain: DomainId): { adjustment: number; e
   });
   const evidence: Evidence[] = ctx.chart.planets.map((natal) => {
     const name = natal.name;
-    const navamsa = vargaSign(ctx, name, 'D9');
-    const moved = signDistance(natal.signNumber, navamsa);
-    const house = vargaHouseOf(ctx, name, 'D9');
-    const comfort = placementComfort(house, vargaStatus(ctx, name, 'D9'), MALEFICS.includes(name));
+    const divisionalSign = vargaSign(ctx, name, plan.division);
+    const moved = signDistance(natal.signNumber, divisionalSign);
+    const house = vargaHouseOf(ctx, name, plan.division);
+    const comfort = placementComfort(house, vargaStatus(ctx, name, plan.division), MALEFICS.includes(name));
     const shifted = moved === 1 ? 'remains in the same sign' : 'moves to the ' + ordinal(moved) + ' sign from its D1 sign';
-    if (difficult.has(moved)) shifts.push(`${name} moves ${moved} signs D1 ${natal.sign} → D9 ${signName(navamsa)}`);
+    if (difficult.has(moved)) shifts.push(`${name} moves ${moved} signs D1 ${natal.sign} → ${plan.label} ${signName(divisionalSign)}`);
     return {
-      text: `${name}${planets.includes(name) ? ' (topic indicator)' : ' (chart-wide context)'}: D1 ${natal.sign}, house ${natal.house}, ${dignityNote(ctx, name)}; D9 ${signName(navamsa)} (${shifted}; D9 house ${house})${difficult.has(moved) ? ', a 6th/8th/12th D1-to-D9 shift to weigh carefully' : ''}; ${STATUS_TEXT[vargaStatus(ctx, name, 'D9')]}; ${comfort}.`,
-      tone: difficult.has(moved) ? 'bad' : ['Exalted', 'Own', 'Adhi Mitra', 'Mitra'].includes(vargaStatus(ctx, name, 'D9')) ? 'good' : 'neutral',
+      text: `${name}${planets.includes(name) ? ' (topic indicator)' : ' (chart-wide context)'}: D1 ${natal.sign}, house ${natal.house}, ${dignityNote(ctx, name)}; ${plan.label} ${signName(divisionalSign)} (${shifted}; ${plan.label} house ${house})${difficult.has(moved) ? `, a 6th/8th/12th D1-to-${plan.division} shift to weigh carefully` : ''}; ${STATUS_TEXT[vargaStatus(ctx, name, plan.division)]}; ${comfort}.`,
+      tone: difficult.has(moved) ? 'bad' : ['Exalted', 'Own', 'Adhi Mitra', 'Mitra'].includes(vargaStatus(ctx, name, plan.division)) ? 'good' : 'neutral',
     };
   });
   evidence.push(...[...new Map(ctx.chart.planets.flatMap((position) => [
     ...assessPlanetInfluences(ctx, position.name).evidence,
-    ...assessPlanetInfluences(ctx, position.name, 'D9').evidence,
+    ...assessPlanetInfluences(ctx, position.name, plan.division).evidence,
   ]).map((item) => [item.text, item])).values()]);
   let challengedPairs = 0;
   const relations: string[] = [];
@@ -160,21 +156,21 @@ function interchartRead(ctx: Context, domain: DomainId): { adjustment: number; e
     for (let j = i + 1; j < planets.length; j++) {
       const a = planets[i], b = planets[j];
       const d1 = signDistance(planet(ctx, a).signNumber, planet(ctx, b).signNumber);
-      const d9 = signDistance(vargaSign(ctx, a, 'D9'), vargaSign(ctx, b, 'D9'));
+      const divisionalDistance = signDistance(vargaSign(ctx, a, plan.division), vargaSign(ctx, b, plan.division));
       const d1Issue = difficult.has(d1);
-      const d9Issue = difficult.has(d9);
-      if (!d1Issue && !d9Issue) continue;
+      const divisionalIssue = difficult.has(divisionalDistance);
+      if (!d1Issue && !divisionalIssue) continue;
       challengedPairs++;
-      relations.push(`${a} and ${b}: D1 ${d1}th, D9 ${d9}th`);
+      relations.push(`${a} and ${b}: D1 ${d1}th, ${plan.division} ${divisionalDistance}th`);
     }
   }
   if (shifts.length) {
     evidence.push({
-      text: `Planets moving 6/8/12 signs from their own D1 sign to D9: ${shifts.join('; ')}. This is a caution about how each planet carries its promise into Navamsa, not a denial by itself.`,
+      text: `Planets moving 6/8/12 signs from their own D1 sign to ${plan.label}: ${shifts.join('; ')}. This is a caution about how each planet carries its promise into this divisional chart, not a denial by itself.`,
       tone: 'bad',
     });
   } else {
-    evidence.push({ text: 'None of the nine grahas moves 6, 8 or 12 signs from its own D1 sign to D9; absence of this pattern is not by itself a positive promise.', tone: 'neutral' });
+    evidence.push({ text: `None of the nine grahas moves 6, 8 or 12 signs from its own D1 sign to ${plan.label}; absence of this pattern is not by itself a positive promise.`, tone: 'neutral' });
   }
   evidence.push({
     text: jaiminiLinks.length
@@ -188,17 +184,17 @@ function interchartRead(ctx: Context, domain: DomainId): { adjustment: number; e
       tone: 'bad',
     });
   } else {
-    evidence.push({ text: 'The selected lords and karakas do not form 6/8/12 sign relationships with one another in D1 or D9.', tone: 'good' });
+    evidence.push({ text: `The selected lords and karakas do not form 6/8/12 sign relationships with one another in D1 or ${plan.division}.`, tone: 'good' });
   }
-  const relevantShifts = planets.filter((name) => difficult.has(signDistance(planet(ctx, name).signNumber, vargaSign(ctx, name, 'D9')))).length;
+  const relevantShifts = planets.filter((name) => difficult.has(signDistance(planet(ctx, name).signNumber, vargaSign(ctx, name, plan.division)))).length;
   const adjustment = -Math.min(8, (challengedPairs + relevantShifts) * 2);
   const summaryParts = [
     shifts.length ? `${shifts.length} of ${ctx.chart.planets.length} grahas have 6/8/12 self-shifts: ${shifts.join('; ')}` : '',
     relations.length ? `inter-planet links ${relations.slice(0, 3).join('; ')}` : '',
   ].filter(Boolean);
   const movementSummary = summaryParts.length
-    ? `D1-to-D9 check: ${summaryParts.join('. ')}. These 6/8/12 patterns are cautions to balance against dignity, house strength and cancellation, not denials.`
-    : 'D1-to-D9 check: no graha has a 6/8/12 self-shift, and the selected topic indicators have no such inter-planet relationships.';
+    ? `D1-to-${plan.division} check: ${summaryParts.join('. ')}. These 6/8/12 patterns are cautions to balance against dignity, house strength and cancellation, not denials.`
+    : `D1-to-${plan.division} check: no graha has a 6/8/12 self-shift, and the selected topic indicators have no such inter-planet relationships.`;
   const primaryHouses = PRIMARY_HOUSES[domain];
   const natalSummary = primaryHouses.map((house) => {
     const assessment = assessHouse(ctx, house, null, [3, 6, 10, 11].includes(house));
@@ -418,9 +414,10 @@ interface VargaPlan {
 }
 
 const PLANS: Record<DomainId, VargaPlan> = {
-  marriage: { division: 'D9', label: 'Navamsa', houses: [7], karaka: 'Venus', weight: 0.5, why: 'the main chart of marriage, showing how a partnership really unfolds and matures', meaning: 'the main chart of marriage and of the partner\'s inner nature' },
+  marriage: { division: 'D9', label: 'Navamsa', houses: [1, 2, 7], karaka: 'Venus', weight: 0.5, why: 'the main chart of marriage, showing how a partnership really unfolds and matures', meaning: 'readiness for commitment, family adjustment and partnership' },
   relationship: { division: 'D9', label: 'Navamsa', houses: [7], karaka: 'Venus', weight: 0.35, why: 'the chart that shows the depth and durability of a partnership', meaning: 'the depth and durability of partnership' },
-  career: { division: 'D10', label: 'Dasamsa', houses: [10], karaka: null, weight: 0.5, upachaya: true, why: 'the main chart of profession and public achievement', meaning: 'the main chart of profession and public achievement' },
+  children: { division: 'D7', label: 'Saptamsa', houses: [1, 5, 7], karaka: 'Jupiter', weight: 0.5, why: 'the chart used to examine children, parenting and creative legacy', meaning: 'the promise and well-being of children, the first child, and family-growth themes' },
+  career: { division: 'D10', label: 'Dasamsa', houses: [1, 10], karaka: null, weight: 0.5, upachaya: true, why: 'the main chart of profession and public achievement', meaning: 'professional capacity, career and public achievement' },
   property: { division: 'D4', label: 'Chaturthamsa', houses: [4], karaka: 'Mars', weight: 0.4, why: 'the chart that shows home, land and fixed assets', meaning: 'fixed assets, home and property' },
   spiritual: { division: 'D20', label: 'Vimshamsa', houses: [9], karaka: 'Jupiter', weight: 0.35, why: 'the chart of spiritual practice and worship', meaning: 'spiritual practice and worship' },
   health: { division: 'D30', label: 'Trimsamsa', houses: [1], karaka: 'Sun', weight: 0.2, why: 'a chart that shows the weak points and troubles of the body', meaning: 'the weak points and misfortunes of the body' },
@@ -488,6 +485,12 @@ const DOMAIN_CONCLUSIONS: Record<DomainId, { qualify: string; both: string; mixe
     mixed: 'Your main chart and your Navamsa do not fully agree on relationships: one side looks easier than the other, so lean on the stronger side while being a little more patient where the weaker side shows up.',
     clear: 'Neither chart layer raises the warning signs checked here for relationships — a good sign for forming healthy bonds, though trust and compatibility still need to be built over time.',
   },
+  children: {
+    qualify: 'your main chart and your Saptamsa both show some pressure around children or parenting themes',
+    both: 'Both your main chart and your Saptamsa show areas that may call for patience around children or parenting. This is not a prediction of infertility or denial; personal circumstances, choices and medical factors are outside what an astrological chart can establish.',
+    mixed: 'Your main chart and your Saptamsa do not fully agree on children or parenting themes. Treat this as a mixed traditional indication, not a promise or denial of a specific family outcome.',
+    clear: 'Neither chart layer raises the warning signs checked here around children or parenting themes. This is not a guarantee of conception, pregnancy or a particular family outcome.',
+  },
   career: {
     qualify: 'your main chart and your Dasamsa (the chart of profession and public standing) both show some real pressure around your career path',
     both: 'Both your main chart and your Dasamsa show real caution about your career path. That does not mean success is out of reach — it means steady effort, skill-building and patience will matter more than lucky breaks.',
@@ -545,7 +548,7 @@ export function synthesizeAnswer(ctx: Context, answer: Answer): Answer {
       ? domainConclusion.mixed
       : domainConclusion.clear;
   const unique = (items: Evidence[]) => [...new Map(items.map((item) => [item.text, item])).values()];
-  const extraPlain = answer.plain.filter((text) => !/^(Overall |D1 \d|I also checked|Navamsa \(D9\)|Dasamsa \(D10\)|Chaturthamsa \(D4\)|Vimshamsa \(D20\)|Trimsamsa \(D30\)|Marriage needs a qualified reading|The checks of the 7th lord)/.test(text)
+  const extraPlain = answer.plain.filter((text) => !/^(Overall |Overall, the traditional indicators|D1 \d|I also checked|Navamsa \(D9\)|Saptamsa \(D7\)|Dasamsa \(D10\)|Chaturthamsa \(D4\)|Vimshamsa \(D20\)|Trimsamsa \(D30\)|Marriage needs a qualified reading|The checks of the 7th lord)/.test(text)
     && !text.includes('(a deeper chart used for')
     && !answer.headline.includes(text)
     && !answer.groups.some((group) => group.tone === 'caution' && group.windows.some((window) => text.includes(formatRange(window.start, window.end)))));
@@ -829,6 +832,92 @@ function relationship(ctx: Context, question: string, focus: Focus): Answer {
   return a;
 }
 
+// ------------------------------------------------------------------ children and parenting
+
+function children(ctx: Context, question: string, focus: Focus): Answer {
+  const a = base(ctx, 'children', 'Children and parenting', question, focus);
+  const plan = PLANS.children;
+  const fifth = assessHouse(ctx, 5, 'Jupiter');
+  const d7 = vargaAssess(ctx, plan);
+  const combined = blend(fifth, d7, plan.weight);
+  const interchart = interchartRead(ctx, 'children');
+  const score = Math.max(5, Math.min(95, Math.round(combined.score + interchart.adjustment)));
+  a.score = score;
+  a.verdict = verdictFor(score, [
+    'Strong support around children and parenting',
+    'Good support around children and parenting',
+    'Mixed signals around children and parenting',
+    'Children and parenting themes may call for patience',
+  ]);
+  a.evidence = topEvidence({
+    score,
+    evidence: [...combined.evidence, ...interchart.evidence],
+  }, 12);
+
+  const fifthLord = lordOfHouse(ctx, 5);
+  const fifthLordPosition = planet(ctx, fifthLord);
+  const putrakaraka = ctx.karakas.find((item) => item.code === 'PiK');
+  const d7FifthLord = vargaLord(ctx, plan.division, 5);
+  const d7Sign = vargaHouseSign(ctx, plan.division, 5);
+  const d7Occupants = vargaOccupants(ctx, plan.division, 5);
+  a.plain = [
+    `Overall, the traditional indicators for children and parenting are ${promiseWord(a.verdict)} (${score} out of 100, a rule-based summary rather than a probability). The reading weighs the 5th house and Jupiter in D1 alongside the 5th house and its lord in Saptamsa (D7).`,
+    vargaPlain(ctx, plan, 'children and parenting', d7),
+    interchart.summary,
+  ];
+  a.natureTitle = 'Children, parenting and creative legacy';
+  a.nature = [
+    `In D1, your 5th-house lord ${fifthLord} is ${strengthWord(ctx, fifthLord)} and placed in the area of ${HOUSE_MEANING[fifthLordPosition.house]}.`,
+    `In Saptamsa, the 1st house is included as a broad traditional indicator of the promise and well-being of children.`,
+    `In D7, the 5th house is ${signName(d7Sign)} and is ruled by ${d7FifthLord}; ${d7Occupants.length ? `${d7Occupants.join(', ')} also occupy it.` : 'it has no planets placed in it.'}`,
+    `The D7 7th house is also weighed as a supplementary procreation and family-growth indicator, not as a medical assessment.`,
+    `Jupiter, the natural significator used in this reading, is ${dignityNote(ctx, 'Jupiter')} in D1 and ${STATUS_TEXT[vargaStatus(ctx, 'Jupiter', 'D7')]} in D7.`,
+    ...(putrakaraka ? [`Jaimini Putrakaraka ${putrakaraka.planet.name} is in ${signName(putrakaraka.planet.signNumber)} in D1 and ${signName(vargaSign(ctx, putrakaraka.planet.name, 'D7'))} in D7.`] : []),
+  ];
+  a.technical = [
+    `The D1 5th house is ${signName(signOfHouse(ctx, 5))}; its lord ${fifthLord} is ${dignityNote(ctx, fifthLord)} in the ${ordinal(fifthLordPosition.house)} house.`,
+    `Jupiter is ${dignityNote(ctx, 'Jupiter')} in D1 and ${STATUS_TEXT[vargaStatus(ctx, 'Jupiter', 'D7')]} in Saptamsa.`,
+    ...vargaLines(ctx, plan),
+    ...interchart.evidence.map((item) => item.text),
+  ];
+
+  const putra = putrakaraka ? [[putrakaraka.planet.name, 2] as [string, number]] : [];
+  const sigs = significators(ctx, {
+    primary: [5],
+    secondary: [2, 9, 11],
+    karakas: [['Jupiter', 2], ...putra],
+    extras: vargaExtras(ctx, plan.division, plan.houses, plan.label),
+  });
+  const from = ctx.today;
+  const to = addYears(ctx.today, 3);
+  const options: TimingOptions = {
+    from,
+    to,
+    houses: [5, 9],
+    promiseScore: score,
+    upcoming: 3,
+    min: 0.5,
+    division: plan.division,
+    note: DOUBLE_NOTE('children and family-growth themes'),
+  };
+  a.groups = supportGroups(ctx, sigs, options, {
+    upcoming: 'Periods that emphasize children and parenting themes',
+    earlier: '',
+    blurb: 'These are broad periods when the 5th-house indicators and Saptamsa are activated; they are not event guarantees.',
+  });
+  const timing = nextSentence('children and parenting-related period', a.groups[0].windows);
+  a.headline = focus === 'timing'
+    ? (timing ?? 'No distinct children or parenting window stands out in the next 3 years.')
+    : `${a.verdict.label} (${score}/100). ${timing ?? ''}`.trim();
+  pushTiming(a, timing, 'No distinct children or parenting window stands out in the next 3 years.');
+  a.notes = [
+    COMMON_NOTE,
+    'Astrology cannot establish fertility, pregnancy, conception, or the number of children. Timing windows are traditional themes, not guarantees; consult a qualified clinician for health concerns.',
+  ];
+  if (!ctx.transits) a.notes.push(TRANSIT_NOTE);
+  return a;
+}
+
 // ------------------------------------------------------------------ career
 
 function career(ctx: Context, question: string, focus: Focus): Answer {
@@ -848,16 +937,7 @@ function career(ctx: Context, question: string, focus: Focus): Answer {
   const amk = ctx.karakas[1].planet.name;
   const lord10 = lordOfHouse(ctx, 10);
   const lord10Pos = planet(ctx, lord10);
-  const fields = new Map<string, number>();
-  const bump = (name: string, w: number) => fields.set(name, (fields.get(name) ?? 0) + w);
-  bump(lord10, 3);
-  for (const o of occupants(ctx, 10)) bump(o, 2);
-  bump(vargaLord(ctx, plan.division, 10), 3);
-  for (const o of vargaOccupants(ctx, plan.division, 10)) bump(o, 2);
-  bump(amk, 2);
-  const strongest = Object.entries(ctx.strength).sort((x, y) => y[1] - x[1])[0]?.[0];
-  if (strongest) bump(strongest, 1);
-  const top = [...fields.entries()].sort((x, y) => y[1] - x[1]).slice(0, 3).map(([n]) => n);
+  const top = careerFieldPlanets(ctx);
   const why = (n: string) => n === lord10 ? `${n} rules your career area` : n === amk ? `${n} is your career planet in Jaimini astrology` : n === vargaLord(ctx, plan.division, 10) ? `${n} rules the career area in your Dasamsa chart` : `${n} is strong or placed in your career area`;
 
   const sigs = significators(ctx, {
@@ -1068,5 +1148,5 @@ function health(ctx: Context, question: string, focus: Focus): Answer {
 }
 
 export const DOMAIN_BUILDERS: Record<DomainId, (ctx: Context, question: string, focus: Focus) => Answer> = {
-  marriage, relationship, career, property, spiritual, health,
+  marriage, relationship, children, career, property, spiritual, health,
 };

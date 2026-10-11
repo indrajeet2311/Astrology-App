@@ -2,7 +2,7 @@ import { SIGN_LORDS, SIGN_NAMES } from '../constants';
 import { todayIso } from '../format';
 import { arudhaPadas, charaKarakas } from '../jaimini';
 import { shadbala } from '../shadbala';
-import { jaiminiYogas } from '../jaiminiYogas';
+import { jaiminiYogas, rashiAspects } from '../jaiminiYogas';
 import type { JaiminiYoga } from '../jaiminiYogas';
 import { EXALTATION_SIGN, compoundRelations, isSeven, signRelation } from '../vargas';
 import type { Relation, Seven } from '../vargas';
@@ -112,6 +112,20 @@ export function functionalNature(ctx: Context, name: string): 'benefic' | 'malef
 
 export function occupants(ctx: Context, house: number): string[] {
   return ctx.chart.planets.filter((p) => p.house === house).map((p) => p.name);
+}
+
+export function careerFieldPlanets(ctx: Context): string[] {
+  const weights = new Map<string, number>();
+  const add = (name: string, weight: number) => weights.set(name, (weights.get(name) ?? 0) + weight);
+  add(lordOfHouse(ctx, 10), 3);
+  occupants(ctx, 10).forEach((name) => add(name, 2));
+  add(vargaLord(ctx, 'D10', 10), 3);
+  vargaOccupants(ctx, 'D10', 10).forEach((name) => add(name, 2));
+  const adviser = ctx.karakas.find((item) => item.code === 'AmK');
+  if (adviser) add(adviser.planet.name, 2);
+  const strongest = Object.entries(ctx.strength).sort((a, b) => b[1] - a[1])[0]?.[0];
+  if (strongest) add(strongest, 1);
+  return [...weights].sort((a, b) => b[1] - a[1]).slice(0, 3).map(([name]) => name);
 }
 
 export function aspectors(ctx: Context, house: number): string[] {
@@ -322,11 +336,27 @@ function periodCondition(ctx: Context, name: string, division?: string): [number
 }
 
 function charaActivation(ctx: Context, sign: number, division: string | undefined, houses: number[]): [number, string[]] {
-  const profile = division === 'D9' ? ['DK', 7] as const : division === 'D10' ? ['AmK', 10] as const
+  const profile = division === 'D9' ? ['DK', 7] as const : division === 'D7' ? ['PiK', 5] as const
+    : division === 'D10' ? ['AmK', 10] as const
     : division === 'D4' ? ['MK', 4] as const : division === 'D20' ? ['AK', 9] as const : ['AK', 1] as const;
   const karaka = ctx.karakas.find((item) => item.code === profile[0]);
   const reasons: string[] = [];
   let points = 0;
+  if (division === 'D9') {
+    const seventhSign = ((sign + 5) % 12) + 1;
+    const seventhLord = SIGN_LORDS[seventhSign - 1];
+    const spouseKaraka = ctx.karakas.find((item) => item.code === 'DK')?.planet.name;
+    const natalSeventhLord = lordOfHouse(ctx, 7);
+    const anchors = [natalSeventhLord, ...(spouseKaraka ? [spouseKaraka] : [])];
+    const lordSign = planet(ctx, seventhLord).signNumber;
+    const connected = anchors.filter((name) => name === seventhLord
+      || planet(ctx, name).signNumber === lordSign
+      || rashiAspects(lordSign, planet(ctx, name).signNumber));
+    if (connected.length) {
+      points += 3;
+      reasons.push(`Chara sign seventh lord ${seventhLord} connects with ${connected.join('/')} (natal marriage lord or DK); supporting timing check, not an event guarantee`);
+    }
+  }
   if (karaka) {
     const anchor = karaka.planet.signNumber;
     const derived = ((anchor + profile[1] - 2) % 12) + 1;

@@ -1,10 +1,18 @@
 import { DOMAIN_BUILDERS, synthesizeAnswer, focusAnswer } from './answers';
 import type { Answer, DomainId, Focus } from './answers';
 import type { Context } from './core';
+import { buildOutcomeReading } from './outcomes';
+import type { OutcomeReading } from './outcomes';
+import { validateReadingChart } from './bookRules';
+
+export interface UserAnswer extends Answer {
+  outcome: OutcomeReading;
+}
 
 const KEYWORDS: Record<DomainId, string[]> = {
   marriage: ['marry', 'marri', 'wedding', 'shaadi', 'shadi', 'spouse', 'husband', 'wife', 'engage', 'bride', 'groom', 'divorce', 'life partner', 'settle down'],
   relationship: ['love', 'relationship', 'partner', 'dating', 'girlfriend', 'boyfriend', 'romanc', 'breakup', 'break up', 'crush', 'affair', 'soulmate', 'compatib'],
+  children: ['children', 'child', 'offspring', 'progeny', 'putra', 'parenting', 'parenthood', 'pregnan', 'baby', 'babies', 'fertility', 'conceiv', 'adopt', 'twins'],
   career: ['career', 'job', 'profession', 'work', 'working', 'promotion', 'business', 'salary', 'boss', 'office', 'employ', 'resign', 'layoff', 'fired', 'income', 'startup', 'entrepreneur'],
   property: ['property', 'house', 'home', 'flat', 'apartment', 'land', 'plot', 'real estate', 'vehicle', 'car', 'construct', 'mortgage', 'buy a', 'bungalow'],
   spiritual: ['spiritual', 'moksha', 'meditat', 'guru', 'dharma', 'god', 'enlighten', 'yoga', 'mantra', 'soul', 'purpose', 'faith', 'religio'],
@@ -39,6 +47,7 @@ export function classify(question: string): Classified {
 export const SUGGESTED_QUESTIONS: { label: string; question: string; domain: DomainId }[] = [
   { label: 'When will I get married?', question: 'When will I get married?', domain: 'marriage' },
   { label: 'How will my marriage and spouse be?', question: 'How will my marriage and spouse be?', domain: 'marriage' },
+  { label: 'Children and parenting themes', question: 'What does my chart indicate about children and parenting?', domain: 'children' },
   { label: 'Career rise or fall ahead?', question: 'Will my career rise or fall in the coming years?', domain: 'career' },
   { label: 'Which field suits my career?', question: 'What kind of career suits me?', domain: 'career' },
   { label: 'When can I buy property?', question: 'When can I buy a house or property?', domain: 'property' },
@@ -52,8 +61,11 @@ export const SUGGESTED_QUESTIONS: { label: string; question: string; domain: Dom
   { label: 'What supports my spiritual growth?', question: 'What practices may support my spiritual growth?', domain: 'spiritual' },
 ];
 
-export function answerQuestion(ctx: Context, question: string, forced?: DomainId): Answer | null {
+export function answerQuestion(ctx: Context, question: string, forced?: DomainId): UserAnswer | null {
   const { domain, focus } = classify(question);
   const chosen = forced ?? domain;
-  return chosen ? focusAnswer(ctx, synthesizeAnswer(ctx, DOMAIN_BUILDERS[chosen](ctx, question, focus))) : null;
+  if (!chosen) return null;
+  validateReadingChart(ctx, chosen);
+  const answer = focusAnswer(ctx, synthesizeAnswer(ctx, DOMAIN_BUILDERS[chosen](ctx, question, focus)));
+  return { ...answer, outcome: buildOutcomeReading(ctx, answer) };
 }

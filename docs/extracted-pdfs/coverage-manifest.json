@@ -1,0 +1,1636 @@
+{
+  "format": "original-page-reference-extraction/v1",
+  "total_source_pages": 1338,
+  "reference_pdf_count": 86,
+  "index_pdf": "00-READ-FIRST-INDEX.pdf",
+  "scope": "Chapter-complete original-page extraction, not individually formalized rules.",
+  "page_numbering": "All range mappings are 1-based PDF pages. TOC printed labels are separate.",
+  "yogini_limit": "Progressed Yogini applications are present; referenced standalone progression manual is absent.",
+  "sources": [
+    {
+      "id": "divisions",
+      "filename": "Comprehensive_Prediction_By_Divisional_Charts_by_V.P._Goel-1.pdf",
+      "sha256": "4a2d8d0ab85d7cc019dd2a18df0f83e8b9e824986120d6fca674fd3cad6f9f32",
+      "pages": 389,
+      "covered_pages": 389,
+      "missing_pages": []
+    },
+    {
+      "id": "navamsa",
+      "filename": "pdfcoffee.com_jyotish-2017-vp-goel-predict-with-navamsha-1-pdf-free.pdf",
+      "sha256": "7b4543b37496aa0ac7aa3b765c8b99971bcf14fd606dc78558cc08155372273f",
+      "pages": 140,
+      "covered_pages": 140,
+      "missing_pages": []
+    },
+    {
+      "id": "career",
+      "filename": "Predict_With_Dashamsha_by_V.P._Goel.pdf",
+      "sha256": "a7ecd4d0d8b3c0641def35dee2d7a4a39c13a6e6f772e8232b276020bfcd4c73",
+      "pages": 210,
+      "covered_pages": 210,
+      "missing_pages": []
+    },
+    {
+      "id": "children",
+      "filename": "Jyotish_2017_V.P. Goel_Predict with saptamsha.pdf",
+      "sha256": "05297a83584b88cfabd545f4b88afafe30747492964c5e09f2b8fc1ba84ada44",
+      "pages": 241,
+      "covered_pages": 241,
+      "missing_pages": []
+    },
+    {
+      "id": "jaimini",
+      "filename": "Jyotish_2017_V.P. Goel_Predicting Through Jaimini Astrology.pdf",
+      "sha256": "beca72cdd37971071d21967dbda6402ac03edd150ca917410f8ad049559b63bc",
+      "pages": 232,
+      "covered_pages": 232,
+      "missing_pages": []
+    },
+    {
+      "id": "vimshottari",
+      "filename": "Jyotish_KN Rao_Timing events through Vimshottari dasha.pdf",
+      "sha256": "3771ca48c8d4a3e726c459ea8b4c18a5224752e1a748d7dc7fcc32697f244f5b",
+      "pages": 126,
+      "covered_pages": 126,
+      "missing_pages": []
+    }
+  ],
+  "extracts": [
+    {
+      "path": "01-marriage-navamsa/01-d9-basics.pdf",
+      "title": "D9 calculation, Pushkar, Vargottam, Vish and deities",
+      "pages": 13,
+      "source_segments": [
+        {
+          "source_id": "navamsa",
+          "source_filename": "pdfcoffee.com_jyotish-2017-vp-goel-predict-with-navamsha-1-pdf-free.pdf",
+          "source_pdf_first_page": 5,
+          "source_pdf_last_page": 17,
+          "extract_first_page": 1,
+          "extract_last_page": 13,
+          "section": "D9 calculation, Pushkar, Vargottam, Vish and deities"
+        }
+      ],
+      "contents_printed_start_reference": 1,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "01-marriage-navamsa/02-marriage-promise-quality-delay-denial.pdf",
+      "title": "Marriage promise, quality, early/timely/late marriage, denial, foreign marriage and separation",
+      "pages": 27,
+      "source_segments": [
+        {
+          "source_id": "navamsa",
+          "source_filename": "pdfcoffee.com_jyotish-2017-vp-goel-predict-with-navamsha-1-pdf-free.pdf",
+          "source_pdf_first_page": 18,
+          "source_pdf_last_page": 44,
+          "extract_first_page": 1,
+          "extract_last_page": 27,
+          "section": "Marriage promise, quality, early/timely/late marriage, denial, foreign marriage and separation"
+        }
+      ],
+      "contents_printed_start_reference": 15,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "01-marriage-navamsa/03-matchmaking.pdf",
+      "title": "Matchmaking and compatibility",
+      "pages": 16,
+      "source_segments": [
+        {
+          "source_id": "navamsa",
+          "source_filename": "pdfcoffee.com_jyotish-2017-vp-goel-predict-with-navamsha-1-pdf-free.pdf",
+          "source_pdf_first_page": 45,
+          "source_pdf_last_page": 60,
+          "extract_first_page": 1,
+          "extract_last_page": 16,
+          "section": "Matchmaking and compatibility"
+        }
+      ],
+      "contents_printed_start_reference": 43,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "01-marriage-navamsa/04-multiple-marriages-and-affairs.pdf",
+      "title": "Multiple marriages, affairs and relationship patterns",
+      "pages": 19,
+      "source_segments": [
+        {
+          "source_id": "navamsa",
+          "source_filename": "pdfcoffee.com_jyotish-2017-vp-goel-predict-with-navamsha-1-pdf-free.pdf",
+          "source_pdf_first_page": 61,
+          "source_pdf_last_page": 79,
+          "extract_first_page": 1,
+          "extract_last_page": 19,
+          "section": "Multiple marriages, affairs and relationship patterns"
+        }
+      ],
+      "contents_printed_start_reference": 61,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "01-marriage-navamsa/05-marriage-timing-all-methods.pdf",
+      "title": "Marriage timing: Vimshottari, Chara, progressed Yogini, transits, Saham and other methods",
+      "pages": 27,
+      "source_segments": [
+        {
+          "source_id": "navamsa",
+          "source_filename": "pdfcoffee.com_jyotish-2017-vp-goel-predict-with-navamsha-1-pdf-free.pdf",
+          "source_pdf_first_page": 80,
+          "source_pdf_last_page": 106,
+          "extract_first_page": 1,
+          "extract_last_page": 27,
+          "section": "Marriage timing: Vimshottari, Chara, progressed Yogini, transits, Saham and other methods"
+        }
+      ],
+      "contents_printed_start_reference": 81,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "01-marriage-navamsa/06-rashi-tulya-navamsha.pdf",
+      "title": "Rashi Tulya Navamsha and dasha assessment",
+      "pages": 7,
+      "source_segments": [
+        {
+          "source_id": "navamsa",
+          "source_filename": "pdfcoffee.com_jyotish-2017-vp-goel-predict-with-navamsha-1-pdf-free.pdf",
+          "source_pdf_first_page": 107,
+          "source_pdf_last_page": 113,
+          "extract_first_page": 1,
+          "extract_last_page": 7,
+          "section": "Rashi Tulya Navamsha and dasha assessment"
+        }
+      ],
+      "contents_printed_start_reference": 109,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "01-marriage-navamsa/07-64th-navamsha.pdf",
+      "title": "64th Navamsha and sensitive transits",
+      "pages": 8,
+      "source_segments": [
+        {
+          "source_id": "navamsa",
+          "source_filename": "pdfcoffee.com_jyotish-2017-vp-goel-predict-with-navamsha-1-pdf-free.pdf",
+          "source_pdf_first_page": 114,
+          "source_pdf_last_page": 121,
+          "extract_first_page": 1,
+          "extract_last_page": 8,
+          "section": "64th Navamsha and sensitive transits"
+        }
+      ],
+      "contents_printed_start_reference": 116,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "01-marriage-navamsa/08-devotion-and-worship.pdf",
+      "title": "Devotion, worship, spiritual timing and astrology",
+      "pages": 19,
+      "source_segments": [
+        {
+          "source_id": "navamsa",
+          "source_filename": "pdfcoffee.com_jyotish-2017-vp-goel-predict-with-navamsha-1-pdf-free.pdf",
+          "source_pdf_first_page": 122,
+          "source_pdf_last_page": 140,
+          "extract_first_page": 1,
+          "extract_last_page": 19,
+          "section": "Devotion, worship, spiritual timing and astrology"
+        }
+      ],
+      "contents_printed_start_reference": 125,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "01-marriage-navamsa/09-spouse-appearance-status-and-care.pdf",
+      "title": "Spouse appearance, status and caring nature",
+      "pages": 5,
+      "source_segments": [
+        {
+          "source_id": "divisions",
+          "source_filename": "Comprehensive_Prediction_By_Divisional_Charts_by_V.P._Goel-1.pdf",
+          "source_pdf_first_page": 151,
+          "source_pdf_last_page": 155,
+          "extract_first_page": 1,
+          "extract_last_page": 5,
+          "section": "Spouse status, caring spouse, colour/beauty and attraction"
+        }
+      ],
+      "contents_printed_start_reference": null,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "01-marriage-navamsa/10-married-life-quality-and-after-marriage.pdf",
+      "title": "Married-life quality, attraction and life after marriage",
+      "pages": 16,
+      "source_segments": [
+        {
+          "source_id": "navamsa",
+          "source_filename": "pdfcoffee.com_jyotish-2017-vp-goel-predict-with-navamsha-1-pdf-free.pdf",
+          "source_pdf_first_page": 19,
+          "source_pdf_last_page": 24,
+          "extract_first_page": 1,
+          "extract_last_page": 6,
+          "section": "Marriage foundations, promise and quality"
+        },
+        {
+          "source_id": "divisions",
+          "source_filename": "Comprehensive_Prediction_By_Divisional_Charts_by_V.P._Goel-1.pdf",
+          "source_pdf_first_page": 143,
+          "source_pdf_last_page": 144,
+          "extract_first_page": 7,
+          "extract_last_page": 8,
+          "section": "D9 marriage house foundations"
+        },
+        {
+          "source_id": "divisions",
+          "source_filename": "Comprehensive_Prediction_By_Divisional_Charts_by_V.P._Goel-1.pdf",
+          "source_pdf_first_page": 153,
+          "source_pdf_last_page": 160,
+          "extract_first_page": 9,
+          "extract_last_page": 16,
+          "section": "Caring spouse, appearance, attraction, after marriage and matching"
+        }
+      ],
+      "contents_printed_start_reference": null,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "01-marriage-navamsa/11-marriage-promise-early-late-multiple.pdf",
+      "title": "Marriage promise, early/late and multiple marriage - comprehensive book",
+      "pages": 8,
+      "source_segments": [
+        {
+          "source_id": "divisions",
+          "source_filename": "Comprehensive_Prediction_By_Divisional_Charts_by_V.P._Goel-1.pdf",
+          "source_pdf_first_page": 143,
+          "source_pdf_last_page": 150,
+          "extract_first_page": 1,
+          "extract_last_page": 8,
+          "section": "Promise, early, late and multiple marriage"
+        }
+      ],
+      "contents_printed_start_reference": null,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "01-marriage-navamsa/12-comprehensive-d9-marriage-complete.pdf",
+      "title": "Complete marriage section from the divisional-chart book",
+      "pages": 18,
+      "source_segments": [
+        {
+          "source_id": "divisions",
+          "source_filename": "Comprehensive_Prediction_By_Divisional_Charts_by_V.P._Goel-1.pdf",
+          "source_pdf_first_page": 143,
+          "source_pdf_last_page": 160,
+          "extract_first_page": 1,
+          "extract_last_page": 18,
+          "section": "Marriage and all nine marriage subsections"
+        }
+      ],
+      "contents_printed_start_reference": null,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "02-career-d10/01-construction-classic.pdf",
+      "title": "D10 construction, classical methods and deities",
+      "pages": 9,
+      "source_segments": [
+        {
+          "source_id": "career",
+          "source_filename": "Predict_With_Dashamsha_by_V.P._Goel.pdf",
+          "source_pdf_first_page": 5,
+          "source_pdf_last_page": 13,
+          "extract_first_page": 1,
+          "extract_last_page": 9,
+          "section": "D10 construction, classical methods and deities"
+        }
+      ],
+      "contents_printed_start_reference": 1,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "02-career-d10/02-houses-tenth-lord-and-argala.pdf",
+      "title": "D10 basics, houses, twelve tenth-lord placements and Argala",
+      "pages": 26,
+      "source_segments": [
+        {
+          "source_id": "career",
+          "source_filename": "Predict_With_Dashamsha_by_V.P._Goel.pdf",
+          "source_pdf_first_page": 14,
+          "source_pdf_last_page": 39,
+          "extract_first_page": 1,
+          "extract_last_page": 26,
+          "section": "D10 basics, houses, twelve tenth-lord placements and Argala"
+        }
+      ],
+      "contents_printed_start_reference": 10,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "02-career-d10/03-profession-and-avocation.pdf",
+      "title": "Profession, livelihood and avocation",
+      "pages": 24,
+      "source_segments": [
+        {
+          "source_id": "career",
+          "source_filename": "Predict_With_Dashamsha_by_V.P._Goel.pdf",
+          "source_pdf_first_page": 40,
+          "source_pdf_last_page": 63,
+          "extract_first_page": 1,
+          "extract_last_page": 24,
+          "section": "Profession, livelihood and avocation"
+        }
+      ],
+      "contents_printed_start_reference": 36,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "02-career-d10/04-self-employed-versus-service.pdf",
+      "title": "Self-employment versus service",
+      "pages": 13,
+      "source_segments": [
+        {
+          "source_id": "career",
+          "source_filename": "Predict_With_Dashamsha_by_V.P._Goel.pdf",
+          "source_pdf_first_page": 64,
+          "source_pdf_last_page": 76,
+          "extract_first_page": 1,
+          "extract_last_page": 13,
+          "section": "Self-employment versus service"
+        }
+      ],
+      "contents_printed_start_reference": 60,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "02-career-d10/05-status.pdf",
+      "title": "Professional and social status",
+      "pages": 24,
+      "source_segments": [
+        {
+          "source_id": "career",
+          "source_filename": "Predict_With_Dashamsha_by_V.P._Goel.pdf",
+          "source_pdf_first_page": 77,
+          "source_pdf_last_page": 100,
+          "extract_first_page": 1,
+          "extract_last_page": 24,
+          "section": "Professional and social status"
+        }
+      ],
+      "contents_printed_start_reference": 73,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "02-career-d10/06-rise.pdf",
+      "title": "Career rise and advancement",
+      "pages": 28,
+      "source_segments": [
+        {
+          "source_id": "career",
+          "source_filename": "Predict_With_Dashamsha_by_V.P._Goel.pdf",
+          "source_pdf_first_page": 101,
+          "source_pdf_last_page": 128,
+          "extract_first_page": 1,
+          "extract_last_page": 28,
+          "section": "Career rise and advancement"
+        }
+      ],
+      "contents_printed_start_reference": 97,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "02-career-d10/07-fall.pdf",
+      "title": "Career fall, loss of status and setbacks",
+      "pages": 20,
+      "source_segments": [
+        {
+          "source_id": "career",
+          "source_filename": "Predict_With_Dashamsha_by_V.P._Goel.pdf",
+          "source_pdf_first_page": 129,
+          "source_pdf_last_page": 148,
+          "extract_first_page": 1,
+          "extract_last_page": 20,
+          "section": "Career fall, loss of status and setbacks"
+        }
+      ],
+      "contents_printed_start_reference": 125,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "02-career-d10/08-inter-relations.pdf",
+      "title": "D10 inter-relations and related charts",
+      "pages": 12,
+      "source_segments": [
+        {
+          "source_id": "career",
+          "source_filename": "Predict_With_Dashamsha_by_V.P._Goel.pdf",
+          "source_pdf_first_page": 149,
+          "source_pdf_last_page": 160,
+          "extract_first_page": 1,
+          "extract_last_page": 12,
+          "section": "D10 inter-relations and related charts"
+        }
+      ],
+      "contents_printed_start_reference": 145,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "02-career-d10/09-partnership.pdf",
+      "title": "Business partnership",
+      "pages": 16,
+      "source_segments": [
+        {
+          "source_id": "career",
+          "source_filename": "Predict_With_Dashamsha_by_V.P._Goel.pdf",
+          "source_pdf_first_page": 161,
+          "source_pdf_last_page": 176,
+          "extract_first_page": 1,
+          "extract_last_page": 16,
+          "section": "Business partnership"
+        }
+      ],
+      "contents_printed_start_reference": 157,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "02-career-d10/10-career-graph-and-timing.pdf",
+      "title": "Career milestones and timing",
+      "pages": 34,
+      "source_segments": [
+        {
+          "source_id": "career",
+          "source_filename": "Predict_With_Dashamsha_by_V.P._Goel.pdf",
+          "source_pdf_first_page": 177,
+          "source_pdf_last_page": 210,
+          "extract_first_page": 1,
+          "extract_last_page": 34,
+          "section": "Career milestones and timing"
+        }
+      ],
+      "contents_printed_start_reference": 173,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "03-children-d7/01-natal-promise-and-progeny.pdf",
+      "title": "Natal promise of children and progeny combinations",
+      "pages": 24,
+      "source_segments": [
+        {
+          "source_id": "children",
+          "source_filename": "Jyotish_2017_V.P. Goel_Predict with saptamsha.pdf",
+          "source_pdf_first_page": 5,
+          "source_pdf_last_page": 28,
+          "extract_first_page": 1,
+          "extract_last_page": 24,
+          "section": "Natal promise of children and progeny combinations"
+        }
+      ],
+      "contents_printed_start_reference": 1,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "03-children-d7/02-d7-construction-houses-examination.pdf",
+      "title": "D7 construction, houses and examination",
+      "pages": 36,
+      "source_segments": [
+        {
+          "source_id": "children",
+          "source_filename": "Jyotish_2017_V.P. Goel_Predict with saptamsha.pdf",
+          "source_pdf_first_page": 29,
+          "source_pdf_last_page": 64,
+          "extract_first_page": 1,
+          "extract_last_page": 36,
+          "section": "D7 construction, houses and examination"
+        }
+      ],
+      "contents_printed_start_reference": 25,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "03-children-d7/03-beeja-kshetra-and-luxury.pdf",
+      "title": "Luxury chapter: Beeja Sphuta and Kshetra Sphuta",
+      "pages": 20,
+      "source_segments": [
+        {
+          "source_id": "children",
+          "source_filename": "Jyotish_2017_V.P. Goel_Predict with saptamsha.pdf",
+          "source_pdf_first_page": 65,
+          "source_pdf_last_page": 84,
+          "extract_first_page": 1,
+          "extract_last_page": 20,
+          "section": "Luxury chapter: Beeja Sphuta and Kshetra Sphuta"
+        }
+      ],
+      "contents_printed_start_reference": 61,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "03-children-d7/04-renanubandhan.pdf",
+      "title": "Renanubandhan and parent-child bonds",
+      "pages": 24,
+      "source_segments": [
+        {
+          "source_id": "children",
+          "source_filename": "Jyotish_2017_V.P. Goel_Predict with saptamsha.pdf",
+          "source_pdf_first_page": 85,
+          "source_pdf_last_page": 108,
+          "extract_first_page": 1,
+          "extract_last_page": 24,
+          "section": "Renanubandhan and parent-child bonds"
+        }
+      ],
+      "contents_printed_start_reference": 81,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "03-children-d7/05-worthy-children.pdf",
+      "title": "Worthy children and care of parents",
+      "pages": 12,
+      "source_segments": [
+        {
+          "source_id": "children",
+          "source_filename": "Jyotish_2017_V.P. Goel_Predict with saptamsha.pdf",
+          "source_pdf_first_page": 109,
+          "source_pdf_last_page": 120,
+          "extract_first_page": 1,
+          "extract_last_page": 12,
+          "section": "Worthy children and care of parents"
+        }
+      ],
+      "contents_printed_start_reference": 105,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "03-children-d7/06-adoption.pdf",
+      "title": "Adoption and related progeny methods",
+      "pages": 16,
+      "source_segments": [
+        {
+          "source_id": "children",
+          "source_filename": "Jyotish_2017_V.P. Goel_Predict with saptamsha.pdf",
+          "source_pdf_first_page": 121,
+          "source_pdf_last_page": 136,
+          "extract_first_page": 1,
+          "extract_last_page": 16,
+          "section": "Adoption and related progeny methods"
+        }
+      ],
+      "contents_printed_start_reference": 117,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "03-children-d7/07-twins.pdf",
+      "title": "Twins and multiple births",
+      "pages": 25,
+      "source_segments": [
+        {
+          "source_id": "children",
+          "source_filename": "Jyotish_2017_V.P. Goel_Predict with saptamsha.pdf",
+          "source_pdf_first_page": 137,
+          "source_pdf_last_page": 161,
+          "extract_first_page": 1,
+          "extract_last_page": 25,
+          "section": "Twins and multiple births"
+        }
+      ],
+      "contents_printed_start_reference": 133,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "03-children-d7/08-sex-and-number.pdf",
+      "title": "Sex and number of children",
+      "pages": 41,
+      "source_segments": [
+        {
+          "source_id": "children",
+          "source_filename": "Jyotish_2017_V.P. Goel_Predict with saptamsha.pdf",
+          "source_pdf_first_page": 162,
+          "source_pdf_last_page": 202,
+          "extract_first_page": 1,
+          "extract_last_page": 41,
+          "section": "Sex and number of children"
+        }
+      ],
+      "contents_printed_start_reference": 158,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "03-children-d7/09-childbirth-timing.pdf",
+      "title": "Childbirth timing: Vimshottari, Chara and progressed Yogini",
+      "pages": 39,
+      "source_segments": [
+        {
+          "source_id": "children",
+          "source_filename": "Jyotish_2017_V.P. Goel_Predict with saptamsha.pdf",
+          "source_pdf_first_page": 203,
+          "source_pdf_last_page": 241,
+          "extract_first_page": 1,
+          "extract_last_page": 39,
+          "section": "Childbirth timing: Vimshottari, Chara and progressed Yogini"
+        }
+      ],
+      "contents_printed_start_reference": 199,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "04-all-divisional-charts/01-general-rules-and-strength.pdf",
+      "title": "General divisional rules, strength, Vimshopak Bala and longitudes",
+      "pages": 12,
+      "source_segments": [
+        {
+          "source_id": "divisions",
+          "source_filename": "Comprehensive_Prediction_By_Divisional_Charts_by_V.P._Goel-1.pdf",
+          "source_pdf_first_page": 8,
+          "source_pdf_last_page": 19,
+          "extract_first_page": 1,
+          "extract_last_page": 12,
+          "section": "General divisional rules, strength, Vimshopak Bala and longitudes"
+        }
+      ],
+      "contents_printed_start_reference": 1,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "04-all-divisional-charts/02-d1-birth-chart.pdf",
+      "title": "D1 birth chart, houses, signs, planets and examination",
+      "pages": 32,
+      "source_segments": [
+        {
+          "source_id": "divisions",
+          "source_filename": "Comprehensive_Prediction_By_Divisional_Charts_by_V.P._Goel-1.pdf",
+          "source_pdf_first_page": 20,
+          "source_pdf_last_page": 51,
+          "extract_first_page": 1,
+          "extract_last_page": 32,
+          "section": "D1 birth chart, houses, signs, planets and examination"
+        }
+      ],
+      "contents_printed_start_reference": 13,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "04-all-divisional-charts/03-d2-hora.pdf",
+      "title": "D2 Hora: all construction methods and wealth interpretation",
+      "pages": 22,
+      "source_segments": [
+        {
+          "source_id": "divisions",
+          "source_filename": "Comprehensive_Prediction_By_Divisional_Charts_by_V.P._Goel-1.pdf",
+          "source_pdf_first_page": 52,
+          "source_pdf_last_page": 73,
+          "extract_first_page": 1,
+          "extract_last_page": 22,
+          "section": "D2 Hora: all construction methods and wealth interpretation"
+        }
+      ],
+      "contents_printed_start_reference": 45,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "04-all-divisional-charts/04-d3-drekkana.pdf",
+      "title": "D3 Drekkana: siblings, nature and all methods",
+      "pages": 25,
+      "source_segments": [
+        {
+          "source_id": "divisions",
+          "source_filename": "Comprehensive_Prediction_By_Divisional_Charts_by_V.P._Goel-1.pdf",
+          "source_pdf_first_page": 74,
+          "source_pdf_last_page": 98,
+          "extract_first_page": 1,
+          "extract_last_page": 25,
+          "section": "D3 Drekkana: siblings, nature and all methods"
+        }
+      ],
+      "contents_printed_start_reference": 67,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "04-all-divisional-charts/05-d4-chaturthamsha.pdf",
+      "title": "D4 Chaturthamsha: property, fortune, residence and settlement abroad",
+      "pages": 14,
+      "source_segments": [
+        {
+          "source_id": "divisions",
+          "source_filename": "Comprehensive_Prediction_By_Divisional_Charts_by_V.P._Goel-1.pdf",
+          "source_pdf_first_page": 99,
+          "source_pdf_last_page": 112,
+          "extract_first_page": 1,
+          "extract_last_page": 14,
+          "section": "D4 Chaturthamsha: property, fortune, residence and settlement abroad"
+        }
+      ],
+      "contents_printed_start_reference": 92,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "04-all-divisional-charts/06-d7-saptamsha.pdf",
+      "title": "D7 Saptamsha: children, houses, sex and Beeja/Kshetra",
+      "pages": 15,
+      "source_segments": [
+        {
+          "source_id": "divisions",
+          "source_filename": "Comprehensive_Prediction_By_Divisional_Charts_by_V.P._Goel-1.pdf",
+          "source_pdf_first_page": 113,
+          "source_pdf_last_page": 127,
+          "extract_first_page": 1,
+          "extract_last_page": 15,
+          "section": "D7 Saptamsha: children, houses, sex and Beeja/Kshetra"
+        }
+      ],
+      "contents_printed_start_reference": 106,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "04-all-divisional-charts/07-d9-navamsha.pdf",
+      "title": "D9 Navamsha: all methods, marriage and related rules",
+      "pages": 36,
+      "source_segments": [
+        {
+          "source_id": "divisions",
+          "source_filename": "Comprehensive_Prediction_By_Divisional_Charts_by_V.P._Goel-1.pdf",
+          "source_pdf_first_page": 128,
+          "source_pdf_last_page": 163,
+          "extract_first_page": 1,
+          "extract_last_page": 36,
+          "section": "D9 Navamsha: all methods, marriage and related rules"
+        }
+      ],
+      "contents_printed_start_reference": 121,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "04-all-divisional-charts/08-d10-dashamsha.pdf",
+      "title": "D10 Dashamsha: career, houses, deities and tenth lord",
+      "pages": 13,
+      "source_segments": [
+        {
+          "source_id": "divisions",
+          "source_filename": "Comprehensive_Prediction_By_Divisional_Charts_by_V.P._Goel-1.pdf",
+          "source_pdf_first_page": 164,
+          "source_pdf_last_page": 176,
+          "extract_first_page": 1,
+          "extract_last_page": 13,
+          "section": "D10 Dashamsha: career, houses, deities and tenth lord"
+        }
+      ],
+      "contents_printed_start_reference": 157,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "04-all-divisional-charts/09-d12-dwadashamsha.pdf",
+      "title": "D12 Dwadashamsha: parents, ancestors and examination",
+      "pages": 14,
+      "source_segments": [
+        {
+          "source_id": "divisions",
+          "source_filename": "Comprehensive_Prediction_By_Divisional_Charts_by_V.P._Goel-1.pdf",
+          "source_pdf_first_page": 177,
+          "source_pdf_last_page": 190,
+          "extract_first_page": 1,
+          "extract_last_page": 14,
+          "section": "D12 Dwadashamsha: parents, ancestors and examination"
+        }
+      ],
+      "contents_printed_start_reference": 170,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "04-all-divisional-charts/10-d16-shodashamsha.pdf",
+      "title": "D16 Shodashamsha: vehicles, happiness and comforts",
+      "pages": 22,
+      "source_segments": [
+        {
+          "source_id": "divisions",
+          "source_filename": "Comprehensive_Prediction_By_Divisional_Charts_by_V.P._Goel-1.pdf",
+          "source_pdf_first_page": 191,
+          "source_pdf_last_page": 212,
+          "extract_first_page": 1,
+          "extract_last_page": 22,
+          "section": "D16 Shodashamsha: vehicles, happiness and comforts"
+        }
+      ],
+      "contents_printed_start_reference": 184,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "04-all-divisional-charts/11-d20-vimshamsha.pdf",
+      "title": "D20 Vimshamsha: worship, spirituality and salvation",
+      "pages": 16,
+      "source_segments": [
+        {
+          "source_id": "divisions",
+          "source_filename": "Comprehensive_Prediction_By_Divisional_Charts_by_V.P._Goel-1.pdf",
+          "source_pdf_first_page": 213,
+          "source_pdf_last_page": 228,
+          "extract_first_page": 1,
+          "extract_last_page": 16,
+          "section": "D20 Vimshamsha: worship, spirituality and salvation"
+        }
+      ],
+      "contents_printed_start_reference": 206,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "04-all-divisional-charts/12-d24-chaturvimshamsha.pdf",
+      "title": "D24 Chaturvimshamsha: education and learning",
+      "pages": 17,
+      "source_segments": [
+        {
+          "source_id": "divisions",
+          "source_filename": "Comprehensive_Prediction_By_Divisional_Charts_by_V.P._Goel-1.pdf",
+          "source_pdf_first_page": 229,
+          "source_pdf_last_page": 245,
+          "extract_first_page": 1,
+          "extract_last_page": 17,
+          "section": "D24 Chaturvimshamsha: education and learning"
+        }
+      ],
+      "contents_printed_start_reference": 222,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "04-all-divisional-charts/13-d27-saptavimshamsha.pdf",
+      "title": "D27 Saptavimshamsha: strengths, weaknesses and planets",
+      "pages": 12,
+      "source_segments": [
+        {
+          "source_id": "divisions",
+          "source_filename": "Comprehensive_Prediction_By_Divisional_Charts_by_V.P._Goel-1.pdf",
+          "source_pdf_first_page": 246,
+          "source_pdf_last_page": 257,
+          "extract_first_page": 1,
+          "extract_last_page": 12,
+          "section": "D27 Saptavimshamsha: strengths, weaknesses and planets"
+        }
+      ],
+      "contents_printed_start_reference": 239,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "04-all-divisional-charts/14-d30-trimshamsha.pdf",
+      "title": "D30 Trimshamsha: houses, deities and examination",
+      "pages": 12,
+      "source_segments": [
+        {
+          "source_id": "divisions",
+          "source_filename": "Comprehensive_Prediction_By_Divisional_Charts_by_V.P._Goel-1.pdf",
+          "source_pdf_first_page": 258,
+          "source_pdf_last_page": 269,
+          "extract_first_page": 1,
+          "extract_last_page": 12,
+          "section": "D30 Trimshamsha: houses, deities and examination"
+        }
+      ],
+      "contents_printed_start_reference": 251,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "04-all-divisional-charts/15-d40-khavedamsha.pdf",
+      "title": "D40 Khavedamsha: methods, deities and examination",
+      "pages": 14,
+      "source_segments": [
+        {
+          "source_id": "divisions",
+          "source_filename": "Comprehensive_Prediction_By_Divisional_Charts_by_V.P._Goel-1.pdf",
+          "source_pdf_first_page": 270,
+          "source_pdf_last_page": 283,
+          "extract_first_page": 1,
+          "extract_last_page": 14,
+          "section": "D40 Khavedamsha: methods, deities and examination"
+        }
+      ],
+      "contents_printed_start_reference": 263,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "04-all-divisional-charts/16-d45-akshayvedamsha.pdf",
+      "title": "D45 Akshayvedamsha: methods, deities and examination",
+      "pages": 14,
+      "source_segments": [
+        {
+          "source_id": "divisions",
+          "source_filename": "Comprehensive_Prediction_By_Divisional_Charts_by_V.P._Goel-1.pdf",
+          "source_pdf_first_page": 284,
+          "source_pdf_last_page": 297,
+          "extract_first_page": 1,
+          "extract_last_page": 14,
+          "section": "D45 Akshayvedamsha: methods, deities and examination"
+        }
+      ],
+      "contents_printed_start_reference": 277,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "04-all-divisional-charts/17-d60-shashtiamsha.pdf",
+      "title": "D60 Shashtiamsha: methods, deities and examination",
+      "pages": 14,
+      "source_segments": [
+        {
+          "source_id": "divisions",
+          "source_filename": "Comprehensive_Prediction_By_Divisional_Charts_by_V.P._Goel-1.pdf",
+          "source_pdf_first_page": 298,
+          "source_pdf_last_page": 311,
+          "extract_first_page": 1,
+          "extract_last_page": 14,
+          "section": "D60 Shashtiamsha: methods, deities and examination"
+        }
+      ],
+      "contents_printed_start_reference": 291,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "04-all-divisional-charts/18-d5-panchamsha.pdf",
+      "title": "D5 Panchamsha: methods, houses, spirituality and worship",
+      "pages": 12,
+      "source_segments": [
+        {
+          "source_id": "divisions",
+          "source_filename": "Comprehensive_Prediction_By_Divisional_Charts_by_V.P._Goel-1.pdf",
+          "source_pdf_first_page": 312,
+          "source_pdf_last_page": 323,
+          "extract_first_page": 1,
+          "extract_last_page": 12,
+          "section": "D5 Panchamsha: methods, houses, spirituality and worship"
+        }
+      ],
+      "contents_printed_start_reference": 305,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "04-all-divisional-charts/19-d6-shashtamsha.pdf",
+      "title": "D6 Shashtamsha: houses and illness-related examination",
+      "pages": 7,
+      "source_segments": [
+        {
+          "source_id": "divisions",
+          "source_filename": "Comprehensive_Prediction_By_Divisional_Charts_by_V.P._Goel-1.pdf",
+          "source_pdf_first_page": 324,
+          "source_pdf_last_page": 330,
+          "extract_first_page": 1,
+          "extract_last_page": 7,
+          "section": "D6 Shashtamsha: houses and illness-related examination"
+        }
+      ],
+      "contents_printed_start_reference": 317,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "04-all-divisional-charts/20-d8-ashtamsha.pdf",
+      "title": "D8 Ashtamsha: sudden events, methods and examination",
+      "pages": 10,
+      "source_segments": [
+        {
+          "source_id": "divisions",
+          "source_filename": "Comprehensive_Prediction_By_Divisional_Charts_by_V.P._Goel-1.pdf",
+          "source_pdf_first_page": 331,
+          "source_pdf_last_page": 340,
+          "extract_first_page": 1,
+          "extract_last_page": 10,
+          "section": "D8 Ashtamsha: sudden events, methods and examination"
+        }
+      ],
+      "contents_printed_start_reference": 324,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "04-all-divisional-charts/21-d11-ekdashamsha.pdf",
+      "title": "D11 Ekdashamsha: gains, methods and examination",
+      "pages": 13,
+      "source_segments": [
+        {
+          "source_id": "divisions",
+          "source_filename": "Comprehensive_Prediction_By_Divisional_Charts_by_V.P._Goel-1.pdf",
+          "source_pdf_first_page": 341,
+          "source_pdf_last_page": 353,
+          "extract_first_page": 1,
+          "extract_last_page": 13,
+          "section": "D11 Ekdashamsha: gains, methods and examination"
+        }
+      ],
+      "contents_printed_start_reference": 334,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "04-all-divisional-charts/22-higher-divisions.pdf",
+      "title": "Higher divisions: D72, D81, D108, D144, Nadi and other amshas",
+      "pages": 14,
+      "source_segments": [
+        {
+          "source_id": "divisions",
+          "source_filename": "Comprehensive_Prediction_By_Divisional_Charts_by_V.P._Goel-1.pdf",
+          "source_pdf_first_page": 354,
+          "source_pdf_last_page": 367,
+          "extract_first_page": 1,
+          "extract_last_page": 14,
+          "section": "Higher divisions: D72, D81, D108, D144, Nadi and other amshas"
+        }
+      ],
+      "contents_printed_start_reference": 347,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "04-all-divisional-charts/23-linking-divisional-charts.pdf",
+      "title": "Linking charts: individual, family, spouses, property, business and guru/disciple",
+      "pages": 22,
+      "source_segments": [
+        {
+          "source_id": "divisions",
+          "source_filename": "Comprehensive_Prediction_By_Divisional_Charts_by_V.P._Goel-1.pdf",
+          "source_pdf_first_page": 368,
+          "source_pdf_last_page": 389,
+          "extract_first_page": 1,
+          "extract_last_page": 22,
+          "section": "Linking charts: individual, family, spouses, property, business and guru/disciple"
+        }
+      ],
+      "contents_printed_start_reference": 361,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "05-jaimini-and-sign-dashas/01-basics.pdf",
+      "title": "Jaimini basics, aspects, karakas, Arudha and strengths",
+      "pages": 24,
+      "source_segments": [
+        {
+          "source_id": "jaimini",
+          "source_filename": "Jyotish_2017_V.P. Goel_Predicting Through Jaimini Astrology.pdf",
+          "source_pdf_first_page": 5,
+          "source_pdf_last_page": 28,
+          "extract_first_page": 1,
+          "extract_last_page": 24,
+          "section": "Jaimini basics, aspects, karakas, Arudha and strengths"
+        }
+      ],
+      "contents_printed_start_reference": 1,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "05-jaimini-and-sign-dashas/02-argala.pdf",
+      "title": "Argala and obstruction",
+      "pages": 14,
+      "source_segments": [
+        {
+          "source_id": "jaimini",
+          "source_filename": "Jyotish_2017_V.P. Goel_Predicting Through Jaimini Astrology.pdf",
+          "source_pdf_first_page": 29,
+          "source_pdf_last_page": 42,
+          "extract_first_page": 1,
+          "extract_last_page": 14,
+          "section": "Argala and obstruction"
+        }
+      ],
+      "contents_printed_start_reference": 25,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "05-jaimini-and-sign-dashas/03-chara-dasha.pdf",
+      "title": "Chara Dasha: calculation and applications",
+      "pages": 28,
+      "source_segments": [
+        {
+          "source_id": "jaimini",
+          "source_filename": "Jyotish_2017_V.P. Goel_Predicting Through Jaimini Astrology.pdf",
+          "source_pdf_first_page": 43,
+          "source_pdf_last_page": 70,
+          "extract_first_page": 1,
+          "extract_last_page": 28,
+          "section": "Chara Dasha: calculation and applications"
+        }
+      ],
+      "contents_printed_start_reference": 39,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "05-jaimini-and-sign-dashas/04-mandook-dasha.pdf",
+      "title": "Mandook Dasha: methods and applications",
+      "pages": 33,
+      "source_segments": [
+        {
+          "source_id": "jaimini",
+          "source_filename": "Jyotish_2017_V.P. Goel_Predicting Through Jaimini Astrology.pdf",
+          "source_pdf_first_page": 71,
+          "source_pdf_last_page": 103,
+          "extract_first_page": 1,
+          "extract_last_page": 33,
+          "section": "Mandook Dasha: methods and applications"
+        }
+      ],
+      "contents_printed_start_reference": 67,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "05-jaimini-and-sign-dashas/05-sthira-and-brahma-dasha.pdf",
+      "title": "Sthira and Brahma Dasha",
+      "pages": 24,
+      "source_segments": [
+        {
+          "source_id": "jaimini",
+          "source_filename": "Jyotish_2017_V.P. Goel_Predicting Through Jaimini Astrology.pdf",
+          "source_pdf_first_page": 104,
+          "source_pdf_last_page": 127,
+          "extract_first_page": 1,
+          "extract_last_page": 24,
+          "section": "Sthira and Brahma Dasha"
+        }
+      ],
+      "contents_printed_start_reference": 100,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "05-jaimini-and-sign-dashas/06-narayan-dasha.pdf",
+      "title": "Narayan Dasha",
+      "pages": 15,
+      "source_segments": [
+        {
+          "source_id": "jaimini",
+          "source_filename": "Jyotish_2017_V.P. Goel_Predicting Through Jaimini Astrology.pdf",
+          "source_pdf_first_page": 128,
+          "source_pdf_last_page": 142,
+          "extract_first_page": 1,
+          "extract_last_page": 15,
+          "section": "Narayan Dasha"
+        }
+      ],
+      "contents_printed_start_reference": 124,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "05-jaimini-and-sign-dashas/07-navamsha-dasha.pdf",
+      "title": "Navamsha Dasha and event confirmation",
+      "pages": 23,
+      "source_segments": [
+        {
+          "source_id": "jaimini",
+          "source_filename": "Jyotish_2017_V.P. Goel_Predicting Through Jaimini Astrology.pdf",
+          "source_pdf_first_page": 143,
+          "source_pdf_last_page": 165,
+          "extract_first_page": 1,
+          "extract_last_page": 23,
+          "section": "Navamsha Dasha and event confirmation"
+        }
+      ],
+      "contents_printed_start_reference": 139,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "05-jaimini-and-sign-dashas/08-narayan-shoola-dasha.pdf",
+      "title": "Narayan Shoola Dasha (NSD)",
+      "pages": 17,
+      "source_segments": [
+        {
+          "source_id": "jaimini",
+          "source_filename": "Jyotish_2017_V.P. Goel_Predicting Through Jaimini Astrology.pdf",
+          "source_pdf_first_page": 166,
+          "source_pdf_last_page": 182,
+          "extract_first_page": 1,
+          "extract_last_page": 17,
+          "section": "Narayan Shoola Dasha (NSD)"
+        }
+      ],
+      "contents_printed_start_reference": 162,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "05-jaimini-and-sign-dashas/09-trikon-dasha.pdf",
+      "title": "Trikon Dasha",
+      "pages": 34,
+      "source_segments": [
+        {
+          "source_id": "jaimini",
+          "source_filename": "Jyotish_2017_V.P. Goel_Predicting Through Jaimini Astrology.pdf",
+          "source_pdf_first_page": 183,
+          "source_pdf_last_page": 216,
+          "extract_first_page": 1,
+          "extract_last_page": 34,
+          "section": "Trikon Dasha"
+        }
+      ],
+      "contents_printed_start_reference": 179,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "05-jaimini-and-sign-dashas/10-atmanadi-dasha.pdf",
+      "title": "Atmanadi Dasha",
+      "pages": 16,
+      "source_segments": [
+        {
+          "source_id": "jaimini",
+          "source_filename": "Jyotish_2017_V.P. Goel_Predicting Through Jaimini Astrology.pdf",
+          "source_pdf_first_page": 217,
+          "source_pdf_last_page": 232,
+          "extract_first_page": 1,
+          "extract_last_page": 16,
+          "section": "Atmanadi Dasha"
+        }
+      ],
+      "contents_printed_start_reference": 213,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "06-vimshottari-and-event-timing/01-purpose-and-dasha-relations.pdf",
+      "title": "Need for the book and dasha relationships",
+      "pages": 3,
+      "source_segments": [
+        {
+          "source_id": "vimshottari",
+          "source_filename": "Jyotish_KN Rao_Timing events through Vimshottari dasha.pdf",
+          "source_pdf_first_page": 29,
+          "source_pdf_last_page": 31,
+          "extract_first_page": 1,
+          "extract_last_page": 3,
+          "section": "Need for the book and dasha relationships"
+        }
+      ],
+      "contents_printed_start_reference": 30,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "06-vimshottari-and-event-timing/02-learning-method.pdf",
+      "title": "Modern method of learning astrology",
+      "pages": 5,
+      "source_segments": [
+        {
+          "source_id": "vimshottari",
+          "source_filename": "Jyotish_KN Rao_Timing events through Vimshottari dasha.pdf",
+          "source_pdf_first_page": 32,
+          "source_pdf_last_page": 36,
+          "extract_first_page": 1,
+          "extract_last_page": 5,
+          "section": "Modern method of learning astrology"
+        }
+      ],
+      "contents_printed_start_reference": 33,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "06-vimshottari-and-event-timing/03-cbi-background-information.pdf",
+      "title": "First memory tablet: CBI",
+      "pages": 8,
+      "source_segments": [
+        {
+          "source_id": "vimshottari",
+          "source_filename": "Jyotish_KN Rao_Timing events through Vimshottari dasha.pdf",
+          "source_pdf_first_page": 37,
+          "source_pdf_last_page": 44,
+          "extract_first_page": 1,
+          "extract_last_page": 8,
+          "section": "First memory tablet: CBI"
+        }
+      ],
+      "contents_printed_start_reference": 38,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "06-vimshottari-and-event-timing/04-task-analysis.pdf",
+      "title": "Second memory tablet: TASK",
+      "pages": 4,
+      "source_segments": [
+        {
+          "source_id": "vimshottari",
+          "source_filename": "Jyotish_KN Rao_Timing events through Vimshottari dasha.pdf",
+          "source_pdf_first_page": 45,
+          "source_pdf_last_page": 48,
+          "extract_first_page": 1,
+          "extract_last_page": 4,
+          "section": "Second memory tablet: TASK"
+        }
+      ],
+      "contents_printed_start_reference": 46,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "06-vimshottari-and-event-timing/05-ipc-inference.pdf",
+      "title": "Third memory tablet: IPC",
+      "pages": 6,
+      "source_segments": [
+        {
+          "source_id": "vimshottari",
+          "source_filename": "Jyotish_KN Rao_Timing events through Vimshottari dasha.pdf",
+          "source_pdf_first_page": 49,
+          "source_pdf_last_page": 54,
+          "extract_first_page": 1,
+          "extract_last_page": 6,
+          "section": "Third memory tablet: IPC"
+        }
+      ],
+      "contents_printed_start_reference": 50,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "06-vimshottari-and-event-timing/06-prediction-checklist.pdf",
+      "title": "Prediction checklist",
+      "pages": 2,
+      "source_segments": [
+        {
+          "source_id": "vimshottari",
+          "source_filename": "Jyotish_KN Rao_Timing events through Vimshottari dasha.pdf",
+          "source_pdf_first_page": 55,
+          "source_pdf_last_page": 56,
+          "extract_first_page": 1,
+          "extract_last_page": 2,
+          "section": "Prediction checklist"
+        }
+      ],
+      "contents_printed_start_reference": null,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "06-vimshottari-and-event-timing/07-money-versus-promotion.pdf",
+      "title": "More money but not higher post",
+      "pages": 5,
+      "source_segments": [
+        {
+          "source_id": "vimshottari",
+          "source_filename": "Jyotish_KN Rao_Timing events through Vimshottari dasha.pdf",
+          "source_pdf_first_page": 57,
+          "source_pdf_last_page": 61,
+          "extract_first_page": 1,
+          "extract_last_page": 5,
+          "section": "More money but not higher post"
+        }
+      ],
+      "contents_printed_start_reference": 58,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "06-vimshottari-and-event-timing/08-predictive-case-studies.pdf",
+      "title": "Predictive tit bits: CBI",
+      "pages": 4,
+      "source_segments": [
+        {
+          "source_id": "vimshottari",
+          "source_filename": "Jyotish_KN Rao_Timing events through Vimshottari dasha.pdf",
+          "source_pdf_first_page": 62,
+          "source_pdf_last_page": 65,
+          "extract_first_page": 1,
+          "extract_last_page": 4,
+          "section": "Predictive tit bits: CBI"
+        }
+      ],
+      "contents_printed_start_reference": 63,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "06-vimshottari-and-event-timing/09-career-timing.pdf",
+      "title": "Guiding a career and timing events",
+      "pages": 7,
+      "source_segments": [
+        {
+          "source_id": "vimshottari",
+          "source_filename": "Jyotish_KN Rao_Timing events through Vimshottari dasha.pdf",
+          "source_pdf_first_page": 66,
+          "source_pdf_last_page": 72,
+          "extract_first_page": 1,
+          "extract_last_page": 7,
+          "section": "Guiding a career and timing events"
+        }
+      ],
+      "contents_printed_start_reference": 67,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "06-vimshottari-and-event-timing/10-difficult-moments.pdf",
+      "title": "Astrologer's difficult moments",
+      "pages": 4,
+      "source_segments": [
+        {
+          "source_id": "vimshottari",
+          "source_filename": "Jyotish_KN Rao_Timing events through Vimshottari dasha.pdf",
+          "source_pdf_first_page": 73,
+          "source_pdf_last_page": 76,
+          "extract_first_page": 1,
+          "extract_last_page": 4,
+          "section": "Astrologer's difficult moments"
+        }
+      ],
+      "contents_printed_start_reference": 74,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "06-vimshottari-and-event-timing/11-crfd-approach.pdf",
+      "title": "CRFD approach to predictions",
+      "pages": 3,
+      "source_segments": [
+        {
+          "source_id": "vimshottari",
+          "source_filename": "Jyotish_KN Rao_Timing events through Vimshottari dasha.pdf",
+          "source_pdf_first_page": 77,
+          "source_pdf_last_page": 79,
+          "extract_first_page": 1,
+          "extract_last_page": 3,
+          "section": "CRFD approach to predictions"
+        }
+      ],
+      "contents_printed_start_reference": 78,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "06-vimshottari-and-event-timing/12-interpretation-example.pdf",
+      "title": "Example of interpretation",
+      "pages": 5,
+      "source_segments": [
+        {
+          "source_id": "vimshottari",
+          "source_filename": "Jyotish_KN Rao_Timing events through Vimshottari dasha.pdf",
+          "source_pdf_first_page": 80,
+          "source_pdf_last_page": 84,
+          "extract_first_page": 1,
+          "extract_last_page": 5,
+          "section": "Example of interpretation"
+        }
+      ],
+      "contents_printed_start_reference": 82,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "06-vimshottari-and-event-timing/13-reason-out-yourself.pdf",
+      "title": "Reason out yourself",
+      "pages": 12,
+      "source_segments": [
+        {
+          "source_id": "vimshottari",
+          "source_filename": "Jyotish_KN Rao_Timing events through Vimshottari dasha.pdf",
+          "source_pdf_first_page": 85,
+          "source_pdf_last_page": 96,
+          "extract_first_page": 1,
+          "extract_last_page": 12,
+          "section": "Reason out yourself"
+        }
+      ],
+      "contents_printed_start_reference": 87,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "06-vimshottari-and-event-timing/14-ayanamsha-and-accuracy.pdf",
+      "title": "Ayanamsha and accuracy",
+      "pages": 15,
+      "source_segments": [
+        {
+          "source_id": "vimshottari",
+          "source_filename": "Jyotish_KN Rao_Timing events through Vimshottari dasha.pdf",
+          "source_pdf_first_page": 97,
+          "source_pdf_last_page": 111,
+          "extract_first_page": 1,
+          "extract_last_page": 15,
+          "section": "Ayanamsha and accuracy"
+        }
+      ],
+      "contents_printed_start_reference": 99,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "06-vimshottari-and-event-timing/15-summary-and-conclusions.pdf",
+      "title": "Summary, conclusions and further applications",
+      "pages": 15,
+      "source_segments": [
+        {
+          "source_id": "vimshottari",
+          "source_filename": "Jyotish_KN Rao_Timing events through Vimshottari dasha.pdf",
+          "source_pdf_first_page": 112,
+          "source_pdf_last_page": 126,
+          "extract_first_page": 1,
+          "extract_last_page": 15,
+          "section": "Summary, conclusions and further applications"
+        }
+      ],
+      "contents_printed_start_reference": 114,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "07-yogini-material/01-progressed-yogini-marriage-and-childbirth.pdf",
+      "title": "Available progressed Yogini material: marriage and childbirth",
+      "pages": 66,
+      "source_segments": [
+        {
+          "source_id": "navamsa",
+          "source_filename": "pdfcoffee.com_jyotish-2017-vp-goel-predict-with-navamsha-1-pdf-free.pdf",
+          "source_pdf_first_page": 80,
+          "source_pdf_last_page": 106,
+          "extract_first_page": 1,
+          "extract_last_page": 27,
+          "section": "Complete marriage timing chapter including progressed Yogini"
+        },
+        {
+          "source_id": "children",
+          "source_filename": "Jyotish_2017_V.P. Goel_Predict with saptamsha.pdf",
+          "source_pdf_first_page": 203,
+          "source_pdf_last_page": 241,
+          "extract_first_page": 28,
+          "extract_last_page": 66,
+          "section": "Complete childbirth timing chapter including progressed Yogini"
+        }
+      ],
+      "contents_printed_start_reference": null,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "08-source-context/divisions-front-matter.pdf",
+      "title": "Source context and contents: divisions",
+      "pages": 7,
+      "source_segments": [
+        {
+          "source_id": "divisions",
+          "source_filename": "Comprehensive_Prediction_By_Divisional_Charts_by_V.P._Goel-1.pdf",
+          "source_pdf_first_page": 1,
+          "source_pdf_last_page": 7,
+          "extract_first_page": 1,
+          "extract_last_page": 7,
+          "section": "Title, contents, preface and introductory material"
+        }
+      ],
+      "contents_printed_start_reference": null,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "08-source-context/navamsa-front-matter.pdf",
+      "title": "Source context and contents: navamsa",
+      "pages": 4,
+      "source_segments": [
+        {
+          "source_id": "navamsa",
+          "source_filename": "pdfcoffee.com_jyotish-2017-vp-goel-predict-with-navamsha-1-pdf-free.pdf",
+          "source_pdf_first_page": 1,
+          "source_pdf_last_page": 4,
+          "extract_first_page": 1,
+          "extract_last_page": 4,
+          "section": "Title, contents, preface and introductory material"
+        }
+      ],
+      "contents_printed_start_reference": null,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "08-source-context/career-front-matter.pdf",
+      "title": "Source context and contents: career",
+      "pages": 4,
+      "source_segments": [
+        {
+          "source_id": "career",
+          "source_filename": "Predict_With_Dashamsha_by_V.P._Goel.pdf",
+          "source_pdf_first_page": 1,
+          "source_pdf_last_page": 4,
+          "extract_first_page": 1,
+          "extract_last_page": 4,
+          "section": "Title, contents, preface and introductory material"
+        }
+      ],
+      "contents_printed_start_reference": null,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "08-source-context/children-front-matter.pdf",
+      "title": "Source context and contents: children",
+      "pages": 4,
+      "source_segments": [
+        {
+          "source_id": "children",
+          "source_filename": "Jyotish_2017_V.P. Goel_Predict with saptamsha.pdf",
+          "source_pdf_first_page": 1,
+          "source_pdf_last_page": 4,
+          "extract_first_page": 1,
+          "extract_last_page": 4,
+          "section": "Title, contents, preface and introductory material"
+        }
+      ],
+      "contents_printed_start_reference": null,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "08-source-context/jaimini-front-matter.pdf",
+      "title": "Source context and contents: jaimini",
+      "pages": 4,
+      "source_segments": [
+        {
+          "source_id": "jaimini",
+          "source_filename": "Jyotish_2017_V.P. Goel_Predicting Through Jaimini Astrology.pdf",
+          "source_pdf_first_page": 1,
+          "source_pdf_last_page": 4,
+          "extract_first_page": 1,
+          "extract_last_page": 4,
+          "section": "Title, contents, preface and introductory material"
+        }
+      ],
+      "contents_printed_start_reference": null,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    },
+    {
+      "path": "08-source-context/vimshottari-front-matter.pdf",
+      "title": "Source context and contents: vimshottari",
+      "pages": 28,
+      "source_segments": [
+        {
+          "source_id": "vimshottari",
+          "source_filename": "Jyotish_KN Rao_Timing events through Vimshottari dasha.pdf",
+          "source_pdf_first_page": 1,
+          "source_pdf_last_page": 28,
+          "extract_first_page": 1,
+          "extract_last_page": 28,
+          "section": "Title, contents, preface and introductory material"
+        }
+      ],
+      "contents_printed_start_reference": null,
+      "verification": "page count, extracted text, page size and decoded drawing streams match source"
+    }
+  ]
+}
