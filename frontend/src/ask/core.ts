@@ -4,7 +4,7 @@ import { arudhaPadas, charaKarakas } from '../jaimini';
 import { shadbala } from '../shadbala';
 import { jaiminiYogas, rashiAspects } from '../jaiminiYogas';
 import type { JaiminiYoga } from '../jaiminiYogas';
-import { EXALTATION_SIGN, compoundRelations, isSeven, signRelation } from '../vargas';
+import { EXALTATION_SIGN, compoundRelations, isSeven, shashtamshaSign, signRelation } from '../vargas';
 import type { Relation, Seven } from '../vargas';
 import type { ArudhaPada, Karaka } from '../jaimini';
 import type { Chart, Position } from '../types';
@@ -167,7 +167,7 @@ export function hasNeechaBhanga(ctx: Context, name: string): boolean {
 /** Sign (1-12) a planet or the Ascendant occupies in a divisional chart such as D9 or D10. */
 export function vargaSign(ctx: Context, name: string, division: string): number {
   const p = name === 'Ascendant' ? ctx.chart.ascendant : planet(ctx, name);
-  return p.divisionalSigns[division] ?? p.signNumber;
+  return p.divisionalSigns[division] ?? (division === 'D6' ? shashtamshaSign(p.longitude) : p.signNumber);
 }
 
 export function vargaHouseSign(ctx: Context, division: string, house: number): number {
@@ -572,6 +572,7 @@ export function addNavataraPeaks(ctx: Context, windows: Window[], minDays = 20) 
   const moonIndex = NAKSHATRAS.indexOf(planet(ctx, 'Moon').nakshatra);
   if (moonIndex < 0 || !ctx.transits) return;
   for (const track of ctx.transits.tracks) {
+    if (!['Jupiter', 'Saturn', 'Rahu'].includes(track.name)) continue;
     for (const segment of track.segments) {
       if (segment.nakshatraIndex === undefined) continue;
       const taraIndex = ((segment.nakshatraIndex - moonIndex + 27) % 27) % 9;

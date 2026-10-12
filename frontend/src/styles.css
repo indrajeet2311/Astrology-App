@@ -334,6 +334,12 @@ tbody tr:last-child > * { border-bottom: 0; }
 .reading-summary p { font-size: 1.08rem; }
 .reading-card-good { border-top: 3px solid #7fe0a8; }
 .reading-card-bad { border-top: 3px solid var(--gold); }
+.marriage-promise-score { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 2px 0 10px; }
+.marriage-promise-score span { color: var(--text); font-weight: 600; }
+.marriage-promise-score strong { color: var(--gold); font-size: 1.65rem; line-height: 1; white-space: nowrap; }
+.marriage-promise-score small { color: var(--muted); font-size: 0.82rem; font-weight: 500; }
+.marriage-promise-meter { height: 7px; margin-bottom: 12px; overflow: hidden; border-radius: 999px; background: rgba(255, 255, 255, 0.1); }
+.marriage-promise-meter span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #a98cf4, var(--gold)); }
 .reading-label { display: block; margin-bottom: 9px; color: var(--muted); font-size: 0.76rem; font-weight: 600; letter-spacing: 0.03em; }
 .reading-period-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 12px; }
 .reading-period { min-width: 0; padding: 14px; border: 1px solid var(--card-border); border-radius: 10px; background: rgba(255, 255, 255, 0.025); }

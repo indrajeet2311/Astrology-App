@@ -6,11 +6,11 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.List;
 
-/** Sign-by-sign passage of the slow planets over a date range, used to time predictions. */
+/** Sign-by-sign planetary passage over a date range, used to refine topic-specific dasha timing. */
 public record SlowTransitsResponse(String from, String to, List<Track> tracks) {
   public record Request(@Valid @NotNull BirthRequest birth, @NotNull LocalDate from, @NotNull LocalDate to) {}
 
-  /** name is Jupiter, Saturn or Rahu (Ketu is always six signs from Rahu). */
+  /** Includes all visible planets and the lunar nodes so dasha-lord transit checks can be evaluated. */
   public record Track(String name, List<Segment> segments) {}
 
   /** signNumber is 1-12 and nakshatraIndex is zero-based; dates are local to the birth timezone. */

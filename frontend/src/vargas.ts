@@ -20,6 +20,15 @@ const ENEMIES: Record<Seven, Seven[]> = {
 export const EXALTATION_SIGN: Record<Seven, number> = {
   Sun: 1, Moon: 2, Mars: 10, Mercury: 6, Jupiter: 4, Venus: 12, Saturn: 7,
 };
+
+/** Parashari Shashtamsha (D6): six equal slices, starting from Aries in odd signs and Libra in even signs. */
+export function shashtamshaSign(longitude: number): number {
+  const normalized = ((longitude % 360) + 360) % 360;
+  const rashi = Math.floor(normalized / 30);
+  const withinSign = normalized - rashi * 30;
+  const part = Math.min(5, Math.floor(withinSign * 6 / 30));
+  return ((rashi % 2 === 0 ? 0 : 6) + part) % 12 + 1;
+}
 // Moolatrikona sign and the degree range inside it.
 export const MOOLATRIKONA: Record<Seven, { sign: number; from: number; to: number }> = {
   Sun: { sign: 5, from: 0, to: 20 }, Moon: { sign: 2, from: 3, to: 30 }, Mars: { sign: 1, from: 0, to: 12 },

@@ -64,6 +64,10 @@ public final class AstroMath {
       }
       case 3 -> { part = segment(withinSign, 3) * 4; start = sign; }
       case 4 -> { part = segment(withinSign, 4) * 3; start = sign; }
+      case 6 -> {
+        part = segment(withinSign, 6);
+        start = sign % 2 == 0 ? 0 : 6;
+      }
       case 7 -> {
         part = segment(withinSign, 7);
         start = sign + (sign % 2 == 0 ? 0 : 6);

@@ -264,7 +264,7 @@ public class SwissEphemerisCalculator {
     int sign = AstroMath.sign(lon);
     int navamsa = AstroMath.navamsaSign(lon);
     Map<String, Integer> divisionalSigns = new LinkedHashMap<>();
-    for (int division : new int[] {1, 2, 3, 4, 7, 9, 10, 12, 16, 20, 24, 27, 30, 40, 45, 60}) {
+    for (int division : new int[] {1, 2, 3, 4, 6, 7, 9, 10, 12, 16, 20, 24, 27, 30, 40, 45, 60}) {
       divisionalSigns.put("D" + division, AstroMath.divisionalSign(lon, division) + 1);
     }
     return new Position(name, lon, AstroMath.signName(sign), sign + 1, AstroMath.house(lon, ascLongitude, houseSystem),

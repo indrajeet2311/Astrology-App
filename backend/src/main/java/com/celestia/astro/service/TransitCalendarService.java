@@ -118,7 +118,7 @@ public class TransitCalendarService {
         !now.isBefore(from) && now.isBefore(to));
   }
 
-  // ---------------------------------------------------------------- slow-planet sign segments
+  // ---------------------------------------------------------------- transit sign segments used by chart-specific timing
 
   public SlowTransitsResponse slowTransits(SlowTransitsResponse.Request request) {
     BirthRequest birth = request.birth();
@@ -138,22 +138,32 @@ public class TransitCalendarService {
     try {
       swe.swe_set_sid_mode(SwissEphemerisCalculator.sidMode(birth.ayanamsa()), 0, 0);
       return new SlowTransitsResponse(from.toString(), to.toString(), List.of(
+          new SlowTransitsResponse.Track("Sun", segments(at -> Ephem.calc(swe, at, SweConst.SE_SUN), start, end, zone, Duration.ofDays(1))),
+          new SlowTransitsResponse.Track("Moon", segments(at -> Ephem.calc(swe, at, SweConst.SE_MOON), start, end, zone, Duration.ofDays(1))),
+          new SlowTransitsResponse.Track("Mars", segments(at -> Ephem.calc(swe, at, SweConst.SE_MARS), start, end, zone, Duration.ofDays(1))),
+          new SlowTransitsResponse.Track("Mercury", segments(at -> Ephem.calc(swe, at, SweConst.SE_MERCURY), start, end, zone, Duration.ofDays(1))),
           new SlowTransitsResponse.Track("Jupiter", segments(at -> Ephem.calc(swe, at, SweConst.SE_JUPITER), start, end, zone)),
+          new SlowTransitsResponse.Track("Venus", segments(at -> Ephem.calc(swe, at, SweConst.SE_VENUS), start, end, zone, Duration.ofDays(1))),
           new SlowTransitsResponse.Track("Saturn", segments(at -> Ephem.calc(swe, at, SweConst.SE_SATURN), start, end, zone)),
-          new SlowTransitsResponse.Track("Rahu", segments(at -> Ephem.node(swe, at, trueNode, false), start, end, zone))));
+          new SlowTransitsResponse.Track("Rahu", segments(at -> Ephem.node(swe, at, trueNode, false), start, end, zone)),
+          new SlowTransitsResponse.Track("Ketu", segments(at -> Ephem.node(swe, at, trueNode, true), start, end, zone))));
     } finally {
       swe.swe_close();
     }
   }
 
   private static List<SlowTransitsResponse.Segment> segments(BodyAt source, Instant start, Instant end, ZoneId zone) {
+    return segments(source, start, end, zone, Duration.ofDays(4));
+  }
+
+  private static List<SlowTransitsResponse.Segment> segments(BodyAt source, Instant start, Instant end, ZoneId zone, Duration step) {
     List<SlowTransitsResponse.Segment> result = new ArrayList<>();
     Instant segmentStart = start;
     double firstLongitude = source.at(start).longitude();
     int sign = signNumber(firstLongitude);
     int nakshatra = AstroMath.nakshatraIndex(firstLongitude);
     Instant previous = start;
-    for (Instant t = start.plus(Duration.ofDays(4)); ; t = t.plus(Duration.ofDays(4))) {
+    for (Instant t = start.plus(step); ; t = t.plus(step)) {
       boolean last = !t.isBefore(end);
       Instant at = last ? end : t;
       double longitude = source.at(at).longitude();

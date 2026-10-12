@@ -1,16 +1,30 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { CalendarRange, HeartHandshake, Loader2, MessageCircleQuestion, Sparkles } from 'lucide-react';
-import { errorMessage } from '../api';
+import { errorMessage, loadSlowTransits } from '../api';
 import { answerQuestion, classify, SUGGESTED_QUESTIONS } from '../ask/engine';
 import type { UserAnswer } from '../ask/engine';
 import type { DomainId } from '../ask/answers';
 import { formatRange, makeContext } from '../ask/core';
+import { todayIso } from '../format';
 import type { Chart } from '../types';
+import { payloadFromChart } from '../savedCharts';
+import type { SlowTransits } from '../ask/transitTypes';
+
+function plusYears(date: string, years: number): string {
+  const value = new Date(`${date}T12:00:00`);
+  value.setFullYear(value.getFullYear() + years);
+  return `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, '0')}-${String(value.getDate()).padStart(2, '0')}`;
+}
 
 export function AnswerView({ answer }: { answer: UserAnswer }) {
   const { outcome } = answer;
   const showTiming = answer.focus !== 'nature' && !outcome.limitation
     && ['marriage', 'relationship', 'career', 'children'].includes(answer.domain);
+  const timingOrder = ['Vimshottari', 'Yogini', 'Chara'];
+  const displayedTiming = timingOrder.flatMap((system) => {
+    const period = outcome.timing.find((item) => item.system === system);
+    return period ? [period] : [];
+  });
   return (
     <article className="answer" aria-live="polite">
       <p className="answer-q">{answer.domainLabel} · “{answer.question}”</p>
@@ -18,16 +32,46 @@ export function AnswerView({ answer }: { answer: UserAnswer }) {
         <div className="reading-card-heading"><Sparkles size={19} aria-hidden="true" /><h3>Your answer</h3></div>
         <p>{outcome.summary}</p>
       </section>
+      {answer.domain === 'marriage' && (
+        <section className={`reading-card marriage-promise-card reading-card-${answer.verdict.tone}`} aria-label="Marriage promise assessment">
+          <div className="reading-card-heading"><HeartHandshake size={18} aria-hidden="true" /><h3>Marriage promise</h3></div>
+          <div className="marriage-promise-score">
+            <span>{answer.verdict.label}</span>
+            <strong>{answer.score}<small>/100</small></strong>
+          </div>
+          <div className="marriage-promise-meter" role="meter" aria-label="Rule-based marriage score" aria-valuemin={0} aria-valuemax={100} aria-valuenow={answer.score}>
+            <span style={{ width: `${answer.score}%` }} />
+          </div>
+          <p>This traditional score weighs the birth-chart marriage promise against Navamsa support and strain, planetary condition and cross-chart links. It is not a probability; timing is assessed separately below.</p>
+        </section>
+      )}
       {showTiming && (
         <section className="reading-card reading-timing">
           <div className="reading-card-heading"><CalendarRange size={19} aria-hidden="true" /><h3>Periods to consider</h3></div>
           {outcome.timing.length > 0 ? (
             <div className="reading-period-grid">
-              {outcome.timing.slice(0, 3).map((period) => (
-                <div className={`reading-period reading-period-${period.tone}`} key={`${period.start}-${period.end}-${period.tone}`}>
-                  <span className="reading-label">{period.tone === 'good' ? 'Opportunity to explore' : 'Plan with extra care'}</span>
+              {displayedTiming.map((period) => (
+                <div className={`reading-period reading-period-${period.tone}`} key={`${period.system}-${period.start}-${period.end}-${period.tone}`}>
+                  <span className="reading-label">{period.system === 'Vimshottari' ? 'Primary timing' : 'Cross-check'}</span>
+                  <span className="reading-label">{period.system} dasha · {period.tone === 'good' ? 'supportive' : 'use extra care'}</span>
                   <strong>{formatRange(period.start, period.end)}</strong>
                   <p>{period.text}</p>
+                  {period.transitContacts?.length ? (
+                    <div className="reading-footnote">
+                      <span>Transit sign-aspect cross-checks:</span>
+                      <ul>
+                        {period.transitContacts.map((contact, index) => (
+                          <li key={`${contact.planet}-${contact.target}-${contact.start}-${index}`}>
+                            {contact.aspect === 'transits over' || contact.aspect === 'conjunction'
+                              ? `${contact.planet} transits over ${contact.target}`
+                              : `${contact.planet}’s ${contact.aspect} reaches ${contact.target}`} · {formatRange(contact.start, contact.end)}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : period.transitCheck === 'not-found' ? (
+                    <p className="reading-footnote">No Jupiter or Saturn sign-aspect contact with the topic-specific chart factors in this dasha window; the dasha indication remains.</p>
+                  ) : null}
                 </div>
               ))}
             </div>
@@ -39,7 +83,6 @@ export function AnswerView({ answer }: { answer: UserAnswer }) {
         {outcome.cards.filter((card) => card.text !== outcome.summary).map((card) => (
           <section className={`reading-card reading-card-${card.tone}`} key={card.id}>
             <div className="reading-card-heading"><HeartHandshake size={18} aria-hidden="true" /><h3>{card.title}</h3></div>
-            <span className="reading-label">{card.tone === 'good' ? 'Support to build on' : card.tone === 'bad' ? 'Needs attention' : 'Keep in perspective'}</span>
             <p>{card.text}</p>
           </section>
         ))}
@@ -56,6 +99,7 @@ export function AskCard({ chart }: { chart: Chart }) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const readingVersion = useRef(0);
+  const transitCache = useRef<{ chart: Chart; data: SlowTransits } | null>(null);
   const topics = useMemo(() => SUGGESTED_QUESTIONS, []);
 
   useEffect(() => {
@@ -63,9 +107,10 @@ export function AskCard({ chart }: { chart: Chart }) {
     setAnswers([]);
     setMessage('');
     setLoading(false);
+    transitCache.current = null;
   }, [chart]);
 
-  const ask = (text: string, forcedDomain: DomainId | '' = domain) => {
+  const ask = async (text: string, forcedDomain: DomainId | '' = domain) => {
     const q = text.trim();
     if (!q) {
       setMessage('Add a question so the reading can focus on what you want to know.');
@@ -82,7 +127,22 @@ export function AskCard({ chart }: { chart: Chart }) {
     setMessage('');
     setLoading(true);
     try {
-      const ctx = makeContext(chart, null);
+      let slowTransits: SlowTransits | null = null;
+      if (['marriage', 'relationship', 'career'].includes(answerDomain)) {
+        const cached = transitCache.current;
+        if (cached?.chart === chart) slowTransits = cached.data;
+        else {
+          const from = todayIso();
+          try {
+            slowTransits = await loadSlowTransits(payloadFromChart(chart), from, plusYears(from, 10));
+            transitCache.current = { chart, data: slowTransits };
+          } catch {
+            // Keep the reading available; its timing note will state that transits were unavailable.
+          }
+        }
+      }
+      if (version !== readingVersion.current) return;
+      const ctx = makeContext(chart, slowTransits);
       const answer = answerQuestion(ctx, q, answerDomain);
       if (answer) setAnswers((prev) => [answer, ...prev]);
       setQuestion('');
